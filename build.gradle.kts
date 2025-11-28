@@ -29,6 +29,12 @@ subprojects {
         incl("org.yaml:snakeyaml:2.3")
         incl("it.unimi.dsi:fastutil:8.5.15")
         incl("org.slf4j:slf4j-api:2.0.17")
+        incl("com.google.guava:guava:33.4.0-jre")
+        incl("org.apache.logging.log4j:log4j-core:2.24.3")
+        incl("org.apache.logging.log4j:log4j-api:2.24.3")
+        incl("org.apache.logging.log4j:log4j-slf4j2-impl:2.24.3")
+        incl("org.fusesource.jansi:jansi:2.4.1")
+        incl("net.sf.jopt-simple:jopt-simple:5.0.4")
 
         compileOnly("org.jetbrains:annotations:26.0.2")
     }
@@ -40,8 +46,14 @@ subprojects {
 
         incl.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
             val group = artifact.moduleVersion.id.group
-
             val rootPackage = group.split(".").take(2).joinToString(".")
+
+            // skip loggers
+            if (group.startsWith("org.apache.logging.log4j") ||
+                group.startsWith("org.slf4j")) {
+                return@forEach
+            }
+
             relocate(rootPackage, "$basePackage.$rootPackage")
         }
 
@@ -53,8 +65,7 @@ subprojects {
             }
         }
 
-        // minimizing is *very* important
-        minimize()
+        // TODO - minimize?
         archiveClassifier.set("")
 
         // configure manifest
@@ -67,7 +78,11 @@ subprojects {
                 "Specification-Title" to "Horizon",
                 "Specification-Version" to version,
                 "Specification-Vendor" to "CanvasMC Team",
-                "Brand-Id" to "canvasmc:horizon"
+                "Brand-Id" to "canvasmc:horizon",
+                // jvm agent
+                "Launcher-Agent-Class" to project.properties["instrumentation"],
+                "Can-Redefine-Classes" to true,
+                "Can-Retransform-Classes" to true
             )
         }
     }

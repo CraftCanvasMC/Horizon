@@ -1,4 +1,5 @@
-- logger for Horizon
 - generalized logo and other branding shit -- ask team?
 - make this shit work!
 - test run dir -- root proj
+- builtin runtime patches
+- api -- serviceloader? classloader access? instrumentation access?
