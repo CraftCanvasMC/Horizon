@@ -1,7 +1,7 @@
 - needs to be able to hook into weaver to add ability for access transforming the server jar for dev purposes
 format(?)
 
-eclipse {
+horizon {
 
     // put shit here
 

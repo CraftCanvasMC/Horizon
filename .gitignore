@@ -1,7 +1,7 @@
 # IDEA && Gradle
 /.idea/
 /.gradle/
-/build/
+**/build/
 
 # Misc log files
 *.log
