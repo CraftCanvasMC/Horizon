@@ -25,18 +25,19 @@ subprojects {
     }
 
     dependencies {
+        // general libraries
         incl("com.google.code.gson:gson:2.11.0")
         incl("org.yaml:snakeyaml:2.3")
         incl("it.unimi.dsi:fastutil:8.5.15")
-        incl("org.slf4j:slf4j-api:2.0.17")
         incl("com.google.guava:guava:33.4.0-jre")
-        incl("org.apache.logging.log4j:log4j-core:2.24.3")
-        incl("org.apache.logging.log4j:log4j-api:2.24.3")
-        incl("org.apache.logging.log4j:log4j-slf4j2-impl:2.24.3")
-        incl("org.fusesource.jansi:jansi:2.4.1")
         incl("net.sf.jopt-simple:jopt-simple:5.0.4")
 
+        // annotations -- compileOnly
         compileOnly("org.jetbrains:annotations:26.0.2")
+
+        // logger libraries
+        implementation("org.tinylog:tinylog-api:2.7.0")
+        implementation("org.tinylog:tinylog-impl:2.7.0")
     }
 
     tasks.shadowJar {
@@ -47,12 +48,6 @@ subprojects {
         incl.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
             val group = artifact.moduleVersion.id.group
             val rootPackage = group.split(".").take(2).joinToString(".")
-
-            // skip loggers
-            if (group.startsWith("org.apache.logging.log4j") ||
-                group.startsWith("org.slf4j")) {
-                return@forEach
-            }
 
             relocate(rootPackage, "$basePackage.$rootPackage")
         }
@@ -65,7 +60,6 @@ subprojects {
             }
         }
 
-        // TODO - minimize?
         archiveClassifier.set("")
 
         // configure manifest

@@ -1,10 +1,9 @@
 package io.canvasmc.horizon;
 
 import joptsimple.OptionSet;
+import org.tinylog.Logger;
 
 import java.lang.instrument.Instrumentation;
-
-import static io.canvasmc.horizon.Main.LOGGER;
 
 public class Horizon {
     private final OptionSet options;
@@ -31,8 +30,9 @@ public class Horizon {
     }
 
     private void main(String[] providedArgs) {
-        LOGGER.info("Preparing Minecraft server");
+        Logger.info("Preparing Minecraft server");
         // Note: this should in general act similar to a Paperclip jar
         // TODO - mod loading first, prepare "containers"
+        // TODO - try and build paperclip jar, download?
     }
 }

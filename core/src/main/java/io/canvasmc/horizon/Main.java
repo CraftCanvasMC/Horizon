@@ -1,14 +1,15 @@
 package io.canvasmc.horizon;
 
+import com.google.gson.GsonBuilder;
 import io.canvasmc.horizon.instrument.JvmAgent;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.JarFile;
@@ -17,10 +18,9 @@ import java.util.jar.Manifest;
 import static java.util.Arrays.asList;
 
 public class Main {
-    static final Logger LOGGER = LoggerFactory.getLogger("Horizon");
 
     public static void main(String[] args) {
-        LOGGER.info("Building Horizon version metadata...");
+        Logger.info("Building Horizon version metadata...");
         Map<String, Object> metadata = new HashMap<>();
         try {
             //noinspection resource
@@ -32,6 +32,8 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException("Couldn't fetch source jar", e);
         }
+        Logger.debug("Metadata:\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(metadata));
+        Logger.debug("Launch args: {}", Arrays.toString(args));
 
         OptionParser parser = new OptionParser() {
             {
@@ -56,14 +58,14 @@ public class Main {
         try {
             options = parser.parse(args);
         } catch (OptionException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
+            Logger.error(ex.getLocalizedMessage());
         }
 
         if ((options == null) || (options.has("?"))) {
             try {
                 parser.printHelpOn(System.out);
             } catch (IOException ex) {
-                LOGGER.error("An unexpected error occurred", ex);
+                Logger.error("An unexpected error occurred", ex);
             }
             return;
         }
