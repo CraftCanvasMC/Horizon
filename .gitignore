@@ -1,0 +1,10 @@
+# IDEA && Gradle
+/.idea/
+/.gradle/
+/build/
+
+# Misc log files
+*.log
+
+# Test run directory
+/dev/
