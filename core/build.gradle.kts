@@ -1,3 +1,3 @@
 dependencies {
-    implementation(rootProject.project("api"))
+    implementation(projects.api)
 }

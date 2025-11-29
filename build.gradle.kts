@@ -19,18 +19,13 @@ subprojects {
         maven(PAPER_MAVEN)
     }
 
-    // configuration that shades and includes as an implementation for the core project
-    val incl by configurations.creating {
-        configurations.implementation.get().extendsFrom(this)
-    }
-
     dependencies {
         // general libraries
-        incl("com.google.code.gson:gson:2.11.0")
-        incl("org.yaml:snakeyaml:2.3")
-        incl("it.unimi.dsi:fastutil:8.5.15")
-        incl("com.google.guava:guava:33.4.0-jre")
-        incl("net.sf.jopt-simple:jopt-simple:5.0.4")
+        shadow("com.google.code.gson:gson:2.11.0")
+        shadow("org.yaml:snakeyaml:2.3")
+        shadow("it.unimi.dsi:fastutil:8.5.15")
+        shadow("com.google.guava:guava:33.4.0-jre")
+        shadow("net.sf.jopt-simple:jopt-simple:5.0.4")
 
         // annotations -- compileOnly
         compileOnly("org.jetbrains:annotations:26.0.2")
@@ -44,8 +39,9 @@ subprojects {
         configurations = listOf(project.configurations.runtimeClasspath.get())
 
         val basePackage = "horizon.libs"
+        val shadowConf = project.configurations.getByName("shadow")
 
-        incl.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
+        shadowConf.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
             val group = artifact.moduleVersion.id.group
             val rootPackage = group.split(".").take(2).joinToString(".")
 
@@ -66,17 +62,19 @@ subprojects {
         val version = fetchVersion()
         manifest {
             attributes(
-                "Main-Class" to project.properties["main-class"],
-                "Implementation-Title" to "Horizon",
-                "Implementation-Version" to version,
-                "Specification-Title" to "Horizon",
-                "Specification-Version" to version,
-                "Specification-Vendor" to "CanvasMC Team",
-                "Brand-Id" to "canvasmc:horizon",
-                // jvm agent
-                "Launcher-Agent-Class" to project.properties["instrumentation"],
-                "Can-Redefine-Classes" to true,
-                "Can-Retransform-Classes" to true
+                mapOf(
+                    "Main-Class" to project.properties["main-class"],
+                    "Implementation-Title" to "Horizon",
+                    "Implementation-Version" to version,
+                    "Specification-Title" to "Horizon",
+                    "Specification-Version" to version,
+                    "Specification-Vendor" to "CanvasMC Team",
+                    "Brand-Id" to "canvasmc:horizon",
+                    // jvm agent
+                    "Launcher-Agent-Class" to project.properties["instrumentation"],
+                    "Can-Redefine-Classes" to true,
+                    "Can-Retransform-Classes" to true
+                )
             )
         }
     }
@@ -88,29 +86,28 @@ subprojects {
     }
 }
 
-fun fetchVersion(): String {
+fun fetchVersion(): Provider<String> {
     // fetch build number from jenkins property, if not present
     // then we can assume it is a local version
-    return rootProject.findProperty("buildNumber")?.toString()
-        ?: System.getenv("BUILD_NUMBER")
-        ?: "local"
+    return providers.gradleProperty("buildNumber").orElse(
+        providers.environmentVariable("BUILD_NUMBER").orElse(
+            "local"
+        )
+    )
 }
 
 tasks.register<Jar>("createPublicationJar") {
     // `horizon-build.{ver}.jar`
     // ver == local ? "local" : build number
-    dependsOn(":core:shadowJar")
-
     val version = fetchVersion()
-    archiveFileName.set("horizon-build.${version}.jar")
 
-    from(zipTree(project(":core").tasks.named("shadowJar").get().outputs.files.singleFile))
+    archiveFileName.set(version.map { "horizon-build.$it.jar" })
 
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(zipTree(project(":core").tasks.shadowJar.flatMap { it.archiveFile }))
 
     // copy manifest from shade
     manifest {
-        from((project(":core").tasks.named("shadowJar").get() as Jar).manifest)
+        attributes(project(":core").tasks.shadowJar.get().manifest.attributes)
     }
 
     // include horizon license
@@ -123,45 +120,43 @@ tasks.register<Jar>("createPublicationJar") {
     }
 
     val coreProject = project(":core")
-    val incl = coreProject.configurations.findByName("incl")
+    val shadowConf = coreProject.configurations.getByName("shadow")
 
-    if (incl != null) {
-        val librariesInfo = buildString {
-            appendLine("Horizon - Shaded Libraries Information")
-            appendLine("=========================================")
-            appendLine()
-            appendLine("Build Version: $version")
-            appendLine("Build Date: ${LocalDateTime.now()}")
-            appendLine()
-            appendLine("Shaded Libraries:")
-            appendLine("-----------------")
+    val librariesInfo = buildString {
+        appendLine("Horizon - Shaded Libraries Information")
+        appendLine("=========================================")
+        appendLine()
+        appendLine("Build Version: ${version.get()}")
+        appendLine("Build Date: ${LocalDateTime.now()}")
+        appendLine()
+        appendLine("Shaded Libraries:")
+        appendLine("-----------------")
 
-            incl.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
-                val group = artifact.moduleVersion.id.group
-                val name = artifact.moduleVersion.id.name
-                val artifactVersion = artifact.moduleVersion.id.version
-                val rootPackage = group.split(".").take(2).joinToString(".")
-
-                appendLine()
-                appendLine("Library: $group:$name:$artifactVersion")
-                appendLine("  Original Package: $rootPackage")
-                appendLine("  Relocated To: horizon.libs.$rootPackage")
-            }
+        shadowConf.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
+            val group = artifact.moduleVersion.id.group
+            val name = artifact.moduleVersion.id.name
+            val artifactVersion = artifact.moduleVersion.id.version
+            val rootPackage = group.split(".").take(2).joinToString(".")
 
             appendLine()
-            appendLine("=========================================")
-            appendLine("Note: All libraries have been relocated to the 'horizon.libs' package")
-            appendLine("to avoid conflicts with other plugins or server dependencies.")
-            appendLine()
-            appendLine("Horizon's license: META-INF/HORIZON_LICENSE")
-            appendLine("Shaded library licenses: horizon/libs/licenses/")
+            appendLine("Library: $group:$name:$artifactVersion")
+            appendLine("  Original Package: $rootPackage")
+            appendLine("  Relocated To: horizon.libs.$rootPackage")
         }
 
-        val infoFile = temporaryDir.resolve("SHADED_LIBRARIES.txt")
-        infoFile.writeText(librariesInfo)
+        appendLine()
+        appendLine("=========================================")
+        appendLine("Note: All libraries have been relocated to the 'horizon.libs' package")
+        appendLine("to avoid conflicts with other plugins or server dependencies.")
+        appendLine()
+        appendLine("Horizon's license: META-INF/HORIZON_LICENSE")
+        appendLine("Shaded library licenses: horizon/libs/licenses/")
+    }
 
-        from(infoFile) {
-            into("META-INF")
-        }
+    val infoFile = temporaryDir.resolve("SHADED_LIBRARIES.txt")
+    infoFile.writeText(librariesInfo)
+
+    from(infoFile) {
+        into("META-INF")
     }
 }
