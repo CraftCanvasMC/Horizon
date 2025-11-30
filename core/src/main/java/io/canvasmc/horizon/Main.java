@@ -50,6 +50,13 @@ public class Main {
                     .ofType(File.class)
                     .defaultsTo(new File[]{})
                     .describedAs("Jar file");
+
+                // TODO - strip this from arguments when passing to server in final launch
+                this.acceptsAll(asList("S", "serverjar"), "The server jarfile name to use")
+                    .withRequiredArg()
+                    .ofType(File.class)
+                    .defaultsTo(new File("server.jar"))
+                    .describedAs("The server jarfile");
             }
         };
 
