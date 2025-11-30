@@ -1,0 +1,107 @@
+/*
+ * This file is part of the paperweight gradle plugin.
+ *
+ * paperweight is a Gradle plugin for the PaperMC project.
+ *
+ * Copyright (c) 2023 Kyle Wood (DenWav)
+ *                    Contributors
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation;
+ * version 2.1 only, no later versions.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
+ * USA
+ */
+
+package io.canvasmc.horizon.util
+
+import java.io.File
+import java.io.OutputStream
+import java.util.concurrent.TimeUnit
+import java.util.jar.JarFile
+import kotlin.io.path.*
+import org.gradle.api.file.FileCollection
+import org.gradle.api.provider.Provider
+import org.gradle.jvm.toolchain.JavaLauncher
+
+private val Iterable<File>.asPath
+    get() = joinToString(File.pathSeparator) { it.absolutePath }
+
+fun JavaLauncher.runJar(
+    classpath: Iterable<File>,
+    workingDir: Any,
+    logFile: Any?,
+    jvmArgs: List<String> = listOf(),
+    vararg args: String
+) {
+    var mainClass: String? = null
+    for (file in classpath) {
+        mainClass = JarFile(file).use { jarFile ->
+            jarFile.manifest.mainAttributes.getValue("Main-Class")
+        } ?: continue
+        break
+    }
+    if (mainClass == null) {
+        throw RuntimeException("Could not determine main class name for ${classpath.asPath}")
+    }
+
+    val dir = workingDir.convertToPath()
+
+    val (logFilePath, output) = when {
+        logFile is OutputStream -> Pair(null, logFile)
+        logFile != null -> {
+            val log = logFile.convertToPath()
+            log.parent.createDirectories()
+            Pair(log, log.outputStream().buffered())
+        }
+        else -> Pair(null, UselessOutputStream)
+    }
+
+    val processBuilder = ProcessBuilder(
+        this.executablePath.path.absolutePathString(),
+        *jvmArgs.toTypedArray(),
+        "-classpath",
+        classpath.asPath,
+        mainClass,
+        *args
+    ).directory(dir)
+
+    output.writer().let {
+        it.appendLine("Command: ${processBuilder.command().joinToString(" ")}")
+        it.flush()
+    }
+
+    val process = processBuilder.start()
+
+    output.use {
+        val outFuture = redirect(process.inputStream, it)
+        val errFuture = redirect(process.errorStream, it)
+
+        val exit = process.waitFor()
+        outFuture.get(500L, TimeUnit.MILLISECONDS)
+        errFuture.get(500L, TimeUnit.MILLISECONDS)
+        if (exit != 0) {
+            val logMsg = logFilePath?.let { p -> " Log file: ${p.absolutePathString()}" } ?: ""
+            throw RuntimeException("Execution of '$mainClass' failed with exit code $exit.$logMsg Classpath: ${classpath.asPath}")
+        }
+    }
+}
+
+fun Provider<JavaLauncher>.runJar(
+    classpath: FileCollection,
+    workingDir: Any,
+    logFile: Any?,
+    jvmArgs: List<String> = listOf(),
+    vararg args: String
+) {
+    get().runJar(classpath, workingDir, logFile, jvmArgs, *args)
+}

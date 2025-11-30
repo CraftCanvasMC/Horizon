@@ -1,0 +1,5 @@
+package io.canvasmc.horizon.util
+
+object LibraryVersions {
+    const val JST: String = "{{ jst_version }}"
+}
