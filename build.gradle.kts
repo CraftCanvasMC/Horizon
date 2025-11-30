@@ -26,7 +26,7 @@ subprojects {
 
     dependencies {
         // general libraries
-        include("com.google.code.gson:gson:2.11.0")
+        include("com.google.code.gson:gson:2.13.2")
         include("org.yaml:snakeyaml:2.3")
         include("it.unimi.dsi:fastutil:8.5.15")
         include("com.google.guava:guava:33.4.0-jre")
@@ -38,6 +38,19 @@ subprojects {
         // logger libraries
         implementation("org.tinylog:tinylog-api:2.7.0")
         implementation("org.tinylog:tinylog-impl:2.7.0")
+
+        // asm
+        include("org.ow2.asm:asm:9.9")
+        include("org.ow2.asm:asm-analysis:9.9")
+        include("org.ow2.asm:asm-commons:9.9")
+        include("org.ow2.asm:asm-tree:9.9")
+        include("org.ow2.asm:asm-util:9.9")
+
+        // mixin libraries
+        implementation("net.fabricmc:sponge-mixin:0.16.5+mixin.0.8.7")
+        implementation("io.github.llamalad7:mixinextras-common:0.5.0")
+        implementation("net.fabricmc:access-widener:2.1.0")
+
     }
 
     tasks.shadowJar {
@@ -45,6 +58,8 @@ subprojects {
 
         val basePackage = "horizon.libs"
 
+        // this is realistically a *rough* relocation. this won't relocate
+        // everything, though we can't have it relocate everything
         include.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
             val group = artifact.moduleVersion.id.group
             val rootPackage = group.split(".").take(2).joinToString(".")
