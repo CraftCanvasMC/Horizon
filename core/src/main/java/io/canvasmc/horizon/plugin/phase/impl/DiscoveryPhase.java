@@ -17,12 +17,10 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
 
@@ -35,13 +33,19 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
             pluginsDirectory.toPath().toAbsolutePath(),
             path -> Files.isRegularFile(path) && path.toString().endsWith(".jar"))) {
 
-            for (Path path : stream) {
+            // also try and parse extra plugins
+            //noinspection unchecked
+            Set<Path> files = ((List<File>) Horizon.INSTANCE.getOptions().valuesOf("add-plugin")).stream().map(File::toPath).collect(Collectors.toSet());
+            stream.forEach(files::add);
+
+            for (Path path : files) {
                 File child = path.toFile();
                 Logger.debug("Scanning potential plugin: {}", child.getName());
 
                 Optional<PluginCandidate> candidate = scanJarFile(child);
                 candidate.ifPresent(candidates::add);
             }
+
         } catch (IOException e) {
             throw new PhaseException("Failed to scan plugins directory", e);
         }
