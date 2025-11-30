@@ -32,8 +32,8 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
         File pluginsDirectory = context.pluginsDirectory();
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(
-                pluginsDirectory.toPath().toAbsolutePath(),
-                path -> Files.isRegularFile(path) && path.toString().endsWith(".jar"))) {
+            pluginsDirectory.toPath().toAbsolutePath(),
+            path -> Files.isRegularFile(path) && path.toString().endsWith(".jar"))) {
 
             for (Path path : stream) {
                 File child = path.toFile();
@@ -54,10 +54,10 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
         try {
             JarFile jar = new JarFile(jarFile);
             Optional<JarEntry> entry = jar.stream()
-                    .filter(e -> !e.isDirectory())
-                    .filter(e -> e.getName().equalsIgnoreCase("paper-plugin.yml") ||
-                            e.getName().equalsIgnoreCase("plugin.yml"))
-                    .findFirst();
+                .filter(e -> !e.isDirectory())
+                .filter(e -> e.getName().equalsIgnoreCase("paper-plugin.yml") ||
+                    e.getName().equalsIgnoreCase("plugin.yml"))
+                .findFirst();
 
             if (entry.isEmpty()) {
                 Logger.debug("No plugin yaml found in {}", jarFile.getName());

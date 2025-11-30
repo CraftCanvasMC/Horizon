@@ -33,12 +33,12 @@ public final class HorizonMetadataDeserializer implements JsonDeserializer<Horiz
         boolean loadDatapackEntry = getBoolean(horizon, "load-datapack-entry", false);
 
         return new HorizonMetadata(
-                name,
-                version,
-                apiVersion,
-                mixins,
-                wideners,
-                loadDatapackEntry
+            name,
+            version,
+            apiVersion,
+            mixins,
+            wideners,
+            loadDatapackEntry
         );
     }
 

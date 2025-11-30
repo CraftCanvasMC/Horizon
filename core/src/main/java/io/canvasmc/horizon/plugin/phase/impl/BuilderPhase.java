@@ -11,7 +11,10 @@ import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.plugin.types.PluginCandidate;
 import org.jspecify.annotations.NonNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class BuilderPhase implements Phase<Set<PluginCandidate>, List<HorizonPlugin>> {
     @Override
@@ -19,15 +22,15 @@ public class BuilderPhase implements Phase<Set<PluginCandidate>, List<HorizonPlu
         List<HorizonPlugin> completed = new ArrayList<>();
 
         Gson gson = new GsonBuilder()
-                .disableHtmlEscaping()
-                .serializeNulls()
-                .create();
+            .disableHtmlEscaping()
+            .serializeNulls()
+            .create();
 
         for (PluginCandidate candidate : input) {
             Map<String, Object> raw = candidate.metadata().rawData();
             HorizonMetadata horizonMetadata = Horizon.GSON.fromJson(
-                    gson.toJson(raw),
-                    HorizonMetadata.class
+                gson.toJson(raw),
+                HorizonMetadata.class
             );
             if (horizonMetadata == null) {
                 throw new PhaseException("Couldn't deserialize horizon metadata for candidate '" + candidate.metadata().name() + "'");

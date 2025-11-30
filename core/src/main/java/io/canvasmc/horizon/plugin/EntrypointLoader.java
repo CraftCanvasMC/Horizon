@@ -19,9 +19,9 @@ import java.util.List;
 public class EntrypointLoader {
 
     private static final List<Phase<?, ?>> PHASES = List.of(
-            new DiscoveryPhase(),
-            new ValidationPhase(),
-            new BuilderPhase()
+        new DiscoveryPhase(),
+        new ValidationPhase(),
+        new BuilderPhase()
     );
 
     public static @NonNull HorizonPlugin @NonNull [] init() {
@@ -35,7 +35,7 @@ public class EntrypointLoader {
 
         if (!pluginsDirectory.isDirectory()) {
             throw new IllegalStateException(
-                    "Plugins folder '" + pluginsDirectory.getPath() + "' is not a directory!"
+                "Plugins folder '" + pluginsDirectory.getPath() + "' is not a directory!"
             );
         }
 
@@ -63,17 +63,17 @@ public class EntrypointLoader {
             List<HorizonMetadata> metas = Arrays.stream(plugins).map(HorizonPlugin::pluginMetadata).toList();
 
             builder.append(
-                    "Found {} plugin(s):\n"
-                            .replace("{}", String.valueOf(metas.size()))
+                "Found {} plugin(s):\n"
+                    .replace("{}", String.valueOf(metas.size()))
             );
 
             for (HorizonMetadata meta : metas) {
 
                 builder.append("\t- ")
-                        .append(meta.name())
-                        .append(" ")
-                        .append(meta.version())
-                        .append("\n");
+                    .append(meta.name())
+                    .append(" ")
+                    .append(meta.version())
+                    .append("\n");
 
                 List<String> mixins = meta.mixins();
                 List<String> wideners = meta.accessWideners();
@@ -85,16 +85,16 @@ public class EntrypointLoader {
                     index++;
                     boolean last = index == totalChildren;
                     builder.append(last ? "\t   \\-- " : "\t   |-- ")
-                            .append(mixin)
-                            .append("\n");
+                        .append(mixin)
+                        .append("\n");
                 }
 
                 for (String widener : wideners) {
                     index++;
                     boolean last = index == totalChildren;
                     builder.append(last ? "\t   \\-- " : "\t   |-- ")
-                            .append(widener)
-                            .append("\n");
+                        .append(widener)
+                        .append("\n");
                 }
             }
 
@@ -109,7 +109,7 @@ public class EntrypointLoader {
 
     @SuppressWarnings("unchecked")
     private static <I, O> O executePhase(@NonNull Phase<I, O> phase, Object input, LoadContext context)
-            throws PhaseException {
+        throws PhaseException {
         return phase.execute((I) input, context);
     }
 }

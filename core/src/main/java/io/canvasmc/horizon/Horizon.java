@@ -23,9 +23,9 @@ import java.util.List;
 public class Horizon {
     public static final Yaml YAML = new Yaml(new SafeConstructor(new LoaderOptions()));
     public static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .registerTypeAdapter(HorizonMetadata.class, new HorizonMetadataDeserializer())
-            .create();
+        .setPrettyPrinting()
+        .registerTypeAdapter(HorizonMetadata.class, new HorizonMetadataDeserializer())
+        .create();
 
     public static Horizon INSTANCE;
 
@@ -82,6 +82,7 @@ public class Horizon {
      * <p>
      * <b>Note:</b> if plugins aren't loaded yet, the list will be empty
      * </p>
+     *
      * @return all plugins
      */
     public List<HorizonPlugin> getPlugins() {

@@ -14,12 +14,12 @@ import java.util.List;
  * @param loadDatapackEntry if the plugin should be registered as a datapack entry
  */
 public record HorizonMetadata(
-        String name,
-        String version,
-        String apiVersion, // TODO - check this when we parse the paperclip version
-        List<String> mixins,
-        List<String> accessWideners,
-        boolean loadDatapackEntry
+    String name,
+    String version,
+    String apiVersion, // TODO - check this when we parse the paperclip version
+    List<String> mixins,
+    List<String> accessWideners,
+    boolean loadDatapackEntry
 ) {
     public HorizonMetadata {
         // preconditions, required fields
