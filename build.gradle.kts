@@ -19,16 +19,21 @@ subprojects {
         maven(PAPER_MAVEN)
     }
 
+    // configuration that shades and includes as an implementation for the core project
+    val include by configurations.creating {
+        configurations.implementation.get().extendsFrom(this)
+    }
+
     dependencies {
         // general libraries
-        shadow("com.google.code.gson:gson:2.11.0")
-        shadow("org.yaml:snakeyaml:2.3")
-        shadow("it.unimi.dsi:fastutil:8.5.15")
-        shadow("com.google.guava:guava:33.4.0-jre")
-        shadow("net.sf.jopt-simple:jopt-simple:5.0.4")
+        include("com.google.code.gson:gson:2.11.0")
+        include("org.yaml:snakeyaml:2.3")
+        include("it.unimi.dsi:fastutil:8.5.15")
+        include("com.google.guava:guava:33.4.0-jre")
+        include("net.sf.jopt-simple:jopt-simple:5.0.4")
 
         // annotations -- compileOnly
-        compileOnly("org.jetbrains:annotations:26.0.2")
+        compileOnly("org.jspecify:jspecify:1.0.0")
 
         // logger libraries
         implementation("org.tinylog:tinylog-api:2.7.0")
@@ -39,9 +44,8 @@ subprojects {
         configurations = listOf(project.configurations.runtimeClasspath.get())
 
         val basePackage = "horizon.libs"
-        val shadowConf = project.configurations.getByName("shadow")
 
-        shadowConf.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
+        include.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
             val group = artifact.moduleVersion.id.group
             val rootPackage = group.split(".").take(2).joinToString(".")
 

@@ -1,3 +1,0 @@
-dependencies {
-    implementation(projects.api)
-}
