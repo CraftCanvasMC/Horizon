@@ -40,16 +40,23 @@ public class Main {
                 this.acceptsAll(asList("?", "help"), "Show the help");
 
                 this.acceptsAll(asList("P", "plugins"), "Plugin directory to use")
-                        .withRequiredArg()
-                        .ofType(File.class)
-                        .defaultsTo(new File("plugins"))
-                        .describedAs("Plugin directory");
+                    .withRequiredArg()
+                    .ofType(File.class)
+                    .defaultsTo(new File("plugins"))
+                    .describedAs("Plugin directory");
 
                 this.acceptsAll(asList("add-plugin", "add-extra-plugin-jar"), "Specify paths to extra plugin jars to be loaded in addition to those in the plugins folder. This argument can be specified multiple times, once for each extra plugin jar path.")
-                        .withRequiredArg()
-                        .ofType(File.class)
-                        .defaultsTo(new File[]{})
-                        .describedAs("Jar file");
+                    .withRequiredArg()
+                    .ofType(File.class)
+                    .defaultsTo(new File[]{})
+                    .describedAs("Jar file");
+
+                // TODO - strip this from arguments when passing to server in final launch
+                this.acceptsAll(asList("S", "serverjar"), "The server jarfile name to use")
+                    .withRequiredArg()
+                    .ofType(File.class)
+                    .defaultsTo(new File("server.jar"))
+                    .describedAs("The server jarfile");
             }
         };
 
