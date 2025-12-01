@@ -5,6 +5,7 @@ import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
 import io.canvasmc.horizon.util.*
 import io.canvasmc.horizon.extension.HorizonExtension
 import io.canvasmc.horizon.tasks.SetupEnvironment
+import io.papermc.paperweight.tasks.ApplyAccessTransform
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import javax.inject.Inject
 import org.gradle.api.Plugin
@@ -48,28 +49,36 @@ abstract class Horizon : Plugin<Project> {
     }
 
     private fun Project.setup(ext: HorizonExtension) {
-        val setupTask = tasks.register<SetupEnvironment>("setupEnvironment")
+        val applySourceTransformersTask = tasks.register<SetupEnvironment>("applyAccessTransformersToSources")
+        val applyClassTransformersTask = tasks.register<ApplyAccessTransform>("applyAccessTransformersToClasses")
         val userdevTask = tasks.named<UserdevSetupTask>(USERDEV_SETUP_TASK_NAME)
 
-        setupTask {
+         applySourceTransformersTask {
             group = "horizon"
             processedServerJar.set(userdevTask.flatMap { it.processedServerJar })
-            transformedServerJar.set(layout.cache.resolve(horizonTaskOutput("transformedServerJar", "jar")))
+            intermediateServerJar.set(layout.cache.resolve(horizonTaskOutput("intermediateServerJar", "jar")))
             atFile.set(ext.accessTransformerFile)
             ats.jst.from(project.configurations.named(JST_CONFIG))
-            doLast {
-            }
         }
 
-        tasks.named("classes") { dependsOn(setupTask) } // this also attaches it to the lifecycle
+        applyClassTransformersTask {
+            doFirst { println("Applying access transformers 2/2...") }
+            group = "horizon"
+            inputJar.set(applySourceTransformersTask.flatMap { it.intermediateServerJar })
+            outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedServerJar", "jar")))
+            atFile.set(ext.accessTransformerFile)
+            doLast { println("Finished setup!") }
+        }
+
+        tasks.named("classes") { dependsOn(applyClassTransformersTask) } // this also attaches it to the lifecycle
 
         // attach sources
         configurations.register(MOJANG_MAPPED_SERVER_CONFIG) {
-            defaultDependencies { add(dependencyFactory.create(files(setupTask.flatMap { it.transformedServerJar }))) }
+            defaultDependencies { add(dependencyFactory.create(files(applyClassTransformersTask.flatMap { it.outputJar }))) }
             extendsFrom(configurations.getByName(io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_CONFIG))
         }
         configurations.register(MOJANG_MAPPED_SERVER_RUNTIME_CONFIG) {
-            defaultDependencies { add(dependencyFactory.create(files(setupTask.flatMap { it.transformedServerJar }))) }
+            defaultDependencies { add(dependencyFactory.create(files(applyClassTransformersTask.flatMap { it.outputJar }))) }
             extendsFrom(configurations.getByName(io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG))
         }
 

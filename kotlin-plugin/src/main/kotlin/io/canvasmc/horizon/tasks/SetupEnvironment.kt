@@ -19,7 +19,7 @@ abstract class SetupEnvironment : JavaLauncherTask() {
     abstract val processedServerJar: RegularFileProperty
 
     @get:OutputFile
-    abstract val transformedServerJar: RegularFileProperty
+    abstract val intermediateServerJar: RegularFileProperty
 
     @get:InputFile
     @get:Optional
@@ -35,23 +35,23 @@ abstract class SetupEnvironment : JavaLauncherTask() {
 
         val generatedIn = measureNanoTime {
             val inputJar = processedServerJar.get().path
-            val outputJar = transformedServerJar.get().path.cleanFile()
+            val outputJar = intermediateServerJar.get().path.cleanFile()
 
             if (atFile.isPresent && atFile.path.readText().isNotBlank()) {
-                println("Applying access transformers...")
+                println("Applying access transformers 1/2...")
                 ats.run(
                     launcher.get(),
                     inputJar,
                     outputJar,
                     atFile.path,
                     temporaryDir.toPath(),
-                    singleFile = true,
+                    archive = true,
                 )
             } else {
                 inputJar.copyTo(outputJar)
             }
         }
         timeSpent.set(generatedIn)
-        println("Done preparing in ${formatNs(timeSpent.get())}!")
+        println("Done in ${formatNs(timeSpent.get())}!")
     }
 }
