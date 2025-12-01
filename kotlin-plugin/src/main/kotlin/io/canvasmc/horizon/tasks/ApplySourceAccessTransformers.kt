@@ -9,7 +9,7 @@ import org.gradle.kotlin.dsl.newInstance
 import kotlin.system.measureNanoTime
 
 @CacheableTask
-abstract class SetupEnvironment : JavaLauncherTask() {
+abstract class ApplySourceAccessTransformers : JavaLauncherTask() {
 
     @get:Nested
     val ats: ApplySourceATs = objects.newInstance()
