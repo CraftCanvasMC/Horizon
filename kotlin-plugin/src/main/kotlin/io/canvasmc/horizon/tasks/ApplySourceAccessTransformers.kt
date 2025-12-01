@@ -31,8 +31,6 @@ abstract class ApplySourceAccessTransformers : JavaLauncherTask() {
 
     @TaskAction
     fun run() {
-        println("Preparing the dev environment...")
-
         val generatedIn = measureNanoTime {
             val inputJar = mappedServerJar.get().path
             val outputJar = processedServerJar.get().path.cleanFile()

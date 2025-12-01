@@ -1,0 +1,251 @@
+/*
+ * This file is part of the paperweight gradle plugin.
+ * 
+ * paperweight is a Gradle plugin for the PaperMC project.
+ *
+ * Copyright (c) 2023 Kyle Wood (DenWav)
+ *                    Contributors
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation;
+ * version 2.1 only, no later versions.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
+ * USA
+ */
+
+package io.canvasmc.horizon.tasks
+
+import io.canvasmc.horizon.util.defaultOutput
+import io.canvasmc.horizon.util.formatNs
+import io.papermc.paperweight.util.*
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
+import org.gradle.jvm.toolchain.JavaLauncher
+import org.gradle.kotlin.dsl.*
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
+import org.gradle.workers.WorkQueue
+import org.gradle.workers.WorkerExecutor
+import paper.libs.org.cadixdev.at.AccessChange
+import paper.libs.org.cadixdev.at.AccessTransform
+import paper.libs.org.cadixdev.at.AccessTransformSet
+import paper.libs.org.cadixdev.at.ModifierChange
+import paper.libs.org.cadixdev.at.io.AccessTransformFormats
+import paper.libs.org.cadixdev.atlas.Atlas
+import paper.libs.org.cadixdev.atlas.AtlasTransformerContext
+import paper.libs.org.cadixdev.bombe.analysis.InheritanceProvider
+import paper.libs.org.cadixdev.bombe.asm.analysis.ClassProviderInheritanceProvider
+import paper.libs.org.cadixdev.bombe.asm.jar.ClassProvider
+import paper.libs.org.cadixdev.bombe.jar.JarClassEntry
+import paper.libs.org.cadixdev.bombe.jar.JarEntryTransformer
+import paper.libs.org.cadixdev.bombe.type.signature.MethodSignature
+import paper.libs.org.objectweb.asm.ClassReader
+import paper.libs.org.objectweb.asm.ClassVisitor
+import paper.libs.org.objectweb.asm.ClassWriter
+import paper.libs.org.objectweb.asm.FieldVisitor
+import paper.libs.org.objectweb.asm.MethodVisitor
+import paper.libs.org.objectweb.asm.Opcodes
+import java.nio.file.Path
+import javax.inject.Inject
+import kotlin.io.path.*
+import kotlin.system.measureNanoTime
+
+fun applyAccessTransform(
+    inputJarPath: Path,
+    outputJarPath: Path,
+    atFilePath: Path,
+    jvmArgs: List<String> = listOf("-Xmx1G"),
+    workerExecutor: WorkerExecutor,
+    launcher: JavaLauncher
+): WorkQueue {
+    ensureParentExists(outputJarPath)
+    ensureDeleted(outputJarPath)
+
+    val queue = workerExecutor.processIsolation {
+        forkOptions.jvmArgs(jvmArgs)
+        forkOptions.executable(launcher.executablePath.path.absolutePathString())
+    }
+
+    queue.submit(ApplyClassAccessTransformers.AtlasAction::class) {
+        inputJar.set(inputJarPath)
+        atFile.set(atFilePath)
+        outputJar.set(outputJarPath)
+    }
+
+    return queue
+}
+
+@CacheableTask
+abstract class ApplyClassAccessTransformers : JavaLauncherTask() {
+
+    @get:Classpath
+    abstract val inputJar: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val atFile: RegularFileProperty
+
+    @get:OutputFile
+    abstract val outputJar: RegularFileProperty
+
+    @get:Internal
+    abstract val jvmargs: ListProperty<String>
+
+    @get:Inject
+    abstract val workerExecutor: WorkerExecutor
+
+    @get:Internal
+    abstract val timeSpent: Property<Long>
+
+    override fun init() {
+        super.init()
+
+        jvmargs.convention(listOf("-Xmx1G"))
+        outputJar.convention(defaultOutput())
+    }
+
+    @TaskAction
+    fun run() {
+        println("Applying access transformers 2/2...")
+        val generatedIn = measureNanoTime {
+            applyAccessTransform(
+                inputJarPath = inputJar.path,
+                outputJarPath = outputJar.path,
+                atFilePath = atFile.path,
+                jvmArgs = jvmargs.get(),
+                workerExecutor = workerExecutor,
+                launcher = launcher.get()
+            )
+        }
+        timeSpent.set(generatedIn)
+        println("Done in ${formatNs(timeSpent.get())}!")
+    }
+
+    abstract class AtlasAction : WorkAction<AtlasParameters> {
+        override fun execute() {
+            val at = AccessTransformFormats.FML.read(parameters.atFile.path)
+
+            Atlas().apply {
+                install {
+                    // Replace the inheritance provider to set ASM9 opcodes
+                    val inheritanceProvider = AtlasTransformerContext::class.java.getDeclaredField("inheritanceProvider")
+                    inheritanceProvider.isAccessible = true
+                    val classProvider = ClassProviderInheritanceProvider::class.java.getDeclaredField("provider")
+                    classProvider.isAccessible = true
+                    inheritanceProvider.set(
+                        it,
+                        ClassProviderInheritanceProvider(
+                            Opcodes.ASM9,
+                            classProvider.get(inheritanceProvider.get(it)) as ClassProvider
+                        )
+                    )
+                    // End replace inheritance provider
+
+                    AtJarEntryTransformer(it, at)
+                }
+                run(parameters.inputJar.path, parameters.outputJar.path)
+            }
+        }
+    }
+
+    interface AtlasParameters : WorkParameters {
+        val inputJar: RegularFileProperty
+        val atFile: RegularFileProperty
+        val outputJar: RegularFileProperty
+    }
+}
+
+class AtJarEntryTransformer(
+    private val context: AtlasTransformerContext,
+    private val at: AccessTransformSet
+) : JarEntryTransformer {
+    override fun transform(entry: JarClassEntry): JarClassEntry {
+        val reader = ClassReader(entry.contents)
+        val writer = ClassWriter(reader, 0)
+        reader.accept(AccessTransformerVisitor(at, context.inheritanceProvider(), writer), 0)
+        return JarClassEntry(entry.name, entry.time, writer.toByteArray())
+    }
+}
+
+class AccessTransformerVisitor(
+    private val at: AccessTransformSet,
+    private val inheritanceProvider: InheritanceProvider,
+    writer: ClassWriter
+) : ClassVisitor(Opcodes.ASM9, writer) {
+
+    private lateinit var classTransform: AccessTransformSet.Class
+
+    override fun visit(
+        version: Int,
+        access: Int,
+        name: String,
+        signature: String?,
+        superName: String?,
+        interfaces: Array<out String>?
+    ) {
+        classTransform = completedClassAt(name)
+        super.visit(version, classTransform.get().apply(access), name, signature, superName, interfaces)
+    }
+
+    override fun visitField(
+        access: Int,
+        name: String,
+        descriptor: String,
+        signature: String?,
+        value: Any?
+    ): FieldVisitor = super.visitField(classTransform.getField(name).apply(access), name, descriptor, signature, value)
+
+    override fun visitMethod(
+        access: Int,
+        name: String,
+        descriptor: String,
+        signature: String?,
+        exceptions: Array<out String>?
+    ): MethodVisitor {
+        val newAccess = classTransform.getMethod(MethodSignature.of(name, descriptor)).apply(access)
+        return super.visitMethod(newAccess, name, descriptor, signature, exceptions)
+    }
+
+    override fun visitInnerClass(name: String, outerName: String?, innerName: String?, access: Int) {
+        super.visitInnerClass(name, outerName, innerName, completedClassAt(name).get().apply(access))
+    }
+
+    private fun completedClassAt(className: String): AccessTransformSet.Class = synchronized(at) {
+        at.getOrCreateClass(className).apply { complete(inheritanceProvider) }
+    }
+}
+
+fun AccessTransform?.apply(currentModifier: Int): Int {
+    if (this == null) {
+        return currentModifier
+    }
+    var value = currentModifier
+    if (this.access != AccessChange.NONE) {
+        value = value and AsmUtil.RESET_ACCESS
+        value = value or this.access.modifier
+    }
+    when (this.final) {
+        ModifierChange.REMOVE -> {
+            value = value and Opcodes.ACC_FINAL.inv()
+        }
+
+        ModifierChange.ADD -> {
+            value = value or Opcodes.ACC_FINAL
+        }
+
+        else -> {
+        }
+    }
+    return value
+}

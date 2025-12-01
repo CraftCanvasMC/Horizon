@@ -1,11 +1,11 @@
 package io.canvasmc.horizon
 
 import io.canvasmc.horizon.extension.HorizonExtension
+import io.canvasmc.horizon.tasks.ApplyClassAccessTransformers
 import io.canvasmc.horizon.tasks.ApplySourceAccessTransformers
 import io.canvasmc.horizon.tasks.MergeAccessTransformers
 import io.canvasmc.horizon.util.*
 import io.canvasmc.horizon.util.constants.*
-import io.papermc.paperweight.tasks.ApplyAccessTransform
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
 import org.gradle.api.Plugin
@@ -59,7 +59,8 @@ abstract class Horizon : Plugin<Project> {
     private fun Project.setup(ext: HorizonExtension) {
         val mergeAccessTransformersTask = tasks.register<MergeAccessTransformers>("mergeAccessTransformers")
         val applySourceTransformersTask = tasks.register<ApplySourceAccessTransformers>("applyAccessTransformersToSources")
-        val applyClassTransformersTask = tasks.register<ApplyAccessTransform>("applyAccessTransformersToClasses")
+        val applyClassTransformersTask = tasks.register<ApplyClassAccessTransformers>("applyAccessTransformersToClasses")
+        val setupTask = tasks.register("horizonSetup")
         val userdevTask = tasks.named<UserdevSetupTask>(USERDEV_SETUP_TASK_NAME)
 
         mergeAccessTransformersTask {
@@ -69,7 +70,7 @@ abstract class Horizon : Plugin<Project> {
         }
 
         applySourceTransformersTask {
-            group = "horizon"
+            group = INTERNAL_TASK_GROUP
             mappedServerJar.set(userdevTask.flatMap { it.mappedServerJar })
             processedServerJar.set(layout.cache.resolve(horizonTaskOutput("processedServerJar", "jar")))
             atFile.set(mergeAccessTransformersTask.flatMap { it.outputFile })
@@ -77,15 +78,18 @@ abstract class Horizon : Plugin<Project> {
         }
 
         applyClassTransformersTask {
-            doFirst { println("Applying access transformers 2/2...") }
-            group = "horizon"
+            group = INTERNAL_TASK_GROUP
             inputJar.set(applySourceTransformersTask.flatMap { it.processedServerJar })
             outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedServerJar", "jar")))
             atFile.set(mergeAccessTransformersTask.flatMap { it.outputFile })
-            doLast { println("Finished setup!") }
         }
 
-        tasks.named("classes") { dependsOn(applyClassTransformersTask) } // this also attaches it to the lifecycle
+        setupTask {
+            group = "horizon"
+            dependsOn(applyClassTransformersTask)
+        }
+
+        tasks.named("classes") { dependsOn(setupTask) } // this also attaches it to the lifecycle
 
         // attach sources
         configurations.register(MOJANG_MAPPED_SERVER_CONFIG) {
