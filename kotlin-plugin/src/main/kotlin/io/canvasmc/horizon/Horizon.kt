@@ -29,13 +29,12 @@ abstract class Horizon : Plugin<Project> {
 
     override fun apply(target: Project) {
         printId<Horizon>("horizon", target.gradle)
-
         // apply userdev
         target.pluginManager.apply("io.canvasmc.weaver.userdev")
         // we reset some values so our slate doesnt get polluted
         val userdevExt = target.extensions.getByType(PaperweightUserExtension::class)
-        userdevExt.addServerDependencyTo.set(emptyList())
-        userdevExt.injectServerJar.set(false) // gotta love weaver for this!
+        userdevExt.addServerDependencyTo.set(emptyList()) // we add them ourselves
+        userdevExt.injectServerJar.set(false) // dont add the server jar to the configurations as we override it
 
         val ext = target.extensions.create<HorizonExtension>(HORIZON_EXTENSION_NAME, target)
 
@@ -44,7 +43,6 @@ abstract class Horizon : Plugin<Project> {
                 add(target.dependencies.create("io.canvasmc.jst:jst-cli-bundle:${LibraryVersions.JST}"))
             }
         }
-
         target.afterEvaluate { setup(ext) }
     }
 
@@ -55,8 +53,8 @@ abstract class Horizon : Plugin<Project> {
 
          applySourceTransformersTask {
             group = "horizon"
-            processedServerJar.set(userdevTask.flatMap { it.processedServerJar })
-            intermediateServerJar.set(layout.cache.resolve(horizonTaskOutput("intermediateServerJar", "jar")))
+            mappedServerJar.set(userdevTask.flatMap { it.mappedServerJar })
+            processedServerJar.set(layout.cache.resolve(horizonTaskOutput("processedServerJar", "jar")))
             atFile.set(ext.accessTransformerFile)
             ats.jst.from(project.configurations.named(JST_CONFIG))
         }
@@ -64,7 +62,7 @@ abstract class Horizon : Plugin<Project> {
         applyClassTransformersTask {
             doFirst { println("Applying access transformers 2/2...") }
             group = "horizon"
-            inputJar.set(applySourceTransformersTask.flatMap { it.intermediateServerJar })
+            inputJar.set(applySourceTransformersTask.flatMap { it.processedServerJar })
             outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedServerJar", "jar")))
             atFile.set(ext.accessTransformerFile)
             doLast { println("Finished setup!") }

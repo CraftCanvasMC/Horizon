@@ -16,10 +16,10 @@ abstract class SetupEnvironment : JavaLauncherTask() {
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
-    abstract val processedServerJar: RegularFileProperty
+    abstract val mappedServerJar: RegularFileProperty
 
     @get:OutputFile
-    abstract val intermediateServerJar: RegularFileProperty
+    abstract val processedServerJar: RegularFileProperty
 
     @get:InputFile
     @get:Optional
@@ -34,8 +34,8 @@ abstract class SetupEnvironment : JavaLauncherTask() {
         println("Preparing the dev environment...")
 
         val generatedIn = measureNanoTime {
-            val inputJar = processedServerJar.get().path
-            val outputJar = intermediateServerJar.get().path.cleanFile()
+            val inputJar = mappedServerJar.get().path
+            val outputJar = processedServerJar.get().path.cleanFile()
 
             if (atFile.isPresent && atFile.path.readText().isNotBlank()) {
                 println("Applying access transformers 1/2...")
