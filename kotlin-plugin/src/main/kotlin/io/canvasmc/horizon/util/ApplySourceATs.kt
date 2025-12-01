@@ -24,14 +24,14 @@
 
 package io.canvasmc.horizon.util
 
-import java.nio.file.Path
-import kotlin.io.path.*
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.CompileClasspath
 import org.gradle.api.tasks.Input
 import org.gradle.jvm.toolchain.JavaLauncher
+import java.nio.file.Path
+import kotlin.io.path.*
 
 abstract class ApplySourceATs {
     @get:Classpath

@@ -22,7 +22,7 @@ gradlePlugin {
 repositories {
     gradlePluginPortal()
     mavenLocal()
-    //maven("https://maven.canvasmc.io/snapshots")
+    // maven("https://maven.canvasmc.io/snapshots")
 }
 
 dependencies {
@@ -83,7 +83,7 @@ extensions.configure<SpotlessExtension> {
         "ktlint_standard_trailing-comma-on-declaration-site" to "disabled",
     )
 
-    val ktlintVer = "0.50.0"
+    val ktlintVer = "1.8.0"
 
     kotlin {
         ktlint(ktlintVer).editorConfigOverride(overrides)

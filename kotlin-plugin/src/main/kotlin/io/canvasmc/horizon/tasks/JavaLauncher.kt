@@ -25,16 +25,15 @@
 package io.canvasmc.horizon.tasks
 
 import io.canvasmc.horizon.util.*
-import javax.inject.Inject
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Nested
 import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.jvm.toolchain.JavaToolchainService
+import javax.inject.Inject
 
-private fun JavaLauncherTaskBase.defaultJavaLauncher(project: Project): Provider<JavaLauncher> =
-    javaToolchainService.defaultJavaLauncher(project)
+private fun JavaLauncherTaskBase.defaultJavaLauncher(project: Project): Provider<JavaLauncher> = javaToolchainService.defaultJavaLauncher(project)
 
 interface JavaLauncherTaskBase {
     @get:Nested
@@ -44,7 +43,9 @@ interface JavaLauncherTaskBase {
     val javaToolchainService: JavaToolchainService
 }
 
-abstract class JavaLauncherTask : BaseTask(), JavaLauncherTaskBase {
+abstract class JavaLauncherTask :
+    BaseTask(),
+    JavaLauncherTaskBase {
 
     override fun init() {
         super.init()
@@ -53,7 +54,9 @@ abstract class JavaLauncherTask : BaseTask(), JavaLauncherTaskBase {
     }
 }
 
-abstract class JavaLauncherZippedTask : ZippedTask(), JavaLauncherTaskBase {
+abstract class JavaLauncherZippedTask :
+    ZippedTask(),
+    JavaLauncherTaskBase {
 
     override fun init() {
         super.init()

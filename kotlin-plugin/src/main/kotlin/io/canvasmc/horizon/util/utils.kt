@@ -25,29 +25,6 @@ package io.canvasmc.horizon.util
 
 import io.canvasmc.horizon.tasks.BaseTask
 import io.canvasmc.horizon.util.constants.*
-import java.io.File
-import java.io.InputStream
-import java.io.OutputStream
-import java.lang.reflect.Type
-import java.net.URI
-import java.net.URL
-import java.nio.file.FileSystem
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.security.MessageDigest
-import java.util.Collections
-import java.util.IdentityHashMap
-import java.util.Locale
-import java.util.Optional
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.ThreadLocalRandom
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
-import java.util.jar.Attributes
-import java.util.jar.Manifest
-import kotlin.io.path.*
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.ConfigurationContainer
@@ -73,6 +50,29 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
+import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
+import java.lang.reflect.Type
+import java.net.URI
+import java.net.URL
+import java.nio.file.FileSystem
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.security.MessageDigest
+import java.util.Collections
+import java.util.IdentityHashMap
+import java.util.Locale
+import java.util.Optional
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
+import java.util.jar.Attributes
+import java.util.jar.Manifest
+import kotlin.io.path.*
 
 val ProjectLayout.cache: Path
     get() = projectDirectory.dir(".gradle/$CACHE_PATH").path
@@ -81,9 +81,7 @@ fun ProjectLayout.cacheDir(path: String) = projectDirectory.dir(".gradle/$CACHE_
 
 fun Project.offlineMode(): Boolean = gradle.startParameter.isOffline
 
-fun <T : FileSystemLocation> Provider<out T>.fileExists(): Provider<out T> {
-    return map { it.takeIf { f -> f.path.exists() } }
-}
+fun <T : FileSystemLocation> Provider<out T>.fileExists(): Provider<out T> = map { it.takeIf { f -> f.path.exists() } }
 
 val redirectThreadCount: AtomicLong = AtomicLong(0)
 
@@ -144,24 +142,20 @@ fun Path.cleanDir(): Path {
     return this
 }
 
-fun Any.convertToFileProvider(layout: ProjectLayout, providers: ProviderFactory): Provider<RegularFile> {
-    return when (this) {
-        is Path -> layout.file(providers.provider { toFile() })
-        is File -> layout.file(providers.provider { this })
-        is FileSystemLocation -> layout.file(providers.provider { asFile })
-        is Provider<*> -> flatMap { it.convertToFileProvider(layout, providers) }
-        else -> throw RuntimeException("Unknown type representing a file: ${this.javaClass.name}")
-    }
+fun Any.convertToFileProvider(layout: ProjectLayout, providers: ProviderFactory): Provider<RegularFile> = when (this) {
+    is Path -> layout.file(providers.provider { toFile() })
+    is File -> layout.file(providers.provider { this })
+    is FileSystemLocation -> layout.file(providers.provider { asFile })
+    is Provider<*> -> flatMap { it.convertToFileProvider(layout, providers) }
+    else -> throw RuntimeException("Unknown type representing a file: ${this.javaClass.name}")
 }
 
-fun Any.convertToPath(): Path {
-    return when (this) {
-        is Path -> this
-        is File -> this.toPath()
-        is FileSystemLocation -> this.path
-        is Provider<*> -> this.get().convertToPath()
-        else -> throw RuntimeException("Unknown type representing a file: ${this.javaClass.name}")
-    }
+fun Any.convertToPath(): Path = when (this) {
+    is Path -> this
+    is File -> this.toPath()
+    is FileSystemLocation -> this.path
+    is Provider<*> -> this.get().convertToPath()
+    else -> throw RuntimeException("Unknown type representing a file: ${this.javaClass.name}")
 }
 
 fun Any?.convertToPathOrNull(): Path? {
@@ -171,19 +165,15 @@ fun Any?.convertToPathOrNull(): Path? {
     return this.convertToPath()
 }
 
-fun Any.convertToUrl(): URL {
-    return when (this) {
-        is URL -> this
-        is URI -> this.toURL()
-        is String -> URI.create(this).toURL()
-        is Provider<*> -> this.get().convertToUrl()
-        else -> throw RuntimeException("Unknown URL type: ${this.javaClass.name}")
-    }
+fun Any.convertToUrl(): URL = when (this) {
+    is URL -> this
+    is URI -> this.toURL()
+    is String -> URI.create(this).toURL()
+    is Provider<*> -> this.get().convertToUrl()
+    else -> throw RuntimeException("Unknown URL type: ${this.javaClass.name}")
 }
 
-fun String.capitalized(): String {
-    return replaceFirstChar(Char::uppercase)
-}
+fun String.capitalized(): String = replaceFirstChar(Char::uppercase)
 
 fun ensureParentExists(vararg files: Any) {
     for (file in files) {
@@ -210,11 +200,9 @@ fun ensureDeleted(vararg files: Any) {
 val <T> Optional<T>.orNull: T?
     get() = orElse(null)
 
-inline fun <reified T : Any> Project.contents(contentFile: RegularFileProperty, crossinline convert: (String) -> T): Provider<T> {
-    return providers.fileContents(contentFile)
-        .asText
-        .map { convert(it) }
-}
+inline fun <reified T : Any> Project.contents(contentFile: RegularFileProperty, crossinline convert: (String) -> T): Provider<T> = providers.fileContents(contentFile)
+    .asText
+    .map { convert(it) }
 
 fun findOutputDir(baseFile: Path): Path {
     var dir: Path
@@ -254,18 +242,14 @@ fun String.hash(algorithm: HashingAlgorithm): ByteArray = algorithm.threadLocalD
     it.digest()
 }
 
-fun InputStream.hash(algorithm: HashingAlgorithm, bufferSize: Int = 8192): ByteArray {
-    return listOf(InputStreamProvider.wrap(this)).hash(algorithm, bufferSize)
-}
+fun InputStream.hash(algorithm: HashingAlgorithm, bufferSize: Int = 8192): ByteArray = listOf(InputStreamProvider.wrap(this)).hash(algorithm, bufferSize)
 
 interface InputStreamProvider {
     fun <T> use(op: (InputStream) -> T): T
 
     companion object {
         fun file(path: Path): InputStreamProvider = object : InputStreamProvider {
-            override fun <T> use(op: (InputStream) -> T): T {
-                return path.inputStream().use(op)
-            }
+            override fun <T> use(op: (InputStream) -> T): T = path.inputStream().use(op)
         }
 
         fun dir(path: Path): List<InputStreamProvider> = path.walk()
@@ -274,9 +258,7 @@ interface InputStreamProvider {
             .toList()
 
         fun wrap(input: InputStream): InputStreamProvider = object : InputStreamProvider {
-            override fun <T> use(op: (InputStream) -> T): T {
-                return op(input)
-            }
+            override fun <T> use(op: (InputStream) -> T): T = op(input)
         }
 
         fun string(value: String) = wrap(value.byteInputStream())
@@ -324,7 +306,6 @@ fun JavaToolchainService.defaultJavaLauncher(project: Project): Provider<JavaLau
 
 fun <P : Property<*>> P.changesDisallowed(): P = apply { disallowChanges() }
 fun <P : Property<*>> P.finalizedOnRead(): P = apply { finalizeValueOnRead() }
-
 
 private fun javaVersion(): Int {
     val version = System.getProperty("java.specification.version")
@@ -381,8 +362,7 @@ fun formatNs(ns: Long): String {
     return "${m}m ${remS}s"
 }
 
-fun isIDEASync(): Boolean =
-    java.lang.Boolean.getBoolean("idea.sync.active")
+fun isIDEASync(): Boolean = java.lang.Boolean.getBoolean("idea.sync.active")
 
 inline fun <reified T : Any> ObjectFactory.providerSet(
     vararg providers: Provider<out T>
@@ -401,16 +381,10 @@ inline fun <reified T : Any> ObjectFactory.providerSet(
     return current!!
 }
 
-fun BaseTask.defaultOutput(name: String, ext: String): RegularFileProperty {
-    return objects.fileProperty().convention {
-        layout.cache.resolve(horizonTaskOutput(name, ext)).toFile()
-    }
+fun BaseTask.defaultOutput(name: String, ext: String): RegularFileProperty = objects.fileProperty().convention {
+    layout.cache.resolve(horizonTaskOutput(name, ext)).toFile()
 }
 
-fun BaseTask.defaultOutput(ext: String): RegularFileProperty {
-    return defaultOutput(name, ext)
-}
+fun BaseTask.defaultOutput(ext: String): RegularFileProperty = defaultOutput(name, ext)
 
-fun BaseTask.defaultOutput(): RegularFileProperty {
-    return defaultOutput("jar")
-}
+fun BaseTask.defaultOutput(): RegularFileProperty = defaultOutput("jar")

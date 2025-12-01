@@ -24,6 +24,12 @@
 
 package io.canvasmc.horizon.util
 
+import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemLocation
+import org.gradle.api.file.FileSystemLocationProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Provider
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.URI
@@ -42,12 +48,6 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.io.path.*
 import kotlin.streams.asSequence
-import org.gradle.api.Project
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileSystemLocation
-import org.gradle.api.file.FileSystemLocationProperty
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.Provider
 
 // utils for dealing with java.nio.file.Path and java.io.File
 
@@ -196,32 +196,22 @@ val Provider<out FileSystemLocation>.path: Path
 val Provider<out FileSystemLocation>.pathOrNull: Path?
     get() = orNull?.path
 
-private fun Path.jarUri(): URI {
-    return URI.create("jar:${toUri()}")
+private fun Path.jarUri(): URI = URI.create("jar:${toUri()}")
+
+fun Path.openZip(): FileSystem = try {
+    FileSystems.getFileSystem(jarUri())
+} catch (e: FileSystemNotFoundException) {
+    FileSystems.newFileSystem(jarUri(), emptyMap<String, Any>())
 }
 
-fun Path.openZip(): FileSystem {
-    return try {
-        FileSystems.getFileSystem(jarUri())
-    } catch (e: FileSystemNotFoundException) {
-        FileSystems.newFileSystem(jarUri(), emptyMap<String, Any>())
-    }
-}
+fun Path.writeZip(): FileSystem = FileSystems.newFileSystem(jarUri(), mapOf("create" to "true"))
 
-fun Path.writeZip(): FileSystem {
-    return FileSystems.newFileSystem(jarUri(), mapOf("create" to "true"))
-}
+fun FileSystem.walkSequence(vararg options: PathWalkOption): Sequence<Path> = StreamSupport.stream(rootDirectories.spliterator(), false)
+    .asSequence()
+    .flatMap { it.walk(*options) }
 
-fun FileSystem.walkSequence(vararg options: PathWalkOption): Sequence<Path> {
-    return StreamSupport.stream(rootDirectories.spliterator(), false)
-        .asSequence()
-        .flatMap { it.walk(*options) }
-}
-
-fun FileSystem.walk(): Stream<Path> {
-    return StreamSupport.stream(rootDirectories.spliterator(), false)
-        .flatMap { Files.walk(it) }
-}
+fun FileSystem.walk(): Stream<Path> = StreamSupport.stream(rootDirectories.spliterator(), false)
+    .flatMap { Files.walk(it) }
 
 fun Path.filesMatchingRecursive(glob: String = "*"): List<Path> {
     if (!exists()) {

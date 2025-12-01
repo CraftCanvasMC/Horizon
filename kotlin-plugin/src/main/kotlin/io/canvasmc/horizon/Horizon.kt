@@ -1,14 +1,13 @@
 package io.canvasmc.horizon
 
-import io.canvasmc.horizon.util.constants.*
-import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
-import io.canvasmc.horizon.util.*
 import io.canvasmc.horizon.extension.HorizonExtension
-import io.canvasmc.horizon.tasks.MergeAccessTransformers
 import io.canvasmc.horizon.tasks.ApplySourceAccessTransformers
+import io.canvasmc.horizon.tasks.MergeAccessTransformers
+import io.canvasmc.horizon.util.*
+import io.canvasmc.horizon.util.constants.*
 import io.papermc.paperweight.tasks.ApplyAccessTransform
 import io.papermc.paperweight.userdev.PaperweightUserExtension
-import javax.inject.Inject
+import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyFactory
@@ -18,6 +17,7 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Delete
 import org.gradle.kotlin.dsl.*
+import javax.inject.Inject
 
 abstract class Horizon : Plugin<Project> {
     @get:Inject
@@ -68,7 +68,7 @@ abstract class Horizon : Plugin<Project> {
             outputFile.set(layout.cache.resolve(horizonTaskOutput("merged", "at")))
         }
 
-         applySourceTransformersTask {
+        applySourceTransformersTask {
             group = "horizon"
             mappedServerJar.set(userdevTask.flatMap { it.mappedServerJar })
             processedServerJar.set(layout.cache.resolve(horizonTaskOutput("processedServerJar", "jar")))

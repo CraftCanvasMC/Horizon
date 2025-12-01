@@ -24,14 +24,14 @@
 
 package io.canvasmc.horizon.util
 
+import org.gradle.api.file.FileCollection
+import org.gradle.api.provider.Provider
+import org.gradle.jvm.toolchain.JavaLauncher
 import java.io.File
 import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 import java.util.jar.JarFile
 import kotlin.io.path.*
-import org.gradle.api.file.FileCollection
-import org.gradle.api.provider.Provider
-import org.gradle.jvm.toolchain.JavaLauncher
 
 private val Iterable<File>.asPath
     get() = joinToString(File.pathSeparator) { it.absolutePath }
@@ -58,11 +58,13 @@ fun JavaLauncher.runJar(
 
     val (logFilePath, output) = when {
         logFile is OutputStream -> Pair(null, logFile)
+
         logFile != null -> {
             val log = logFile.convertToPath()
             log.parent.createDirectories()
             Pair(log, log.outputStream().buffered())
         }
+
         else -> Pair(null, UselessOutputStream)
     }
 

@@ -1,11 +1,11 @@
 package io.canvasmc.horizon.tasks
 
 import io.canvasmc.horizon.util.*
-import kotlin.io.path.*
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.newInstance
+import kotlin.io.path.*
 import kotlin.system.measureNanoTime
 
 @CacheableTask

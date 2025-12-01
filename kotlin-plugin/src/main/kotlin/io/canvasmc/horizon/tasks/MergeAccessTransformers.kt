@@ -26,8 +26,6 @@ package io.canvasmc.horizon.tasks
 
 import io.canvasmc.horizon.util.defaultOutput
 import io.papermc.paperweight.util.*
-import paper.libs.org.cadixdev.at.AccessTransformSet
-import paper.libs.org.cadixdev.at.io.AccessTransformFormats
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFiles
@@ -36,6 +34,8 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import paper.libs.org.cadixdev.at.AccessTransformSet
+import paper.libs.org.cadixdev.at.io.AccessTransformFormats
 
 abstract class MergeAccessTransformers : BaseTask() {
 
