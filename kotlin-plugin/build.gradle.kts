@@ -21,8 +21,7 @@ gradlePlugin {
 
 repositories {
     gradlePluginPortal()
-    mavenLocal()
-    // maven("https://maven.canvasmc.io/snapshots")
+    maven("https://maven.canvasmc.io/snapshots")
 }
 
 dependencies {
@@ -34,7 +33,7 @@ java {
     withSourcesJar()
 }
 
-tasks.withType(JavaCompile::class).configureEach {
+tasks.withType<JavaCompile>().configureEach {
     options.release = 17
 }
 
