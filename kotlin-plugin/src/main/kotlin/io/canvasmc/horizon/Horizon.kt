@@ -82,6 +82,13 @@ abstract class Horizon : Plugin<Project> {
             dependsOn(applyClassTransformersTask)
         }
 
+        cleanTask {
+            group = TASK_GROUP
+            description = "Delete the project-local horizon setup cache."
+            delete(layout.cache)
+            delete(rootProject.layout.cache.resolve("horizon"))
+        }
+
         tasks.named("classes") { dependsOn(setupTask) } // this also attaches the task to the lifecycle
 
         configurations.register(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG) {
