@@ -74,7 +74,7 @@ abstract class Horizon : Plugin<Project> {
         applySourceTransformersTask {
             group = INTERNAL_TASK_GROUP
             mappedServerJar.set(userdevTask.flatMap { it.mappedServerJar })
-            processedServerJar.set(layout.cache.resolve(horizonTaskOutput("processedServerJar", "jar")))
+            processedServerJar.set(layout.cache.resolve(horizonTaskOutput("sourceTransformedMojangMappedServerJar", "jar")))
             atFile.set(mergeAccessTransformersTask.flatMap { it.outputFile })
             ats.jst.from(project.configurations.named(JST_CONFIG))
         }
@@ -82,7 +82,7 @@ abstract class Horizon : Plugin<Project> {
         applyClassTransformersTask {
             group = INTERNAL_TASK_GROUP
             inputJar.set(applySourceTransformersTask.flatMap { it.processedServerJar })
-            outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedServerJar", "jar")))
+            outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedMojangMappedServerJar", "jar")))
             atFile.set(mergeAccessTransformersTask.flatMap { it.outputFile })
         }
 
