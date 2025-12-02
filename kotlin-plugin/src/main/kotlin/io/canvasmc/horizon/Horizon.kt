@@ -90,7 +90,6 @@ abstract class Horizon : Plugin<Project> {
         tasks.register<Delete>("cleanHorizonCache") {
             group = TASK_GROUP
             description = "Delete the project-local horizon setup cache."
-            delete(layout.cache)
             delete(rootProject.layout.cache.resolve(HORIZON_NAME))
         }
 
