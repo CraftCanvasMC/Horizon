@@ -9,7 +9,7 @@ import kotlin.io.path.*
 import kotlin.system.measureNanoTime
 
 @CacheableTask
-abstract class ApplySourceAccessTransformers : JavaLauncherTask() {
+abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
 
     @get:Nested
     val ats: ApplySourceATs = objects.newInstance()
@@ -19,7 +19,7 @@ abstract class ApplySourceAccessTransformers : JavaLauncherTask() {
     abstract val mappedServerJar: RegularFileProperty
 
     @get:OutputFile
-    abstract val processedServerJar: RegularFileProperty
+    abstract val sourceTransformedMappedServerJar: RegularFileProperty
 
     @get:InputFile
     @get:Optional
@@ -33,7 +33,7 @@ abstract class ApplySourceAccessTransformers : JavaLauncherTask() {
     fun run() {
         val generatedIn = measureNanoTime {
             val inputJar = mappedServerJar.get().path
-            val outputJar = processedServerJar.get().path.cleanFile()
+            val outputJar = sourceTransformedMappedServerJar.get().path.cleanFile()
 
             if (atFile.isPresent && atFile.path.readText().isNotBlank()) {
                 println("Applying access transformers 1/2...")

@@ -77,7 +77,7 @@ fun applyAccessTransform(
         forkOptions.executable(launcher.executablePath.path.absolutePathString())
     }
 
-    queue.submit(ApplyClassAccessTransformers.AtlasAction::class) {
+    queue.submit(ApplyClassAccessTransforms.AtlasAction::class) {
         inputJar.set(inputJarPath)
         atFile.set(atFilePath)
         outputJar.set(outputJarPath)
@@ -87,7 +87,7 @@ fun applyAccessTransform(
 }
 
 @CacheableTask
-abstract class ApplyClassAccessTransformers : JavaLauncherTask() {
+abstract class ApplyClassAccessTransforms : JavaLauncherTask() {
 
     @get:Classpath
     abstract val inputJar: RegularFileProperty

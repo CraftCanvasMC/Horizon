@@ -1,8 +1,8 @@
 package io.canvasmc.horizon
 
 import io.canvasmc.horizon.extension.HorizonExtension
-import io.canvasmc.horizon.tasks.ApplyClassAccessTransformers
-import io.canvasmc.horizon.tasks.ApplySourceAccessTransformers
+import io.canvasmc.horizon.tasks.ApplyClassAccessTransforms
+import io.canvasmc.horizon.tasks.ApplySourceAccessTransforms
 import io.canvasmc.horizon.tasks.MergeAccessTransformers
 import io.canvasmc.horizon.util.*
 import io.canvasmc.horizon.util.constants.*
@@ -12,6 +12,7 @@ import io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_CONFIG
 import io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.dsl.DependencyFactory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.invocation.Gradle
@@ -50,11 +51,6 @@ abstract class Horizon : Plugin<Project> {
     }
 
     private fun Project.setup(ext: HorizonExtension) {
-        val mergeAccessTransformersTask = tasks.register<MergeAccessTransformers>("mergeAccessTransformers")
-        val applySourceTransformersTask = tasks.register<ApplySourceAccessTransformers>("applyAccessTransformersToSources")
-        val applyClassTransformersTask = tasks.register<ApplyClassAccessTransformers>("applyAccessTransformersToClasses")
-        val setupTask = tasks.register("horizonSetup")
-        val cleanTask = tasks.register<Delete>("cleanHorizonCache")
         val userdevTask = tasks.named<UserdevSetupTask>(USERDEV_SETUP_TASK_NAME)
 
         // repository for JST
@@ -65,47 +61,47 @@ abstract class Horizon : Plugin<Project> {
             }
         }
 
-        mergeAccessTransformersTask {
+        val mergeAccessTransformers by tasks.registering<MergeAccessTransformers> {
             group = INTERNAL_TASK_GROUP
             files.from(ext.accessTransformerFiles)
             outputFile.set(layout.cache.resolve(horizonTaskOutput("merged", "at")))
         }
 
-        applySourceTransformersTask {
+        val applySourceAccessTransforms by tasks.registering<ApplySourceAccessTransforms> {
             group = INTERNAL_TASK_GROUP
             mappedServerJar.set(userdevTask.flatMap { it.mappedServerJar })
-            processedServerJar.set(layout.cache.resolve(horizonTaskOutput("sourceTransformedMojangMappedServerJar", "jar")))
-            atFile.set(mergeAccessTransformersTask.flatMap { it.outputFile })
+            sourceTransformedMappedServerJar.set(layout.cache.resolve(horizonTaskOutput("sourceTransformedMappedServerJar", "jar")))
+            atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
             ats.jst.from(project.configurations.named(JST_CONFIG))
         }
 
-        applyClassTransformersTask {
+        val applyClassAccessTransforms by tasks.registering<ApplyClassAccessTransforms> {
             group = INTERNAL_TASK_GROUP
-            inputJar.set(applySourceTransformersTask.flatMap { it.processedServerJar })
-            outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedMojangMappedServerJar", "jar")))
-            atFile.set(mergeAccessTransformersTask.flatMap { it.outputFile })
+            inputJar.set(applySourceAccessTransforms.flatMap { it.sourceTransformedMappedServerJar })
+            outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedMappedServerJar", "jar")))
+            atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
         }
 
-        setupTask {
+        val horizonSetup by tasks.registering<Task> {
             group = TASK_GROUP
-            dependsOn(applyClassTransformersTask)
+            dependsOn(applyClassAccessTransforms)
         }
 
-        cleanTask {
+        tasks.register<Delete>("cleanHorizonCache") {
             group = TASK_GROUP
             description = "Delete the project-local horizon setup cache."
             delete(layout.cache)
             delete(rootProject.layout.cache.resolve(HORIZON_NAME))
         }
 
-        tasks.named("classes") { dependsOn(setupTask) } // this also attaches the task to the lifecycle
+        tasks.named("classes") { dependsOn(horizonSetup) } // this also attaches the task to the lifecycle
 
         configurations.register(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG) {
-            dependencies.add((dependencyFactory.create(files(applyClassTransformersTask.flatMap { it.outputJar }))))
+            dependencies.add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
         }
 
         configurations.register(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG) {
-            dependencies.add((dependencyFactory.create(files(applyClassTransformersTask.flatMap { it.outputJar }))))
+            dependencies.add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
         }
 
         // attach sources into original paperweight configurations for compatibility reasons
