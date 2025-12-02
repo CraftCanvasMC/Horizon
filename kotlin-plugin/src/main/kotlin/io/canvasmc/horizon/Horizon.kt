@@ -57,6 +57,14 @@ abstract class Horizon : Plugin<Project> {
         val cleanTask = tasks.register<Delete>("cleanHorizonCache")
         val userdevTask = tasks.named<UserdevSetupTask>(USERDEV_SETUP_TASK_NAME)
 
+        // repository for JST
+        repositories {
+            maven(ext.jstRepo) {
+                name = JST_REPO_NAME
+                content { onlyForConfigurations(JST_CONFIG) }
+            }
+        }
+
         mergeAccessTransformersTask {
             group = INTERNAL_TASK_GROUP
             files.from(ext.accessTransformerFiles)

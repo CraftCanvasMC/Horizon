@@ -2,6 +2,8 @@ package io.canvasmc.horizon.util.constants
 
 import org.gradle.api.Task
 
+const val CANVAS_MAVEN_REPO_URL = "https://maven.canvasmc.io/snapshots"
+const val JST_REPO_NAME = "horizonJstRepository"
 const val USERDEV_SETUP_TASK_NAME = "paperweightUserdevSetup"
 const val HORIZON_NAME = "horizon"
 const val JST_CONFIG = "horizonJstConfig"
