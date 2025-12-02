@@ -8,6 +8,8 @@ import io.canvasmc.horizon.util.*
 import io.canvasmc.horizon.util.constants.*
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
+import io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_CONFIG
+import io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyFactory
@@ -15,7 +17,6 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Delete
 import org.gradle.kotlin.dsl.*
 import javax.inject.Inject
 
@@ -33,9 +34,7 @@ abstract class Horizon : Plugin<Project> {
         printId<Horizon>("horizon", target.gradle)
         // apply userdev
         target.pluginManager.apply("io.canvasmc.weaver.userdev")
-        // we reset some values so our slate doesnt get polluted
         val userdevExt = target.extensions.getByType(PaperweightUserExtension::class)
-        userdevExt.addServerDependencyTo.set(emptyList()) // we add them ourselves
         userdevExt.injectServerJar.set(false) // dont add the server jar to the configurations as we override it
 
         val ext = target.extensions.create<HorizonExtension>(HORIZON_EXTENSION_NAME, target)
@@ -46,13 +45,6 @@ abstract class Horizon : Plugin<Project> {
             }
         }
 
-        target.tasks.register<Delete>("cleanHorizonCache") {
-            group = "horizon"
-            description = "Delete the project-local horizon setup cache."
-            delete(target.layout.cache)
-            delete(target.rootProject.layout.cache.resolve("horizon"))
-        }
-
         target.afterEvaluate { setup(ext) }
     }
 
@@ -61,6 +53,7 @@ abstract class Horizon : Plugin<Project> {
         val applySourceTransformersTask = tasks.register<ApplySourceAccessTransformers>("applyAccessTransformersToSources")
         val applyClassTransformersTask = tasks.register<ApplyClassAccessTransformers>("applyAccessTransformersToClasses")
         val setupTask = tasks.register("horizonSetup")
+        val cleanTask = tasks.register("cleanHorizonCache")
         val userdevTask = tasks.named<UserdevSetupTask>(USERDEV_SETUP_TASK_NAME)
 
         mergeAccessTransformersTask {
@@ -85,24 +78,26 @@ abstract class Horizon : Plugin<Project> {
         }
 
         setupTask {
-            group = "horizon"
+            group = TASK_GROUP
             dependsOn(applyClassTransformersTask)
         }
 
-        tasks.named("classes") { dependsOn(setupTask) } // this also attaches it to the lifecycle
+        tasks.named("classes") { dependsOn(setupTask) } // this also attaches the task to the lifecycle
 
-        // attach sources
-        configurations.register(MOJANG_MAPPED_SERVER_CONFIG) {
-            defaultDependencies { add(dependencyFactory.create(files(applyClassTransformersTask.flatMap { it.outputJar }))) }
-            extendsFrom(configurations.getByName(io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_CONFIG))
-        }
-        configurations.register(MOJANG_MAPPED_SERVER_RUNTIME_CONFIG) {
-            defaultDependencies { add(dependencyFactory.create(files(applyClassTransformersTask.flatMap { it.outputJar }))) }
-            extendsFrom(configurations.getByName(io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG))
+        configurations.register(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG) {
+            dependencies.add((dependencyFactory.create(files(applyClassTransformersTask.flatMap { it.outputJar }))))
         }
 
-        ext.addServerDependencyTo.get().forEach {
-            it.extendsFrom(configurations.getByName(MOJANG_MAPPED_SERVER_CONFIG))
+        configurations.register(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG) {
+            dependencies.add((dependencyFactory.create(files(applyClassTransformersTask.flatMap { it.outputJar }))))
+        }
+
+        // attach sources into original paperweight configurations for compatibility reasons
+        configurations.named(MOJANG_MAPPED_SERVER_CONFIG).configure {
+            extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
+        }
+        configurations.named(MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).configure {
+            extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).get())
         }
     }
 

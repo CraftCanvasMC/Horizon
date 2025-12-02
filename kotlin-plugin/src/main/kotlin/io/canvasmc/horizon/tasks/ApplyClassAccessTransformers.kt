@@ -1,6 +1,6 @@
 /*
  * This file is part of the paperweight gradle plugin.
- * 
+ *
  * paperweight is a Gradle plugin for the PaperMC project.
  *
  * Copyright (c) 2023 Kyle Wood (DenWav)
