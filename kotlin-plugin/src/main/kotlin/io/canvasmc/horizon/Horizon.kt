@@ -31,13 +31,13 @@ abstract class Horizon : Plugin<Project> {
     abstract val objects: ObjectFactory
 
     override fun apply(target: Project) {
-        printId<Horizon>("horizon", target.gradle)
+        printId<Horizon>(HORIZON_NAME, target.gradle)
         // apply userdev
-        target.pluginManager.apply("io.canvasmc.weaver.userdev")
+        target.pluginManager.apply(Plugins.WEAVER_USERDEV_PLUGIN_ID)
         val userdevExt = target.extensions.getByType(PaperweightUserExtension::class)
         userdevExt.injectServerJar.set(false) // dont add the server jar to the configurations as we override it
 
-        val ext = target.extensions.create<HorizonExtension>(HORIZON_EXTENSION_NAME, target)
+        val ext = target.extensions.create<HorizonExtension>(HORIZON_NAME, target)
 
         target.configurations.register(JST_CONFIG) {
             defaultDependencies {
@@ -86,7 +86,7 @@ abstract class Horizon : Plugin<Project> {
             group = TASK_GROUP
             description = "Delete the project-local horizon setup cache."
             delete(layout.cache)
-            delete(rootProject.layout.cache.resolve("horizon"))
+            delete(rootProject.layout.cache.resolve(HORIZON_NAME))
         }
 
         tasks.named("classes") { dependsOn(setupTask) } // this also attaches the task to the lifecycle
