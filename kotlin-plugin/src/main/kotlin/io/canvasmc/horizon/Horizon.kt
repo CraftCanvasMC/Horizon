@@ -17,6 +17,7 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.tasks.Delete
 import org.gradle.kotlin.dsl.*
 import javax.inject.Inject
 
@@ -53,7 +54,7 @@ abstract class Horizon : Plugin<Project> {
         val applySourceTransformersTask = tasks.register<ApplySourceAccessTransformers>("applyAccessTransformersToSources")
         val applyClassTransformersTask = tasks.register<ApplyClassAccessTransformers>("applyAccessTransformersToClasses")
         val setupTask = tasks.register("horizonSetup")
-        val cleanTask = tasks.register("cleanHorizonCache")
+        val cleanTask = tasks.register<Delete>("cleanHorizonCache")
         val userdevTask = tasks.named<UserdevSetupTask>(USERDEV_SETUP_TASK_NAME)
 
         mergeAccessTransformersTask {
