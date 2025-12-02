@@ -1,0 +1,21 @@
+### Current TODOs
+
+- run-task integration (waiting on https://github.com/jpenilla/run-task/pull/146)
+  - once that is merged/we fork the repo, we need to either ->
+    - find a way to hook into the task's configuration, cc: @Toffikk 
+    - provide an example plugin with the proper configurations applied
+    
+- ~~probably should read plugin yaml like the core launcher does~~
+  - this would require some dirty casting. do we really want/need that?
+
+### Reference: 
+- current plugin configuration format ->
+
+```gradle
+horizon {
+  accessTransformerFiles.from(
+    file("build-data/first.at"),
+    file("build-data/second.at"),
+  )
+}
+```
