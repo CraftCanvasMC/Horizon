@@ -62,13 +62,11 @@ abstract class Horizon : Plugin<Project> {
         }
 
         val mergeAccessTransformers by tasks.registering<MergeAccessTransformers> {
-            group = INTERNAL_TASK_GROUP
             files.from(ext.accessTransformerFiles)
             outputFile.set(layout.cache.resolve(horizonTaskOutput("merged", "at")))
         }
 
         val applySourceAccessTransforms by tasks.registering<ApplySourceAccessTransforms> {
-            group = INTERNAL_TASK_GROUP
             mappedServerJar.set(userdevTask.flatMap { it.mappedServerJar })
             sourceTransformedMappedServerJar.set(layout.cache.resolve(horizonTaskOutput("sourceTransformedMappedServerJar", "jar")))
             atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
@@ -76,7 +74,6 @@ abstract class Horizon : Plugin<Project> {
         }
 
         val applyClassAccessTransforms by tasks.registering<ApplyClassAccessTransforms> {
-            group = INTERNAL_TASK_GROUP
             inputJar.set(applySourceAccessTransforms.flatMap { it.sourceTransformedMappedServerJar })
             outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedMappedServerJar", "jar")))
             atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
