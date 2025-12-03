@@ -34,12 +34,18 @@ abstract class Horizon : Plugin<Project> {
 
     override fun apply(target: Project) {
         printId<Horizon>(HORIZON_NAME, target.gradle)
-        // apply userdev
-        target.pluginManager.apply(Plugins.WEAVER_USERDEV_PLUGIN_ID)
+        // check for userdev
+        target.checkForWeaverUserdev()
         val userdevExt = target.extensions.getByType(PaperweightUserExtension::class)
         userdevExt.injectServerJar.set(false) // dont add the server jar to the configurations as we override it
 
         val ext = target.extensions.create<HorizonExtension>(HORIZON_NAME, target)
+
+        target.tasks.register<Delete>("cleanHorizonCache") {
+            group = TASK_GROUP
+            description = "Delete the project-local horizon setup cache."
+            delete(target.rootProject.layout.cache.resolve(HORIZON_NAME))
+        }
 
         target.configurations.register(JST_CONFIG) {
             defaultDependencies {
@@ -68,7 +74,14 @@ abstract class Horizon : Plugin<Project> {
 
         val applySourceAccessTransforms by tasks.registering<ApplySourceAccessTransforms> {
             mappedServerJar.set(userdevTask.flatMap { it.mappedServerJar })
-            sourceTransformedMappedServerJar.set(layout.cache.resolve(horizonTaskOutput("sourceTransformedMappedServerJar", "jar")))
+            sourceTransformedMappedServerJar.set(
+                layout.cache.resolve(
+                    horizonTaskOutput(
+                        "sourceTransformedMappedServerJar",
+                        "jar"
+                    )
+                )
+            )
             atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
             ats.jst.from(project.configurations.named(JST_CONFIG))
         }
@@ -82,12 +95,6 @@ abstract class Horizon : Plugin<Project> {
         val horizonSetup by tasks.registering<Task> {
             group = TASK_GROUP
             dependsOn(applyClassAccessTransforms)
-        }
-
-        tasks.register<Delete>("cleanHorizonCache") {
-            group = TASK_GROUP
-            description = "Delete the project-local horizon setup cache."
-            delete(rootProject.layout.cache.resolve(HORIZON_NAME))
         }
 
         tasks.named("classes") { dependsOn(horizonSetup) } // this also attaches the task to the lifecycle
@@ -115,5 +122,19 @@ abstract class Horizon : Plugin<Project> {
             return
         }
         println("$pluginId v${P::class.java.`package`.implementationVersion} (running on '${System.getProperty("os.name")}')")
+    }
+
+    private fun Project.checkForWeaverUserdev() {
+        runCatching {
+            project.pluginManager.apply(Plugins.WEAVER_USERDEV_PLUGIN_ID)
+        }
+        val hasUserdev = project.pluginManager.hasPlugin(Plugins.WEAVER_USERDEV_PLUGIN_ID)
+        if (!hasUserdev) {
+            val message =
+                "Unable to find the weaver userdev plugin, which is needed in order for Horizon to work properly, " +
+                    "due to Horizon depending on a dev bundle being present and hooking into internal weaver functionality.\n" +
+                    "Please apply the weaver userdev plugin in order to resolve this issue and use Horizon."
+            throw RuntimeException(message)
+        }
     }
 }

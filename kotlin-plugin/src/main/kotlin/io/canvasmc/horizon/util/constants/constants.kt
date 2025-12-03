@@ -17,6 +17,7 @@ private const val TASK_CACHE = "$CACHE_DIR/taskCache"
 
 object Plugins {
     const val WEAVER_USERDEV_PLUGIN_ID = "io.canvasmc.weaver.userdev"
+    const val PAPERWEIGHT_USERDEV_PLUGIN_ID = "io.papermc.paperweight.userdev"
 }
 
 fun Task.horizonTaskOutput(ext: String? = null) = horizonTaskOutput(name, ext)
