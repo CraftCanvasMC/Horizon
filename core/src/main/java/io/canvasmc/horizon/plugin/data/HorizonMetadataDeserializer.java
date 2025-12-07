@@ -21,6 +21,7 @@ public final class HorizonMetadataDeserializer implements JsonDeserializer<Horiz
         String name = getRequiredString(root, "name");
         String version = getRequiredString(root, "version");
         String apiVersion = getRequiredString(root, "api-version");
+        String main = getRequiredString(root, "main");
 
         JsonObject horizon = root.getAsJsonObject("horizon");
         if (horizon == null) {
@@ -36,6 +37,7 @@ public final class HorizonMetadataDeserializer implements JsonDeserializer<Horiz
             name,
             version,
             apiVersion,
+            main,
             mixins,
             wideners,
             loadDatapackEntry

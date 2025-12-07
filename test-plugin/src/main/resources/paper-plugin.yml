@@ -1,0 +1,11 @@
+name: "TestPlugin"
+main: "io.canvasmc.testplugin.HorizonTestPlugin"
+version: "1.0.0-SNAPSHOT"
+author: "CanvasMC"
+horizon:
+  mixins:
+    - "mixins.test.json"
+api-version: "1.21.10"
+
+bootstrapper: "io.canvasmc.testplugin.TestBootstrapper"
+loader: "io.canvasmc.testplugin.TestLoader"

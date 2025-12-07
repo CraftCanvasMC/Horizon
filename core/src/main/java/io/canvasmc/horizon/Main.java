@@ -20,6 +20,10 @@ import static java.util.Arrays.asList;
 public class Main {
 
     public static void main(String[] args) {
+        // TODO - can we support this..?
+        if (Boolean.getBoolean("paper.useLegacyPluginLoading")) {
+            throw new IllegalStateException("Legacy plugin loading is unsupported with Horizon");
+        }
         Logger.info("Building Horizon version metadata...");
         Map<String, Object> metadata = new HashMap<>();
         try {
@@ -77,6 +81,6 @@ public class Main {
             return;
         }
 
-        new Horizon(options, metadata.get("Implementation-Version").toString(), JvmAgent.INSTRUMENT, args);
+        new Horizon(options, metadata.get("Implementation-Version").toString(), JvmAgent.INSTRUMENTATION, args);
     }
 }

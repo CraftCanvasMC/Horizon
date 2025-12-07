@@ -1,0 +1,234 @@
+package io.canvasmc.horizon.service;
+
+import com.llamalad7.mixinextras.MixinExtrasBootstrap;
+import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.ember.EmberClassLoader;
+import io.canvasmc.horizon.ember.TransformationService;
+import io.canvasmc.horizon.plugin.EntrypointLoader;
+import io.canvasmc.horizon.plugin.types.HorizonPlugin;
+import io.canvasmc.horizon.util.ClassLoaders;
+import org.jspecify.annotations.NonNull;
+import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.tinylog.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.regex.Pattern;
+
+public final class MixinLaunch {
+    public static final Pattern TRANSFORMATION_EXCLUDED_PATTERN = Pattern.compile(
+        "^(?:" +
+            "io\\.canvasmc\\.horizon\\.(?!inject\\.)" + "|" +
+            "org\\.tinylog\\." + "|" +
+            "org\\.spongepowered\\.asm\\." + "|" +
+            "com\\.llamalad7\\.mixinextras\\." + "|" +
+            "org\\.slf4j\\." + "|" +
+            "org\\.apache\\.logging\\.log4j\\." + "|" +
+            "net\\.fabricmc\\.accesswidener\\." +
+            ").*"
+    );
+    public static final String[] TRANSFORMATION_EXCLUDED_RESOURCES = {
+        "org/spongepowered/asm/"
+    };
+
+    private static final String JAVA_HOME = System.getProperty("java.home");
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static final Optional<Manifest> DEFAULT_MANIFEST = Optional.of(new Manifest());
+    private static MixinLaunch INSTANCE;
+    private static LaunchContext CONTEXT;
+    private final ConcurrentMap<String, Optional<Manifest>> manifests = new ConcurrentHashMap<>();
+    private ClassTransformer transformer;
+    private EmberClassLoader classLoader;
+
+    private MixinLaunch() {
+        INSTANCE = this;
+    }
+
+    public static MixinLaunch getInstance() {
+        return INSTANCE;
+    }
+
+    public static LaunchContext getContext() {
+        return CONTEXT;
+    }
+
+    public static void launch(LaunchContext context) {
+        MixinLaunch.CONTEXT = context;
+        new MixinLaunch().run(context);
+    }
+
+    private void run(@NonNull LaunchContext context) {
+        this.transformer = new ClassTransformer();
+
+        this.classLoader = new EmberClassLoader(this.transformer, Arrays.asList(context.initialGameConnections));
+
+        // set context classloader to ember classloader
+        Thread.currentThread().setContextClassLoader(this.classLoader);
+
+        for (final URL url : ClassLoaders.gatherSystemPaths()) {
+            try {
+                final URI uri = url.toURI();
+                if (!this.transformable(uri)) {
+                    Logger.debug("Skipped adding transformation path for: {}", url);
+                    continue;
+                }
+
+                this.classLoader.addTransformationPath(Paths.get(url.toURI()));
+                Logger.debug("Added transformation path for: {}", url);
+            } catch (final URISyntaxException | IOException exception) {
+                Logger.error(exception, "Failed to add transformation path for: {}", url);
+            }
+        }
+
+        this.classLoader.addTransformationFilter(this.packageFilter());
+        this.classLoader.addManifestLocator(this.manifestLocator());
+        this.transformer.addExclusionFilter(this.resourceFilter());
+
+        prepareMixin();
+
+        try {
+            if (Files.exists(context.gameJar)) {
+                try (final JarFile file = new JarFile(context.gameJar.toFile())) {
+                    String target = file.getManifest().getMainAttributes().getValue("Main-Class");
+                    Logger.info("Launching {}", target);
+                    Class.forName(target, true, this.classLoader)
+                        .getMethod("main", String[].class)
+                        .invoke(null, (Object) context.args);
+                }
+            } else {
+                throw new IllegalStateException("No game jar was found to launch!");
+            }
+        } catch (final Exception exception) {
+            Logger.error(exception, "Failed to launch the game!");
+        }
+    }
+
+    private void prepareMixin() {
+        MixinBootstrap.init();
+
+        // finish plugin load, resolve mixin and wideners // TODO - datapack entries and entrypoints api
+        EntrypointLoader.INSTANCE.finishPluginLoad(this.transformer);
+
+        try {
+            final Method method = MixinEnvironment.class.getDeclaredMethod("gotoPhase", MixinEnvironment.Phase.class);
+            method.setAccessible(true);
+            method.invoke(null, MixinEnvironment.Phase.INIT);
+            method.invoke(null, MixinEnvironment.Phase.DEFAULT);
+        } catch (final Exception exception) {
+            Logger.error(exception, "Failed to complete mixin bootstrap!");
+        }
+
+        for (final TransformationService transformer : this.transformer.services()) {
+            transformer.preboot();
+        }
+
+        // init mixin extras
+        MixinExtrasBootstrap.init();
+    }
+
+    public EmberClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    public ClassTransformer getTransformer() {
+        return transformer;
+    }
+
+    private @NonNull Predicate<String> packageFilter() {
+        return name -> {
+            return !name.matches(TRANSFORMATION_EXCLUDED_PATTERN.pattern());
+        };
+    }
+
+    private @NonNull Predicate<String> resourceFilter() {
+        return path -> {
+            for (final String test : TRANSFORMATION_EXCLUDED_RESOURCES) {
+                if (path.startsWith(test)) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+    }
+
+    private @NonNull Function<URLConnection, Optional<Manifest>> manifestLocator() {
+        return connection -> {
+            if (connection instanceof JarURLConnection) {
+                final URL url = ((JarURLConnection) connection).getJarFileURL();
+                final Optional<Manifest> manifest = this.manifests.computeIfAbsent(url.toString(), key -> {
+                    for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins()) {
+                        try {
+                            if (plugin.file().ioFile().toPath().toAbsolutePath().normalize().equals(Paths.get(url.toURI()).toAbsolutePath().normalize())) {
+                                return Optional.ofNullable(plugin.file().jarFile().getManifest());
+                            }
+                        } catch (final URISyntaxException | IOException exception) {
+                            Logger.error(exception, "Failed to load manifest from jar: {}", url);
+                        }
+                    }
+
+                    return DEFAULT_MANIFEST;
+                });
+
+                try {
+                    if (manifest == DEFAULT_MANIFEST) {
+                        return Optional.ofNullable(((JarURLConnection) connection).getManifest());
+                    } else {
+                        return manifest;
+                    }
+                } catch (final IOException exception) {
+                    Logger.error(exception, "Failed to load manifest from connection for: {}", url);
+                }
+            }
+
+            return Optional.empty();
+        };
+    }
+
+    private boolean transformable(final @NonNull URI uri) throws URISyntaxException, IOException {
+        final File target = new File(uri);
+
+        if (target.getAbsolutePath().startsWith(JAVA_HOME)) {
+            return false;
+        }
+
+        if (target.isDirectory()) {
+            for (final String test : TRANSFORMATION_EXCLUDED_RESOURCES) {
+                if (new File(target, test).exists()) {
+                    return false;
+                }
+            }
+        } else if (target.isFile()) {
+            try (final JarFile jarFile = new JarFile(new File(uri))) {
+                for (final String test : TRANSFORMATION_EXCLUDED_RESOURCES) {
+                    if (jarFile.getEntry(test) != null) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public record LaunchContext(
+        String[] args,
+        Path[] initialGameConnections,
+        Path gameJar
+    ) {
+    }
+}

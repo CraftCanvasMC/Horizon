@@ -1,6 +1,7 @@
 package io.canvasmc.horizon.plugin;
 
 import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.ember.EmberMixinService;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
 import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
@@ -8,23 +9,66 @@ import io.canvasmc.horizon.plugin.phase.impl.BuilderPhase;
 import io.canvasmc.horizon.plugin.phase.impl.DiscoveryPhase;
 import io.canvasmc.horizon.plugin.phase.impl.ValidationPhase;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
+import io.canvasmc.horizon.service.ClassTransformer;
+import io.canvasmc.horizon.service.MixinContainerHandle;
+import io.canvasmc.horizon.transformer.AccessTransformationImpl;
 import joptsimple.OptionSet;
 import org.jspecify.annotations.NonNull;
+import org.spongepowered.asm.mixin.FabricUtil;
+import org.spongepowered.asm.mixin.Mixins;
+import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
+import org.spongepowered.asm.mixin.transformer.Config;
+import org.spongepowered.asm.service.MixinService;
 import org.tinylog.Logger;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public class EntrypointLoader {
 
+    public static final Supplier<Throwable> PLUGIN_NOT_FOUND_FROM_MAIN = () -> new IllegalArgumentException("Unable to find plugin from string 'main'");
+    public static final Supplier<Throwable> PLUGIN_NOT_FOUND_FROM_NAME = () -> new IllegalArgumentException("Unable to find plugin from string 'name'");
+    // Note: we use "?" here because we don't want to load the JavaPlugin ref before we load the game
+    //     and only contains mappings for horizon plugins
+    public static final Map<String, Object> MAIN2JAVA_PLUGIN = new ConcurrentHashMap<>();
     private static final List<Phase<?, ?>> PHASES = List.of(
         new DiscoveryPhase(),
         new ValidationPhase(),
         new BuilderPhase()
     );
+    public static EntrypointLoader INSTANCE = new EntrypointLoader();
+    // used for 'mixin.initfix' to store the current plugin provider
+    public static AtomicReference<Object> ACTIVE_PLUGIN_PROVIDER_REF = new AtomicReference<>();
+    private final Map<String, HorizonPlugin> containersByConfig = new HashMap<>();
 
-    public static @NonNull HorizonPlugin @NonNull [] init() {
+    @SuppressWarnings("unchecked")
+    private static <I, O> O executePhase(@NonNull Phase<I, O> phase, Object input, LoadContext context)
+        throws PhaseException {
+        return phase.execute((I) input, context);
+    }
+
+    public static HorizonPlugin getPluginFromMain(String main) throws Throwable {
+        return Horizon.INSTANCE.getPlugins().stream()
+            .filter(pl -> pl.pluginMetadata().main().equalsIgnoreCase(main))
+            .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_MAIN);
+    }
+
+    public static HorizonPlugin getPluginFromPluginClazz(@NonNull Class<?> main) throws Throwable {
+        return getPluginFromMain(main.getName());
+    }
+
+    public static HorizonPlugin getPluginFromName(String name) throws Throwable {
+        return Horizon.INSTANCE.getPlugins().stream()
+            .filter(pl -> pl.pluginMetadata().name().equalsIgnoreCase(name))
+            .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_NAME);
+    }
+
+    public @NonNull HorizonPlugin @NonNull [] init() {
         OptionSet optionSet = Horizon.INSTANCE.getOptions();
         File pluginsDirectory = (File) optionSet.valueOf("plugins");
 
@@ -56,18 +100,20 @@ public class EntrypointLoader {
                 throw new IllegalStateException("Phases returned null value?");
             }
 
-            @SuppressWarnings("unchecked")
-            HorizonPlugin[] plugins = ((List<HorizonPlugin>) result).toArray(new HorizonPlugin[0]);
-            StringBuilder builder = new StringBuilder();
+            @SuppressWarnings("unchecked") final List<HorizonPlugin> fullResult = new LinkedList<>(((List<HorizonPlugin>) result));
+            fullResult.add(Horizon.INTERNAL_PLUGIN);
 
-            List<HorizonMetadata> metas = Arrays.stream(plugins).map(HorizonPlugin::pluginMetadata).toList();
+            final HorizonPlugin[] plugins = fullResult.toArray(new HorizonPlugin[0]);
+            final StringBuilder builder = new StringBuilder();
+
+            List<HorizonMetadata> metas = new LinkedList<>(Arrays.stream(plugins).map(HorizonPlugin::pluginMetadata).toList());
 
             builder.append(
                 "Found {} plugin(s):\n"
                     .replace("{}", String.valueOf(metas.size()))
             );
 
-            for (HorizonMetadata meta : metas) {
+            for (HorizonMetadata meta : metas.reversed()) {
 
                 builder.append("\t- ")
                     .append(meta.name())
@@ -107,9 +153,61 @@ public class EntrypointLoader {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static <I, O> O executePhase(@NonNull Phase<I, O> phase, Object input, LoadContext context)
-        throws PhaseException {
-        return phase.execute((I) input, context);
+    public void finishPluginLoad(final @NonNull ClassTransformer transformer) {
+        final AccessTransformationImpl accessTransformer = transformer.getService(AccessTransformationImpl.class);
+        if (accessTransformer == null) {
+            throw new IllegalStateException("Access transforming impl cannot be null!");
+        }
+
+        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins()) {
+            List<String> wideners = plugin.pluginMetadata().accessWideners();
+            if (wideners.isEmpty()) {
+                continue;
+            }
+            for (String widener : wideners) {
+                final Path path = plugin.fileSystem().getPath(widener);
+                try {
+                    Logger.trace("Adding the access widener: {}", widener);
+                    accessTransformer.addWidener(path);
+                } catch (final IOException exception) {
+                    Logger.trace(exception, "Failed to configure widener: {}", widener);
+                    continue;
+                }
+
+                Logger.trace("Added the access widener: {}", widener);
+            }
+        }
+
+        final EmberMixinService service = (EmberMixinService) MixinService.getService();
+        final MixinContainerHandle handle = (MixinContainerHandle) service.getPrimaryContainer();
+
+        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins()) {
+            Path pluginPath = plugin.file().ioFile().toPath();
+            handle.addResource(pluginPath.getFileName().toString(), pluginPath);
+
+            final List<String> mixins = plugin.pluginMetadata().mixins();
+            if (mixins != null && !mixins.isEmpty()) {
+                for (final String config : mixins) {
+                    final HorizonPlugin previous = this.containersByConfig.putIfAbsent(config, plugin);
+                    if (previous != null) {
+                        Logger.warn("Skipping duplicate mixin configuration: {} (in {} and {})", config, previous.identifier(), plugin.identifier());
+                        continue;
+                    }
+
+                    Mixins.addConfiguration(config);
+                }
+
+                Logger.trace("Added the mixin configurations: {}", String.join(", ", mixins));
+            }
+        }
+
+        for (final Config config : Mixins.getConfigs()) {
+            final HorizonPlugin container = this.containersByConfig.get(config.getName());
+            if (container == null) continue;
+
+            final IMixinConfig mixinConfig = config.getConfig();
+            mixinConfig.decorate(FabricUtil.KEY_MOD_ID, container.identifier());
+            mixinConfig.decorate(FabricUtil.KEY_COMPATIBILITY, FabricUtil.COMPATIBILITY_LATEST);
+        }
     }
 }

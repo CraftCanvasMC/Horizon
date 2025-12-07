@@ -17,17 +17,15 @@ public record HorizonMetadata(
     String name,
     String version,
     String apiVersion, // TODO - check this when we parse the paperclip version
+    String main,
     List<String> mixins,
     List<String> accessWideners,
     boolean loadDatapackEntry
-) {
+) { // TODO - dependencies?
     public HorizonMetadata {
-        // preconditions, required fields
-        if (name == null) throw new IllegalArgumentException("name cannot be null");
-        if (version == null) throw new IllegalArgumentException("version cannot be null");
-        if (apiVersion == null) throw new IllegalArgumentException("api-version cannot be null");
-
-        // setup option args
+        // we don't need to validate arguments here, as pre construction they already are
+        name = name.toLowerCase();
+        // setup option args so they are non-null
         mixins = List.copyOf(mixins == null ? Collections.emptyList() : mixins);
         accessWideners = List.copyOf(accessWideners == null ? Collections.emptyList() : accessWideners);
     }

@@ -2,6 +2,12 @@ package io.canvasmc.horizon.plugin.types;
 
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
 import io.canvasmc.horizon.util.FileJar;
+import org.jspecify.annotations.NonNull;
+
+import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.util.Objects;
 
 /**
  * Represents a full valid and parsed Horizon plugin data
@@ -10,5 +16,48 @@ import io.canvasmc.horizon.util.FileJar;
  * this is validated at a later time in the boot process
  * </p>
  */
-public record HorizonPlugin(String identifier, FileJar file, HorizonMetadata pluginMetadata) {
+public final class HorizonPlugin {
+    private final String identifier;
+    private final FileJar file;
+    private final HorizonMetadata pluginMetadata;
+
+    private FileSystem fileSystem;
+
+    public HorizonPlugin(String identifier, FileJar file, HorizonMetadata pluginMetadata) {
+        this.identifier = identifier;
+        this.file = file;
+        this.pluginMetadata = pluginMetadata;
+    }
+
+    public String identifier() {
+        return identifier;
+    }
+
+    public FileJar file() {
+        return file;
+    }
+
+    public HorizonMetadata pluginMetadata() {
+        return pluginMetadata;
+    }
+
+    public @NonNull FileSystem fileSystem() {
+        if (this.fileSystem == null) {
+            try {
+                this.fileSystem = FileSystems.newFileSystem(this.file.ioFile().toPath(), this.getClass().getClassLoader());
+            } catch (final IOException exception) {
+                throw new RuntimeException(exception);
+            }
+        }
+
+        return this.fileSystem;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (HorizonPlugin) obj;
+        return Objects.equals(this.identifier, that.identifier);
+    }
 }

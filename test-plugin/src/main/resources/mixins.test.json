@@ -1,0 +1,7 @@
+{
+  "mixins": [
+    "SheepMixin",
+    "TestMixin"
+  ],
+  "package": "io.canvasmc.testplugin.mixin"
+}
