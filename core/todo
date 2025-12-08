@@ -5,3 +5,4 @@
 - make ObjectTree API that can read universally tree-data-like-structs and replace the api we currently use in Horizon for that
 - Use new API to create plugin trees which allow for sub plugins to be loaded and also dependencies
 - all mixin priorities to 1
+- include mixinextras in horizon internal for logging startup plugins

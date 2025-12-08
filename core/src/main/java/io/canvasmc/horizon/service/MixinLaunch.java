@@ -14,6 +14,9 @@ import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.file.Files;
@@ -105,9 +108,20 @@ public final class MixinLaunch {
                 try (final JarFile file = new JarFile(context.gameJar.toFile())) {
                     String target = file.getManifest().getMainAttributes().getValue("Main-Class");
                     Logger.info("Launching {}", target);
-                    Class.forName(target, true, this.classLoader)
-                        .getMethod("main", String[].class)
-                        .invoke(null, (Object) context.args);
+                    Thread runThread = new Thread(() -> {
+                        try {
+                            final Class<?> mainClass = Class.forName(target, true, classLoader);
+                            final MethodHandle mainHandle = MethodHandles.lookup()
+                                .findStatic(mainClass, "main", MethodType.methodType(void.class, String[].class))
+                                .asFixedArity();
+                            mainHandle.invoke((Object) context.args);
+                        } catch (Throwable thrown) {
+                            Logger.error(thrown, "Unable to launch server");
+                            System.exit(1);
+                        }
+                    }, "launch");
+                    runThread.setContextClassLoader(this.classLoader);
+                    runThread.start();
                 }
             } else {
                 throw new IllegalStateException("No game jar was found to launch!");

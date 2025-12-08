@@ -52,6 +52,9 @@ allprojects {
         implementation("io.github.llamalad7:mixinextras-common:0.5.0")
         implementation("net.fabricmc:access-widener:2.1.0")
 
+        // paperclip patching
+        include("io.sigpipe:jbsdiff:1.0")
+
         // minecraft setup
         paperweight.paperDevBundle("1.21.10-R0.1-SNAPSHOT")
     }
