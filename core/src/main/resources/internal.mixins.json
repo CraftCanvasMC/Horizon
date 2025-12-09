@@ -11,5 +11,6 @@
     "initfix.spigot.PluginClassLoaderMixin",
     "initfix.spigot.SpigotPluginProviderMixin"
   ],
-  "package": "io.canvasmc.horizon.inject.mixin"
+  "package": "io.canvasmc.horizon.inject.mixin",
+  "mixinPriority": 1
 }
