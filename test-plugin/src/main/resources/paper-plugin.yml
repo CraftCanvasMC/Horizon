@@ -5,6 +5,8 @@ author: "CanvasMC"
 horizon:
   mixins:
     - "mixins.test.json"
+  wideners:
+    - "widener.at"
 api-version: "1.21.10"
 
 bootstrapper: "io.canvasmc.testplugin.TestBootstrapper"

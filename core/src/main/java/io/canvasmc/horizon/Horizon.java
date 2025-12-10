@@ -45,7 +45,6 @@ public class Horizon {
         .registerTypeAdapter(PaperclipVersion.class, new PaperclipVersion.PaperclipVersionSerializer())
         .create();
     public static final int ASM_VERSION = Opcodes.ASM9;
-    private static final String PAPERCLIP_MAIN = "io.papermc.paperclip.Paperclip";
     public static HorizonPlugin INTERNAL_PLUGIN;
 
     public static Horizon INSTANCE;

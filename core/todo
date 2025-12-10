@@ -6,3 +6,4 @@
 - Use new API to create plugin trees which allow for sub plugins to be loaded and also dependencies
 - all mixin priorities to 1
 - include mixinextras in horizon internal for logging startup plugins
+- horizon.properties?

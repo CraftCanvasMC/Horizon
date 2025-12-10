@@ -1,34 +1,28 @@
 package io.canvasmc.horizon.transformer;
 
-import io.canvasmc.horizon.Horizon;
 import io.canvasmc.horizon.ember.TransformPhase;
 import io.canvasmc.horizon.ember.TransformationService;
-import net.fabricmc.accesswidener.AccessWidener;
-import net.fabricmc.accesswidener.AccessWidenerClassVisitor;
-import net.fabricmc.accesswidener.AccessWidenerReader;
+import io.canvasmc.horizon.transformer.widener.TransformerContainer;
 import org.jspecify.annotations.NonNull;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 public final class AccessTransformationImpl implements TransformationService {
-    private final AccessWidener widener = new AccessWidener();
-    private final AccessWidenerReader widenerReader = new AccessWidenerReader(this.widener);
+    private final TransformerContainer container = new TransformerContainer();
+    private volatile boolean initialized = false;
 
-    public void addWidener(final @NonNull Path path) throws IOException {
-        try (final BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-            this.widenerReader.read(reader);
-        }
+    public TransformerContainer getContainer() {
+        return container;
     }
 
     @Override
     public void preboot() {
+        if (initialized) {
+            return;
+        }
+
+        container.lock();
+        initialized = true;
     }
 
     @Override
@@ -39,16 +33,20 @@ public final class AccessTransformationImpl implements TransformationService {
 
     @Override
     public boolean shouldTransform(final @NonNull Type type, final @NonNull ClassNode node) {
-        return this.widener.getTargets().contains(node.name.replace('/', '.'));
+        if (!initialized) {
+            return false;
+        }
+
+        return container.shouldTransform(node);
     }
 
     @Override
     public @NonNull ClassNode transform(final @NonNull Type type, final @NonNull ClassNode node, final @NonNull TransformPhase phase) throws Throwable {
-        final ClassNode writer = new ClassNode(Horizon.ASM_VERSION);
-        final ClassVisitor visitor = AccessWidenerClassVisitor.createClassVisitor(Horizon.ASM_VERSION, writer, this.widener);
+        if (!initialized) {
+            throw new IllegalStateException("Access transformation not initialized");
+        }
 
-        node.accept(visitor);
-
-        return writer;
+        container.transformNode(node);
+        return node;
     }
 }

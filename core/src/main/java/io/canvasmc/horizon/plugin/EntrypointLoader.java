@@ -22,7 +22,6 @@ import org.spongepowered.asm.service.MixinService;
 import org.tinylog.Logger;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -154,8 +153,8 @@ public class EntrypointLoader {
     }
 
     public void finishPluginLoad(final @NonNull ClassTransformer transformer) {
-        final AccessTransformationImpl accessTransformer = transformer.getService(AccessTransformationImpl.class);
-        if (accessTransformer == null) {
+        final AccessTransformationImpl transformerService = transformer.getService(AccessTransformationImpl.class);
+        if (transformerService == null) {
             throw new IllegalStateException("Access transforming impl cannot be null!");
         }
 
@@ -164,17 +163,11 @@ public class EntrypointLoader {
             if (wideners.isEmpty()) {
                 continue;
             }
-            for (String widener : wideners) {
-                final Path path = plugin.fileSystem().getPath(widener);
-                try {
-                    Logger.trace("Adding the access widener: {}", widener);
-                    accessTransformer.addWidener(path);
-                } catch (final IOException exception) {
-                    Logger.trace(exception, "Failed to configure widener: {}", widener);
-                    continue;
-                }
 
-                Logger.trace("Added the access widener: {}", widener);
+            try {
+                transformerService.getContainer().register(plugin);
+            } catch (Throwable thrown) {
+                throw new RuntimeException("Failed to configure wideners: " + plugin.pluginMetadata().name(), thrown);
             }
         }
 

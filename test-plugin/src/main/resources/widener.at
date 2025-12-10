@@ -1,0 +1,20 @@
+public net.minecraft.server.MinecraftServer hasStopped
+protected-f com.test.Foo bar(I)V
+default+f com.example.ClassName
+private com.x.MyClass fieldName
+# gay
+# private com.dddd.Test ajk
+
+public net.minecraft.server.level.ServerLevel emptyTime
+public net.minecraft.server.level.ServerLevel lastMidTickFailure
+public net.minecraft.server.level.ServerLevel tickedBlocksOrFluids
+
+public-f net.minecraft.server.level.ServerLevel THUNDER_DELAY
+public net.minecraft.server.level.ServerLevel LOGGER
+public net.minecraft.server.level.ServerLevel EMPTY_TIME_NO_TICK
+public net.minecraft.server.level.ServerLevel MAX_SCHEDULED_TICKS_PER_TICK
+
+public net.minecraft.server.level.ServerLevel tickBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;)V
+protected net.minecraft.server.level.ServerLevel tickFluid(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/material/Fluid;)V
+
+public net.minecraft.server.level.ServerLevel$EntityCallbacks

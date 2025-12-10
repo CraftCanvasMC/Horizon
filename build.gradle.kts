@@ -84,6 +84,8 @@ allprojects {
             }
 
             archiveClassifier.set("")
+            if (project.name == "test-plugin") archiveClassifier.set("fat")
+            mergeServiceFiles()
 
             // configure manifest
             val version = fetchVersion()

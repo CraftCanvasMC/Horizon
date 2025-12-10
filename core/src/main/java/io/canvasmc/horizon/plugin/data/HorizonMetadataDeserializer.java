@@ -29,7 +29,7 @@ public final class HorizonMetadataDeserializer implements JsonDeserializer<Horiz
         }
 
         List<String> mixins = getStringArray(horizon, "mixins");
-        List<String> wideners = getStringArray(horizon, "access-wideners");
+        List<String> wideners = getStringArray(horizon, "wideners");
 
         boolean loadDatapackEntry = getBoolean(horizon, "load-datapack-entry", false);
 
