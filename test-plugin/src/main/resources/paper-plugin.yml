@@ -7,6 +7,7 @@ horizon:
     - "mixins.test.json"
   wideners:
     - "widener.at"
+  load-datapack-entry: true
 api-version: "1.21.10"
 
 bootstrapper: "io.canvasmc.testplugin.TestBootstrapper"

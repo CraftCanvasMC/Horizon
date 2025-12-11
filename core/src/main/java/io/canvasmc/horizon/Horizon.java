@@ -16,6 +16,7 @@ import joptsimple.OptionSet;
 import org.jspecify.annotations.NonNull;
 import org.objectweb.asm.Opcodes;
 import org.tinylog.Logger;
+import org.tinylog.TaggedLogger;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -47,6 +48,7 @@ public class Horizon {
     public static final int ASM_VERSION = Opcodes.ASM9;
     public static HorizonPlugin INTERNAL_PLUGIN;
 
+    public static final TaggedLogger LOGGER = Logger.tag("main");
     public static Horizon INSTANCE;
 
     private @NonNull
@@ -90,8 +92,7 @@ public class Horizon {
         try {
             start(providedArgs);
         } catch (Throwable thrown) {
-            Logger.error("Couldn't start Horizon server due to an unexpected exception!");
-            Logger.error(thrown);
+            LOGGER.error(thrown, "Couldn't start Horizon server due to an unexpected exception!");
             System.exit(1);
         }
     }
@@ -161,7 +162,7 @@ public class Horizon {
      * @param providedArgs the arguments provided to the server to be passed to the Minecraft main method
      */
     private void start(String[] providedArgs) {
-        Logger.info("Preparing Minecraft server");
+        LOGGER.info("Preparing Minecraft server");
         this.plugins = ImmutableList.copyOf(EntrypointLoader.INSTANCE.init());
 
         final URL[] unpacked = prepareHorizonServer();
@@ -208,7 +209,7 @@ public class Horizon {
             exists = false;
         }
         if (!exists) {
-            Logger.error("Paperclip jar is invalid, couldn't locate version.json");
+            LOGGER.error("Paperclip jar is invalid, couldn't locate version.json");
             System.exit(1);
         }
 

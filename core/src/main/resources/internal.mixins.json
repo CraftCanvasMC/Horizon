@@ -3,6 +3,8 @@
     "MinecraftServerMixin",
     "PaperCommandsMixin",
     "SimpleCommandMapMixin",
+    "datapack.PackRepositoryAccessor",
+    "datapack.ServerPacksSourceMixin",
     "initfix.JavaPluginMixin",
     "initfix.ModernPluginLoadingStrategyMixin",
     "initfix.paper.PaperClasspathBuilderMixin",

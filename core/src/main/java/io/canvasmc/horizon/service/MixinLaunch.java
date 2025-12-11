@@ -134,7 +134,7 @@ public final class MixinLaunch {
     private void prepareMixin() {
         MixinBootstrap.init();
 
-        // finish plugin load, resolve mixin and wideners // TODO - datapack entries and entrypoints api
+        // finish plugin load, resolve mixin and wideners
         EntrypointLoader.INSTANCE.finishPluginLoad(this.transformer);
 
         try {
