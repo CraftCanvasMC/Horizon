@@ -196,7 +196,7 @@ public class TransformerContainer {
         if (locked) {
             throw new IllegalStateException("TransformerContainer is locked and cannot be modified.");
         }
-        LOGGER.info("Compiled and adding definition {} to target clazz '{}'", def, className);
+        LOGGER.debug("Compiled and adding definition {} to target clazz '{}'", def, className);
         definitionRegistry
             .computeIfAbsent(className, k -> new ObjectOpenHashSet<>())
             .add(def);
