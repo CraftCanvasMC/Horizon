@@ -1,13 +1,14 @@
 package io.canvasmc.horizon.util;
 
 import org.jspecify.annotations.NonNull;
-import org.tinylog.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+
+import static io.canvasmc.horizon.Horizon.LOGGER;
 
 /**
  * Taken from <a href="https://github.com/cpw/grossjava9hacks/blob/1.3/src/main/java/cpw/mods/gross/Java9ClassLoaderUtil.java">grossjava9hacks</a>.
@@ -59,7 +60,7 @@ public final class ClassLoaders {
 
                 return path.toArray(new URL[0]);
             } catch (final Exception exception) {
-                Logger.error(exception, "Failed to retrieve system classloader paths!");
+                LOGGER.error(exception, "Failed to retrieve system classloader paths!");
                 return new URL[0];
             }
         }

@@ -33,7 +33,7 @@ import java.util.function.Consumer;
  * @author dueris
  */
 public record HorizonRepositorySource(DirectoryValidator validator) implements RepositorySource {
-    static final TaggedLogger LOGGER = Logger.tag("HorizonDatapackInjection");
+    private static final TaggedLogger LOGGER = Logger.tag("datapack-injection");
     private static final PackSelectionConfig DISCOVERED_PACK_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.TOP, false);
 
     private static @NonNull String nameFromPath(@NonNull Path path) {

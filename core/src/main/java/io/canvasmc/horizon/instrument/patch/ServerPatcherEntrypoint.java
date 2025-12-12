@@ -4,7 +4,6 @@ import io.canvasmc.horizon.Horizon;
 import io.canvasmc.horizon.util.Util;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import org.tinylog.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +21,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import static io.canvasmc.horizon.Horizon.LOGGER;
 import static java.nio.file.StandardOpenOption.*;
 
 public final class ServerPatcherEntrypoint {
@@ -213,7 +213,7 @@ public final class ServerPatcherEntrypoint {
             throw new IllegalStateException("Hash check failed for extracted file " + outputFile);
         }
 
-        Logger.info("Unpacking Jar {} to {}", entry.id, outputFile);
+        LOGGER.info("Unpacking Jar {} to {}", entry.id, outputFile);
         urls.put(entry.path(), outputFile.toUri().toURL());
     }
 

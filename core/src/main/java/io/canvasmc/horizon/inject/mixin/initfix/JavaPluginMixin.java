@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.tinylog.Logger;
+
+import static io.canvasmc.horizon.Horizon.LOGGER;
 
 @Mixin(JavaPlugin.class)
 public abstract class JavaPluginMixin implements PluginClassloaderHolder {
@@ -77,7 +78,7 @@ public abstract class JavaPluginMixin implements PluginClassloaderHolder {
     @Override
     public ClassLoader horizon$setPluginClassLoader(ClassLoader loader) {
         String clazzName = ((Object) this).getClass().getName();
-        Logger.info("Set stored horizon ClassLoader for '{}'", clazzName);
+        LOGGER.info("Set stored horizon ClassLoader for '{}'", clazzName);
         // put the main class name, this, as a mapping to the object
         EntrypointLoader.MAIN2JAVA_PLUGIN.put(clazzName, (Object) this);
         return this.horizon$pluginClassLoader = loader;

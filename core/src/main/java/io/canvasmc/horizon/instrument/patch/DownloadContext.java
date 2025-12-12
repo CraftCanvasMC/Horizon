@@ -2,7 +2,6 @@ package io.canvasmc.horizon.instrument.patch;
 
 import io.canvasmc.horizon.util.Util;
 import org.jspecify.annotations.NonNull;
-import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +14,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static io.canvasmc.horizon.Horizon.LOGGER;
 import static java.nio.file.StandardOpenOption.*;
 
 record DownloadContext(byte[] hash, URL url, String fileName) {
@@ -56,7 +56,7 @@ record DownloadContext(byte[] hash, URL url, String fileName) {
             Files.createDirectories(outputFile.getParent());
             Files.deleteIfExists(outputFile);
 
-            Logger.info("Downloading {}", fileName);
+            LOGGER.info("Downloading {}", fileName);
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setConnectTimeout(10_000);
@@ -65,7 +65,7 @@ record DownloadContext(byte[] hash, URL url, String fileName) {
 
             final long contentLength = connection.getContentLengthLong();
             if (contentLength <= 0) {
-                Logger.warn("Server did not provide content length for {}", fileName);
+                LOGGER.warn("Server did not provide content length for {}", fileName);
             }
 
             try (InputStream in = connection.getInputStream();
@@ -100,7 +100,7 @@ record DownloadContext(byte[] hash, URL url, String fileName) {
             throw Util.kill("Hash check failed for downloaded file " + fileName, null);
         }
 
-        Logger.info("{} downloaded successfully.", fileName);
+        LOGGER.info("{} downloaded successfully.", fileName);
     }
 
     private void printProgress(long current, long total) {

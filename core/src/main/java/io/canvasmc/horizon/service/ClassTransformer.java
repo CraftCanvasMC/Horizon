@@ -13,11 +13,12 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+
+import static io.canvasmc.horizon.Horizon.LOGGER;
 
 public final class ClassTransformer {
     private static final List<TransformationService> SERVICES = ImmutableList.of(
@@ -55,7 +56,7 @@ public final class ClassTransformer {
         final String internalName = className.replace('.', '/');
 
         if (!this.exclusionFilter.test(internalName)) {
-            Logger.debug("Skipping resource excluded class: {}", internalName);
+            LOGGER.debug("Skipping resource excluded class: {}", internalName);
             return input;
         }
 
@@ -81,7 +82,7 @@ public final class ClassTransformer {
                     transformed = true;
                 }
             } catch (final Throwable throwable) {
-                Logger.error(throwable, "Failed to transform {} with {}", type.getClassName(), service.getClass().getName());
+                LOGGER.error(throwable, "Failed to transform {} with {}", type.getClassName(), service.getClass().getName());
             }
         }
 

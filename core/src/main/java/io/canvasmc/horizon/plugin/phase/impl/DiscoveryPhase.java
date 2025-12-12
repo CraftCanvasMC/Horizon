@@ -9,7 +9,6 @@ import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.plugin.types.PluginCandidate;
 import io.canvasmc.horizon.util.FileJar;
 import org.jspecify.annotations.NonNull;
-import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +20,8 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
+
+import static io.canvasmc.horizon.plugin.EntrypointLoader.LOGGER;
 
 public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
 
@@ -40,7 +41,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
 
             for (Path path : files) {
                 File child = path.toFile();
-                Logger.debug("Scanning potential plugin: {}", child.getName());
+                LOGGER.debug("Scanning potential plugin: {}", child.getName());
 
                 Optional<PluginCandidate> candidate = scanJarFile(child);
                 candidate.ifPresent(candidates::add);
@@ -50,7 +51,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
             throw new PhaseException("Failed to scan plugins directory", e);
         }
 
-        Logger.debug("Discovered {} plugin candidates", candidates.size());
+        LOGGER.debug("Discovered {} plugin candidates", candidates.size());
         return candidates;
     }
 
@@ -64,7 +65,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                 .findFirst();
 
             if (entry.isEmpty()) {
-                Logger.debug("No plugin yaml found in {}", jarFile.getName());
+                LOGGER.debug("No plugin yaml found in {}", jarFile.getName());
                 return Optional.empty();
             }
 
@@ -72,17 +73,17 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                 Map<String, Object> data = Horizon.YAML.load(in);
 
                 if (!data.containsKey("horizon")) {
-                    Logger.debug("Not a Horizon plugin: {}", jarFile.getName());
+                    LOGGER.debug("Not a Horizon plugin: {}", jarFile.getName());
                     return Optional.empty();
                 }
 
                 CandidateMetadata metadata = parseMetadata(data);
 
-                Logger.debug("Found Horizon plugin: {} v{}", metadata.name(), metadata.version());
+                LOGGER.debug("Found Horizon plugin: {} v{}", metadata.name(), metadata.version());
                 return Optional.of(new PluginCandidate(new FileJar(jarFile, jar), metadata));
             }
         } catch (Exception e) {
-            Logger.error(e, "Error scanning jar file: {}", jarFile.getName());
+            LOGGER.error(e, "Error scanning jar file: {}", jarFile.getName());
             return Optional.empty();
         }
     }

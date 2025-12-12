@@ -7,7 +7,6 @@ import io.sigpipe.jbsdiff.Patch;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import org.tinylog.Logger;
 
 import java.io.*;
 import java.net.URL;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
 
+import static io.canvasmc.horizon.Horizon.LOGGER;
 import static java.nio.file.StandardOpenOption.*;
 
 record PatchEntry(
@@ -106,7 +106,7 @@ record PatchEntry(
 
     private void announceOnce() {
         if (!bannerPrinted) {
-            Logger.info("Applying patches...");
+            LOGGER.info("Applying patches...");
             bannerPrinted = true;
         }
     }

@@ -5,7 +5,6 @@ import io.canvasmc.horizon.instrument.JvmAgent;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +14,7 @@ import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import static io.canvasmc.horizon.Horizon.LOGGER;
 import static java.util.Arrays.asList;
 
 public class Main {
@@ -24,7 +24,7 @@ public class Main {
         if (Boolean.getBoolean("paper.useLegacyPluginLoading")) {
             throw new IllegalStateException("Legacy plugin loading is unsupported with Horizon");
         }
-        Logger.info("Building Horizon version metadata...");
+        LOGGER.info("Building Horizon version metadata...");
         Map<String, Object> metadata = new HashMap<>();
         try {
             //noinspection resource
@@ -36,8 +36,8 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException("Couldn't fetch source jar", e);
         }
-        Logger.debug("Metadata:\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(metadata));
-        Logger.debug("Launch args: {}", Arrays.toString(args));
+        LOGGER.debug("Metadata:\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(metadata));
+        LOGGER.debug("Launch args: {}", Arrays.toString(args));
 
         OptionParser parser = new OptionParser() {
             {
@@ -69,14 +69,14 @@ public class Main {
         try {
             options = parser.parse(args);
         } catch (OptionException ex) {
-            Logger.error(ex.getLocalizedMessage());
+            LOGGER.error(ex.getLocalizedMessage());
         }
 
         if ((options == null) || (options.has("?"))) {
             try {
                 parser.printHelpOn(System.out);
             } catch (IOException ex) {
-                Logger.error("An unexpected error occurred", ex);
+                LOGGER.error("An unexpected error occurred", ex);
             }
             return;
         }

@@ -2,7 +2,6 @@ package io.canvasmc.horizon.util;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import org.tinylog.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -10,6 +9,8 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+
+import static io.canvasmc.horizon.Horizon.LOGGER;
 
 public class Util {
     public static MessageDigest SHA_256_DIGEST;
@@ -111,10 +112,9 @@ public class Util {
     }
 
     public static @NonNull InternalError kill(final String message, final @Nullable Throwable thrown) {
-        Logger.error(message);
         if (thrown != null) {
-            Logger.error(thrown);
-        }
+            LOGGER.error(thrown, message);
+        } else LOGGER.error(message);
         System.exit(1);
         return new InternalError();
     }

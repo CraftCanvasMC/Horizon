@@ -9,6 +9,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.tinylog.Logger;
+import org.tinylog.TaggedLogger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,6 +44,8 @@ public class TransformerContainer {
     // just for pre-validation
     private static final Pattern MODIFIER_PREFIX =
         Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\b");
+
+    private static final TaggedLogger LOGGER = Logger.tag("widener");
 
     private static final int VIS_PUBLIC = 3;
     private static final int VIS_PROTECTED = 2;
@@ -175,15 +178,15 @@ public class TransformerContainer {
                     // classes: <access modifier> <fully qualified class name>
                     // fields: <access modifier> <fully qualified class name> <field name>
                     // methods: <access modifier> <fully qualified class name> <method name>(<parameter types>)<return type>
-                    Logger.debug("Testing '{}' for transformer definition at line ({})", trimmed, idx);
+                    LOGGER.debug("Testing '{}' for transformer definition at line ({})", trimmed, idx);
                     Definition compiled = tryCompile(trimmed);
                     if (compiled != null) {
                         addDefinition(compiled.nodeTarget(), compiled);
-                    } else Logger.warn("Couldn't compile target definition on line ({}), \"{}\"", idx, line);
+                    } else LOGGER.warn("Couldn't compile target definition on line ({}), \"{}\"", idx, line);
                 }
             } catch (IOException ignored) {
             } catch (CompileError compileError) {
-                Logger.error("Failed to apply access transformer {}:{} at line ({}) due to {}",
+                LOGGER.error("Failed to apply access transformer {}:{} at line ({}) due to {}",
                     plugin.pluginMetadata().name(), jarEntry.getName(), idx, compileError.getMessage());
             }
         }
@@ -193,7 +196,7 @@ public class TransformerContainer {
         if (locked) {
             throw new IllegalStateException("TransformerContainer is locked and cannot be modified.");
         }
-        Logger.info("Compiled and adding definition {} to target clazz '{}'", def, className);
+        LOGGER.info("Compiled and adding definition {} to target clazz '{}'", def, className);
         definitionRegistry
             .computeIfAbsent(className, k -> new ObjectOpenHashSet<>())
             .add(def);
@@ -205,7 +208,7 @@ public class TransformerContainer {
     }
 
     public void transformNode(@NonNull ClassNode toTransform) throws Throwable {
-        Logger.debug("Access transforming node {}", toTransform.name);
+        LOGGER.debug("Access transforming node {}", toTransform.name);
         Set<Definition> modifiers = definitionRegistry.get(toTransform.name);
         if (modifiers == null) {
             throw new IllegalStateException("Attempted to transform unregistered class node");
@@ -215,7 +218,7 @@ public class TransformerContainer {
             switch (transformDef.data()) {
                 case Definition.ClassData ignored -> {
                     // is class transformer, try and modify class access
-                    Logger.debug("Applied class transformation to {}", toTransform.name);
+                    LOGGER.debug("Applied class transformation to {}", toTransform.name);
                     toTransform.access = transformDef.operation().apply(toTransform.access);
                 }
                 case Definition.FieldData fdata -> {
@@ -224,7 +227,7 @@ public class TransformerContainer {
                         .filter(f -> f.name.equals(target))
                         .findFirst().orElseThrow(COULDNT_LOCATE_FIELD);
 
-                    Logger.debug("Applied field transformation to {}:{}", toTransform.name, targetNode.name);
+                    LOGGER.debug("Applied field transformation to {}:{}", toTransform.name, targetNode.name);
                     targetNode.access = transformDef.operation().apply(targetNode.access);
                 }
                 case Definition.MethodData mdata -> {
@@ -240,7 +243,7 @@ public class TransformerContainer {
                         .filter(m -> methodName.equals(m.name) && methodDesc.equals(m.desc))
                         .findFirst().orElseThrow(COULDNT_LOCATE_METHOD);
 
-                    Logger.debug("Applied method transformation to {}:{}", toTransform.name, targetNode.name);
+                    LOGGER.debug("Applied method transformation to {}:{}", toTransform.name, targetNode.name);
                     targetNode.access = transformDef.operation().apply(targetNode.access);
                 }
                 default -> {

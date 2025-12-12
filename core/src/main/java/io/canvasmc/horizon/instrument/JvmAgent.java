@@ -1,7 +1,6 @@
 package io.canvasmc.horizon.instrument;
 
 import org.jspecify.annotations.NonNull;
-import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,12 +10,14 @@ import java.lang.instrument.Instrumentation;
 import java.nio.file.Path;
 import java.util.jar.JarFile;
 
+import static io.canvasmc.horizon.Horizon.LOGGER;
+
 public class JvmAgent {
     // Note: non-null guaranteed when accessed outside this class
     public static Instrumentation INSTRUMENTATION;
 
     public static void agentmain(String agentArgs, java.lang.instrument.Instrumentation inst) {
-        Logger.info("Booted from agent main");
+        LOGGER.info("Booted from agent main");
         INSTRUMENTATION = inst;
     }
 
@@ -34,7 +35,7 @@ public class JvmAgent {
 
     public static void addJar(final @NonNull JarFile jar) {
         if (INSTRUMENTATION != null) {
-            Logger.debug("Appending jar '{}' to system classloader", jar.getName());
+            LOGGER.debug("Appending jar '{}' to system classloader", jar.getName());
             INSTRUMENTATION.appendToSystemClassLoaderSearch(jar);
             return;
         }

@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
 import org.spongepowered.asm.mixin.transformer.Config;
 import org.spongepowered.asm.service.MixinService;
 import org.tinylog.Logger;
+import org.tinylog.TaggedLogger;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -32,9 +33,12 @@ public class EntrypointLoader {
 
     public static final Supplier<Throwable> PLUGIN_NOT_FOUND_FROM_MAIN = () -> new IllegalArgumentException("Unable to find plugin from string 'main'");
     public static final Supplier<Throwable> PLUGIN_NOT_FOUND_FROM_NAME = () -> new IllegalArgumentException("Unable to find plugin from string 'name'");
+
     // Note: we use "?" here because we don't want to load the JavaPlugin ref before we load the game
     //     and only contains mappings for horizon plugins
     public static final Map<String, Object> MAIN2JAVA_PLUGIN = new ConcurrentHashMap<>();
+    public static final TaggedLogger LOGGER = Logger.tag("pluginloader");
+
     private static final List<Phase<?, ?>> PHASES = List.of(
         new DiscoveryPhase(),
         new ValidationPhase(),
@@ -72,7 +76,7 @@ public class EntrypointLoader {
         File pluginsDirectory = (File) optionSet.valueOf("plugins");
 
         if (!pluginsDirectory.exists()) {
-            Logger.info("No plugins directory exists, creating one");
+            LOGGER.info("No plugins directory exists, creating one");
             pluginsDirectory.mkdirs();
         }
 
@@ -143,12 +147,12 @@ public class EntrypointLoader {
                 }
             }
 
-            Logger.info(builder.substring(0, builder.length() - 1));
+            LOGGER.info(builder.substring(0, builder.length() - 1));
 
             return plugins;
-        } catch (Throwable e) {
-            Logger.error(e, "Plugin loading failed");
-            throw new RuntimeException("Failed to load plugins", e);
+        } catch (Throwable thrown) {
+            LOGGER.error(thrown, "Plugin loading failed");
+            throw new RuntimeException("Failed to load plugins", thrown);
         }
     }
 
@@ -183,14 +187,14 @@ public class EntrypointLoader {
                 for (final String config : mixins) {
                     final HorizonPlugin previous = this.containersByConfig.putIfAbsent(config, plugin);
                     if (previous != null) {
-                        Logger.warn("Skipping duplicate mixin configuration: {} (in {} and {})", config, previous.identifier(), plugin.identifier());
+                        LOGGER.warn("Skipping duplicate mixin configuration: {} (in {} and {})", config, previous.identifier(), plugin.identifier());
                         continue;
                     }
 
                     Mixins.addConfiguration(config);
                 }
 
-                Logger.trace("Added the mixin configurations: {}", String.join(", ", mixins));
+                LOGGER.debug("Added the mixin configurations: {}", String.join(", ", mixins));
             }
         }
 

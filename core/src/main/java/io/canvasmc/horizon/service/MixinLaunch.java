@@ -10,7 +10,6 @@ import io.canvasmc.horizon.util.ClassLoaders;
 import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +30,8 @@ import java.util.function.Predicate;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
+
+import static io.canvasmc.horizon.Horizon.LOGGER;
 
 public final class MixinLaunch {
     public static final Pattern TRANSFORMATION_EXCLUDED_PATTERN = Pattern.compile(
@@ -86,14 +87,14 @@ public final class MixinLaunch {
             try {
                 final URI uri = url.toURI();
                 if (!this.transformable(uri)) {
-                    Logger.debug("Skipped adding transformation path for: {}", url);
+                    LOGGER.debug("Skipped adding transformation path for: {}", url);
                     continue;
                 }
 
                 this.classLoader.addTransformationPath(Paths.get(url.toURI()));
-                Logger.debug("Added transformation path for: {}", url);
+                LOGGER.debug("Added transformation path for: {}", url);
             } catch (final URISyntaxException | IOException exception) {
-                Logger.error(exception, "Failed to add transformation path for: {}", url);
+                LOGGER.error(exception, "Failed to add transformation path for: {}", url);
             }
         }
 
@@ -107,7 +108,7 @@ public final class MixinLaunch {
             if (Files.exists(context.gameJar)) {
                 try (final JarFile file = new JarFile(context.gameJar.toFile())) {
                     String target = file.getManifest().getMainAttributes().getValue("Main-Class");
-                    Logger.info("Launching {}", target);
+                    LOGGER.info("Launching {}", target);
                     Thread runThread = new Thread(() -> {
                         try {
                             final Class<?> mainClass = Class.forName(target, true, classLoader);
@@ -116,7 +117,7 @@ public final class MixinLaunch {
                                 .asFixedArity();
                             mainHandle.invoke((Object) context.args);
                         } catch (Throwable thrown) {
-                            Logger.error(thrown, "Unable to launch server");
+                            LOGGER.error(thrown, "Unable to launch server");
                             System.exit(1);
                         }
                     }, "launch");
@@ -127,7 +128,7 @@ public final class MixinLaunch {
                 throw new IllegalStateException("No game jar was found to launch!");
             }
         } catch (final Exception exception) {
-            Logger.error(exception, "Failed to launch the game!");
+            LOGGER.error(exception, "Failed to launch the game!");
         }
     }
 
@@ -143,7 +144,7 @@ public final class MixinLaunch {
             method.invoke(null, MixinEnvironment.Phase.INIT);
             method.invoke(null, MixinEnvironment.Phase.DEFAULT);
         } catch (final Exception exception) {
-            Logger.error(exception, "Failed to complete mixin bootstrap!");
+            LOGGER.error(exception, "Failed to complete mixin bootstrap!");
         }
 
         for (final TransformationService transformer : this.transformer.services()) {
@@ -191,7 +192,7 @@ public final class MixinLaunch {
                                 return Optional.ofNullable(plugin.file().jarFile().getManifest());
                             }
                         } catch (final URISyntaxException | IOException exception) {
-                            Logger.error(exception, "Failed to load manifest from jar: {}", url);
+                            LOGGER.error(exception, "Failed to load manifest from jar: {}", url);
                         }
                     }
 
@@ -205,7 +206,7 @@ public final class MixinLaunch {
                         return manifest;
                     }
                 } catch (final IOException exception) {
-                    Logger.error(exception, "Failed to load manifest from connection for: {}", url);
+                    LOGGER.error(exception, "Failed to load manifest from connection for: {}", url);
                 }
             }
 
