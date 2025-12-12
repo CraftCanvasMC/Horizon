@@ -13,6 +13,11 @@ const val CACHE_PATH = "caches"
 const val CACHE_DIR = "horizon"
 const val TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG = "transformedMojangMappedServer"
 const val TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG = "transformedMojangMappedServerRuntime"
+const val EMBEDDED_JAR_PATH = "META-INF/jars"
+const val PLUGIN_API = "pluginApi"
+const val PLUGIN_IMPLEMENTATION = "pluginImplementation"
+const val PLUGIN_COMPILE_ONLY = "pluginCompileOnly"
+const val PLUGIN_RUNTIME_ONLY = "pluginRuntimeOnly"
 private const val TASK_CACHE = "$CACHE_DIR/taskCache"
 
 object Plugins {

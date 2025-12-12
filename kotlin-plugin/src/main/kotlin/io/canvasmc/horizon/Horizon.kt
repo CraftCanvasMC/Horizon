@@ -14,11 +14,16 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.dsl.DependencyFactory
+import org.gradle.api.attributes.Category
+import org.gradle.api.attributes.LibraryElements
+import org.gradle.api.attributes.Usage
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 import javax.inject.Inject
 
@@ -51,6 +56,46 @@ abstract class Horizon : Plugin<Project> {
             defaultDependencies {
                 add(target.dependencies.create("io.canvasmc.jst:jst-cli-bundle:${LibraryVersions.JST}"))
             }
+        }
+
+        // configurations for JiJ
+        val pluginApi = target.configurations.register(PLUGIN_API) {
+            attributes {
+                attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class, Usage.JAVA_API))
+                attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class, Category.LIBRARY))
+                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
+            }
+        }
+
+        val pluginImplementation = target.configurations.register(PLUGIN_IMPLEMENTATION) {
+            isCanBeConsumed = false
+            extendsFrom(pluginApi.get())
+        }
+
+        val pluginCompileOnly = target.configurations.register(PLUGIN_COMPILE_ONLY) {
+            isCanBeConsumed = false
+            extendsFrom(pluginImplementation.get())
+            attributes {
+                attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class, Usage.JAVA_API))
+            }
+        }
+
+        val pluginRuntimeOnly = target.configurations.register(PLUGIN_RUNTIME_ONLY) {
+            isCanBeConsumed = false
+            extendsFrom(pluginImplementation.get())
+            attributes {
+                attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class, Usage.JAVA_RUNTIME))
+                attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class, Category.LIBRARY))
+                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.objects.named(LibraryElements.JAR))
+            }
+        }
+
+        target.configurations.named(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).configure {
+            extendsFrom(pluginRuntimeOnly.get())
+        }
+
+        target.configurations.named(JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME).configure {
+            extendsFrom(pluginCompileOnly.get())
         }
 
         target.afterEvaluate { setup(ext) }
@@ -95,6 +140,13 @@ abstract class Horizon : Plugin<Project> {
         val horizonSetup by tasks.registering<Task> {
             group = TASK_GROUP
             dependsOn(applyClassAccessTransforms)
+        }
+
+        // JiJ
+        tasks.named<Jar>("jar") {
+            from(configurations.named(PLUGIN_RUNTIME_ONLY)) {
+                into(EMBEDDED_JAR_PATH)
+            }
         }
 
         tasks.named("classes") { dependsOn(horizonSetup) } // this also attaches the task to the lifecycle
