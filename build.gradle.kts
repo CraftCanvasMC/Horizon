@@ -32,7 +32,7 @@ allprojects {
             include("com.google.code.gson:gson:2.13.2")
             include("org.yaml:snakeyaml:2.3")
             include("com.google.guava:guava:33.4.0-jre")
-            include("net.sf.jopt-simple:jopt-simple:5.0.4")
+            include("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.16.0")
 
             // annotations -- compileOnly
             compileOnly("org.jspecify:jspecify:1.0.0")
@@ -57,7 +57,7 @@ allprojects {
             include("io.sigpipe:jbsdiff:1.0")
 
             // minecraft setup
-            paperweight.paperDevBundle("1.21.10-R0.1-SNAPSHOT")
+            paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
         }
 
         tasks.shadowJar {

@@ -1,4 +1,4 @@
-package io.canvasmc.horizon.inject.mixin;
+package io.canvasmc.horizon.inject.mixin.name;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.server.MinecraftServer;

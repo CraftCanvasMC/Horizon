@@ -80,7 +80,7 @@ public abstract class JavaPluginMixin implements PluginClassloaderHolder {
         String clazzName = ((Object) this).getClass().getName();
         LOGGER.info("Set stored horizon ClassLoader for '{}'", clazzName);
         // put the main class name, this, as a mapping to the object
-        EntrypointLoader.MAIN2JAVA_PLUGIN.put(clazzName, (Object) this);
+        EntrypointLoader.MAIN2JAVA_PLUGIN.put(clazzName, this);
         return this.horizon$pluginClassLoader = loader;
     }
 }

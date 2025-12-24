@@ -12,7 +12,6 @@ import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.ClassTransformer;
 import io.canvasmc.horizon.service.MixinContainerHandle;
 import io.canvasmc.horizon.transformer.AccessTransformationImpl;
-import joptsimple.OptionSet;
 import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.FabricUtil;
 import org.spongepowered.asm.mixin.Mixins;
@@ -72,8 +71,7 @@ public class EntrypointLoader {
     }
 
     public @NonNull HorizonPlugin @NonNull [] init() {
-        OptionSet optionSet = Horizon.INSTANCE.getOptions();
-        File pluginsDirectory = (File) optionSet.valueOf("plugins");
+        File pluginsDirectory = Horizon.INSTANCE.getProperties().pluginsDirectory();
 
         if (!pluginsDirectory.exists()) {
             LOGGER.info("No plugins directory exists, creating one");

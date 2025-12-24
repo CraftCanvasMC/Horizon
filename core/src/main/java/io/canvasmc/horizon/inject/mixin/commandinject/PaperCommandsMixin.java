@@ -1,4 +1,4 @@
-package io.canvasmc.horizon.inject.mixin;
+package io.canvasmc.horizon.inject.mixin.commandinject;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;

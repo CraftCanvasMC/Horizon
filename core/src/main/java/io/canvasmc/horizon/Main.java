@@ -2,11 +2,7 @@ package io.canvasmc.horizon;
 
 import com.google.gson.GsonBuilder;
 import io.canvasmc.horizon.instrument.JvmAgent;
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,7 +11,6 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import static io.canvasmc.horizon.Horizon.LOGGER;
-import static java.util.Arrays.asList;
 
 public class Main {
 
@@ -39,48 +34,7 @@ public class Main {
         LOGGER.debug("Metadata:\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(metadata));
         LOGGER.debug("Launch args: {}", Arrays.toString(args));
 
-        OptionParser parser = new OptionParser() {
-            {
-                this.acceptsAll(asList("?", "help"), "Show the help");
-
-                this.acceptsAll(asList("P", "plugins"), "Plugin directory to use")
-                    .withRequiredArg()
-                    .ofType(File.class)
-                    .defaultsTo(new File("plugins"))
-                    .describedAs("Plugin directory");
-
-                this.acceptsAll(asList("add-plugin", "add-extra-plugin-jar"), "Specify paths to extra plugin jars to be loaded in addition to those in the plugins folder. This argument can be specified multiple times, once for each extra plugin jar path.")
-                    .withRequiredArg()
-                    .ofType(File.class)
-                    .defaultsTo(new File[]{})
-                    .describedAs("Jar file");
-
-                // TODO - strip this from arguments when passing to server in final launch
-                this.acceptsAll(asList("S", "serverjar"), "The server jarfile name to use")
-                    .withRequiredArg()
-                    .ofType(File.class)
-                    .defaultsTo(new File("server.jar"))
-                    .describedAs("The server jarfile");
-            }
-        };
-
-        OptionSet options = null;
-
-        try {
-            options = parser.parse(args);
-        } catch (OptionException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
-        }
-
-        if ((options == null) || (options.has("?"))) {
-            try {
-                parser.printHelpOn(System.out);
-            } catch (IOException ex) {
-                LOGGER.error("An unexpected error occurred", ex);
-            }
-            return;
-        }
-
-        new Horizon(options, metadata.get("Implementation-Version").toString(), JvmAgent.INSTRUMENTATION, args);
+        // load properties and start horizon init
+        new Horizon(ServerProperties.load(args), metadata.get("Implementation-Version").toString(), JvmAgent.INSTRUMENTATION, args);
     }
 }

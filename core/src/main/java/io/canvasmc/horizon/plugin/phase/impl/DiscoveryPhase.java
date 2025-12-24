@@ -16,7 +16,10 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -35,8 +38,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
             path -> Files.isRegularFile(path) && path.toString().endsWith(".jar"))) {
 
             // also try and parse extra plugins
-            //noinspection unchecked
-            Set<Path> files = ((List<File>) Horizon.INSTANCE.getOptions().valuesOf("add-plugin")).stream().map(File::toPath).collect(Collectors.toSet());
+            Set<Path> files = Horizon.INSTANCE.getProperties().extraPlugins().stream().map(File::toPath).collect(Collectors.toSet());
             stream.forEach(files::add);
 
             for (Path path : files) {

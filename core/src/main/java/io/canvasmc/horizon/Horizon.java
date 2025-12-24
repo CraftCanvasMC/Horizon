@@ -12,7 +12,6 @@ import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.MixinLaunch;
 import io.canvasmc.horizon.util.FileJar;
 import io.canvasmc.horizon.util.PaperclipVersion;
-import joptsimple.OptionSet;
 import org.jspecify.annotations.NonNull;
 import org.objectweb.asm.Opcodes;
 import org.tinylog.Logger;
@@ -52,7 +51,7 @@ public class Horizon {
     public static Horizon INSTANCE;
 
     private @NonNull
-    final OptionSet options;
+    final ServerProperties properties;
     private @NonNull
     final String version;
     private @NonNull
@@ -62,14 +61,14 @@ public class Horizon {
     private List<HorizonPlugin> plugins;
     private PaperclipVersion paperclipVersion;
 
-    public Horizon(@NonNull OptionSet options, @NonNull String version, @NonNull Instrumentation instrumentation, String @NonNull [] providedArgs) {
-        this.options = options;
+    public Horizon(@NonNull ServerProperties properties, @NonNull String version, @NonNull Instrumentation instrumentation, String @NonNull [] providedArgs) {
+        this.properties = properties;
         this.version = version;
         this.instrumentation = instrumentation;
 
         INSTANCE = this;
         try {
-            File paperclipIOFile = (File) options.valueOf("serverjar");
+            File paperclipIOFile = properties.serverJar();
             this.paperclipJar = new FileJar(paperclipIOFile, new JarFile(paperclipIOFile));
 
             INTERNAL_PLUGIN = new HorizonPlugin(
@@ -101,10 +100,10 @@ public class Horizon {
      * The optionset parsed for Horizon
      *
      * @return the Horizon optionset
-     * @see OptionSet
+     * @see ServerProperties
      */
-    public @NonNull OptionSet getOptions() {
-        return options;
+    public @NonNull ServerProperties getProperties() {
+        return this.properties;
     }
 
     /**

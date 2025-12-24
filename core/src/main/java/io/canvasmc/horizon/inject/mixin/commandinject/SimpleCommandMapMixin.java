@@ -1,4 +1,4 @@
-package io.canvasmc.horizon.inject.mixin;
+package io.canvasmc.horizon.inject.mixin.commandinject;
 
 import org.bukkit.command.SimpleCommandMap;
 import org.jspecify.annotations.NonNull;

@@ -1,8 +1,8 @@
 {
   "mixins": [
-    "MinecraftServerMixin",
-    "PaperCommandsMixin",
-    "SimpleCommandMapMixin",
+    "name.MinecraftServerMixin",
+    "commandinject.PaperCommandsMixin",
+    "commandinject.SimpleCommandMapMixin",
     "datapack.PackRepositoryAccessor",
     "datapack.ServerPacksSourceMixin",
     "initfix.JavaPluginMixin",
@@ -14,5 +14,6 @@
     "initfix.spigot.SpigotPluginProviderMixin"
   ],
   "package": "io.canvasmc.horizon.inject.mixin",
-  "mixinPriority": 1
+  "mixinPriority": 1,
+  "plugin": "io.canvasmc.horizon.inject.mixin.MixinConfig"
 }
