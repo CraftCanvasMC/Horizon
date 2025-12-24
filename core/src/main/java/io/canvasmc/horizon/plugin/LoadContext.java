@@ -7,5 +7,5 @@ import java.io.File;
  *
  * @param pluginsDirectory root directory for plugin searching
  */
-public record LoadContext(File pluginsDirectory) {
+public record LoadContext(File pluginsDirectory, File cacheDirectory) {
 }

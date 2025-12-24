@@ -34,6 +34,8 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
     public Set<PluginCandidate> execute(Void input, @NonNull LoadContext context) throws PhaseException {
         Set<PluginCandidate> candidates = new HashSet<>();
         File pluginsDirectory = context.pluginsDirectory();
+        File cacheDirectory = context.cacheDirectory();
+        Util.clearDirectory(cacheDirectory); // cleanup directory
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(
             pluginsDirectory.toPath().toAbsolutePath(),
@@ -124,6 +126,19 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
             File cacheDir = Horizon.INSTANCE.getProperties().cacheLocation();
             String fileName = entry.getName().substring(Util.JIJ_PATH.length());
             File extractedFile = new File(cacheDir, fileName);
+
+            // defend against path traversal attempts
+            try {
+                String canonicalCachePath = cacheDir.getCanonicalPath();
+                String canonicalFilePath = extractedFile.getCanonicalPath();
+                if (!canonicalFilePath.startsWith(canonicalCachePath + File.separator)) {
+                    LOGGER.error("Path traversal attempt detected: {}", entry.getName());
+                    return;
+                }
+            } catch (IOException e) {
+                LOGGER.error("Failed to validate path for: {}", entry.getName(), e);
+                return;
+            }
 
             try {
                 //noinspection ResultOfMethodCallIgnored

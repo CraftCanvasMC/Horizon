@@ -71,20 +71,7 @@ public class EntrypointLoader {
     }
 
     public @NonNull HorizonPlugin @NonNull [] init() {
-        File pluginsDirectory = Horizon.INSTANCE.getProperties().pluginsDirectory();
-
-        if (!pluginsDirectory.exists()) {
-            LOGGER.info("No plugins directory exists, creating one");
-            pluginsDirectory.mkdirs();
-        }
-
-        if (!pluginsDirectory.isDirectory()) {
-            throw new IllegalStateException(
-                "Plugins folder '" + pluginsDirectory.getPath() + "' is not a directory!"
-            );
-        }
-
-        LoadContext context = new LoadContext(pluginsDirectory);
+        LoadContext context = getLoadContext();
 
         try {
             Object result = null;
@@ -132,6 +119,22 @@ public class EntrypointLoader {
             LOGGER.error(thrown, "Plugin loading failed");
             throw new RuntimeException("Failed to load plugins", thrown);
         }
+    }
+
+    private static @NonNull LoadContext getLoadContext() {
+        File pluginsDirectory = Horizon.INSTANCE.getProperties().pluginsDirectory();
+        File cacheDirectory = Horizon.INSTANCE.getProperties().cacheLocation();
+        if (!pluginsDirectory.isDirectory()) {
+            throw new IllegalStateException(
+                "Plugins folder '" + pluginsDirectory.getPath() + "' is not a directory!"
+            );
+        }
+        if (!cacheDirectory.isDirectory()) {
+            throw new IllegalStateException(
+                "Cache folder '" + cacheDirectory.getPath() + "' is not a directory!"
+            );
+        }
+        return new LoadContext(pluginsDirectory, cacheDirectory);
     }
 
     private void appendNested(StringBuilder builder, HorizonPlugin.@NonNull NestedData nestedData, String prefix) {

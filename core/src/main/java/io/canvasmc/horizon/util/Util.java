@@ -120,4 +120,17 @@ public class Util {
         System.exit(1);
         return new InternalError();
     }
+
+    public static void clearDirectory(@NonNull File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            Arrays.stream(files).forEach(file -> {
+                if (file.isDirectory()) {
+                    clearDirectory(file);
+                }
+                //noinspection ResultOfMethodCallIgnored
+                file.delete();
+            });
+        }
+    }
 }
