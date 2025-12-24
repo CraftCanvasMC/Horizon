@@ -7,7 +7,6 @@ import io.canvasmc.horizon.instrument.JvmAgent;
 import io.canvasmc.horizon.instrument.patch.ServerPatcherEntrypoint;
 import io.canvasmc.horizon.plugin.EntrypointLoader;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
-import io.canvasmc.horizon.plugin.data.HorizonMetadataDeserializer;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.MixinLaunch;
 import io.canvasmc.horizon.util.FileJar;
@@ -16,9 +15,6 @@ import org.jspecify.annotations.NonNull;
 import org.objectweb.asm.Opcodes;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,7 +25,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.jar.JarFile;
 
 /**
@@ -37,10 +35,9 @@ import java.util.jar.JarFile;
  * that runs the full startup and bootstrap process
  */
 public class Horizon {
-    public static final Yaml YAML = new Yaml(new SafeConstructor(new LoaderOptions()));
+    // TODO - nuke GSON, replace with ObjectTree
     public static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
-        .registerTypeAdapter(HorizonMetadata.class, new HorizonMetadataDeserializer())
         .registerTypeAdapter(PaperclipVersion.class, new PaperclipVersion.PaperclipVersionDeserializer())
         .registerTypeAdapter(PaperclipVersion.class, new PaperclipVersion.PaperclipVersionSerializer())
         .create();
@@ -82,7 +79,7 @@ public class Horizon {
                     List.of("internal.mixins.json"),
                     List.of(),
                     false
-                )
+                ), new HorizonPlugin.NestedData(List.of(), List.of(), List.of())
             );
         } catch (IOException e) {
             throw new RuntimeException("Couldn't build FileJar", e);
@@ -144,7 +141,7 @@ public class Horizon {
     }
 
     /**
-     * Get all the plugins in the Horizon server
+     * Get all the plugins in the Horizon server, including nested Horizon plugins
      * <p>
      * <b>Note:</b> if plugins aren't loaded yet, the list will be empty
      * </p>
@@ -152,7 +149,18 @@ public class Horizon {
      * @return all plugins
      */
     public List<HorizonPlugin> getPlugins() {
-        return this.plugins == null ? List.of() : this.plugins;
+        List<HorizonPlugin> allPlugins = new ArrayList<>();
+        if (this.plugins == null) return List.of();
+
+        Queue<HorizonPlugin> queue = new LinkedList<>(this.plugins);
+
+        while (!queue.isEmpty()) {
+            HorizonPlugin plugin = queue.poll();
+            allPlugins.add(plugin);
+            queue.addAll(plugin.nestedData().nestedHPlugins());
+        }
+
+        return allPlugins;
     }
 
     /**
@@ -167,11 +175,6 @@ public class Horizon {
         final URL[] unpacked = prepareHorizonServer();
         final List<Path> initalClasspath = new ArrayList<>();
 
-        for (HorizonPlugin plugin : plugins) {
-            // add all plugins to initial classpath
-            initalClasspath.add(plugin.file().ioFile().toPath());
-        }
-
         for (URL url : unpacked) {
             try {
                 Path asPath = Path.of(url.toURI());
@@ -179,6 +182,23 @@ public class Horizon {
                 initalClasspath.add(asPath);
             } catch (URISyntaxException | IOException e) {
                 throw new RuntimeException("Couldn't unpack and attach jar: " + url, e);
+            }
+        }
+
+        for (HorizonPlugin plugin : getPlugins()) {
+            // add all plugins to initial classpath
+            initalClasspath.add(plugin.file().ioFile().toPath());
+
+            // add all nested libraries like we are unpacking them as normal
+            for (FileJar nestedLibrary : plugin.nestedData().nestedLibraries()) {
+                try {
+                    LOGGER.info("Adding nested library jar '{}'", nestedLibrary.ioFile().getName());
+                    Path asPath = Path.of(nestedLibrary.ioFile().toURI());
+                    JvmAgent.addJar(asPath);
+                    initalClasspath.add(asPath);
+                } catch (IOException e) {
+                    throw new RuntimeException("Couldn't attach jar: " + nestedLibrary.jarFile().getName(), e);
+                }
             }
         }
 

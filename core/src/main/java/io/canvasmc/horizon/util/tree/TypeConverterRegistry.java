@@ -3,6 +3,7 @@ package io.canvasmc.horizon.util.tree;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -19,9 +20,45 @@ public final class TypeConverterRegistry {
         registerDefaults();
     }
 
+    private static @NonNull File getOrCreateFile(String path) {
+        File file = new File(path);
+        boolean isDirectory = path.endsWith("/") || path.endsWith("\\") || !hasFileExtension(path);
+
+        try {
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                if (!parent.mkdirs() && !parent.exists()) {
+                    throw new IOException("Failed to create directories: " + parent);
+                }
+            }
+
+            if (!file.exists()) {
+                if (isDirectory) {
+                    if (!file.mkdirs() && !file.exists()) {
+                        throw new IOException("Failed to create directory: " + file);
+                    }
+                } else {
+                    if (!file.createNewFile()) {
+                        throw new IOException("Failed to create file: " + file);
+                    }
+                }
+            }
+
+            return file;
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to get or create file: " + path, e);
+        }
+    }
+
+    private static boolean hasFileExtension(String path) {
+        String name = new File(path).getName();
+        int lastDot = name.lastIndexOf('.');
+        return lastDot > 0 && lastDot < name.length() - 1;
+    }
+
     private void registerDefaults() {
         register(String.class, Object::toString);
-        register(File.class, obj -> new File(obj.toString()));
+        register(File.class, obj -> getOrCreateFile(obj.toString()));
         register(Integer.class, obj -> {
             if (obj instanceof Number n) return n.intValue();
             return Integer.parseInt(obj.toString());
@@ -55,15 +92,15 @@ public final class TypeConverterRegistry {
         });
     }
 
-    <T> void register(Class<T> type, TypeConverter<T> converter) {
+    public <T> void register(Class<T> type, TypeConverter<T> converter) {
         converters.put(type, converter);
     }
 
-    <T> void registerDeserializer(Class<T> type, ObjectDeserializer<T> deserializer) {
+    public <T> void registerDeserializer(Class<T> type, ObjectDeserializer<T> deserializer) {
         deserializers.put(type, deserializer);
     }
 
-    <T> @NonNull TypeConverter<T> get(Class<T> type) {
+    public <T> @NonNull TypeConverter<T> get(Class<T> type) {
         //noinspection unchecked
         TypeConverter<T> converter = (TypeConverter<T>) converters.get(type);
         if (converter == null) {
@@ -72,7 +109,7 @@ public final class TypeConverterRegistry {
         return converter;
     }
 
-    <T> @NonNull ObjectDeserializer<T> getDeserializer(Class<T> type) {
+    public <T> @NonNull ObjectDeserializer<T> getDeserializer(Class<T> type) {
         //noinspection unchecked
         ObjectDeserializer<T> deserializer = (ObjectDeserializer<T>) deserializers.get(type);
         if (deserializer == null) {

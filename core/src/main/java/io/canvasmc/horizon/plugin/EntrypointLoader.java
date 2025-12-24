@@ -2,7 +2,6 @@ package io.canvasmc.horizon.plugin;
 
 import io.canvasmc.horizon.Horizon;
 import io.canvasmc.horizon.ember.EmberMixinService;
-import io.canvasmc.horizon.plugin.data.HorizonMetadata;
 import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.plugin.phase.impl.BuilderPhase;
@@ -12,6 +11,7 @@ import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.ClassTransformer;
 import io.canvasmc.horizon.service.MixinContainerHandle;
 import io.canvasmc.horizon.transformer.AccessTransformationImpl;
+import io.canvasmc.horizon.util.FileJar;
 import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.FabricUtil;
 import org.spongepowered.asm.mixin.Mixins;
@@ -107,42 +107,22 @@ public class EntrypointLoader {
             final HorizonPlugin[] plugins = fullResult.toArray(new HorizonPlugin[0]);
             final StringBuilder builder = new StringBuilder();
 
-            List<HorizonMetadata> metas = new LinkedList<>(Arrays.stream(plugins).map(HorizonPlugin::pluginMetadata).toList());
+            List<HorizonPlugin> metas = new LinkedList<>(Arrays.stream(plugins).toList());
 
             builder.append(
                 "Found {} plugin(s):\n"
                     .replace("{}", String.valueOf(metas.size()))
             );
 
-            for (HorizonMetadata meta : metas.reversed()) {
+            for (HorizonPlugin plugin : metas.reversed()) {
 
                 builder.append("\t- ")
-                    .append(meta.name())
+                    .append(plugin.pluginMetadata().name())
                     .append(" ")
-                    .append(meta.version())
+                    .append(plugin.pluginMetadata().version())
                     .append("\n");
 
-                List<String> mixins = meta.mixins();
-                List<String> wideners = meta.accessWideners();
-
-                int totalChildren = mixins.size() + wideners.size();
-                int index = 0;
-
-                for (String mixin : mixins) {
-                    index++;
-                    boolean last = index == totalChildren;
-                    builder.append(last ? "\t   \\-- " : "\t   |-- ")
-                        .append(mixin)
-                        .append("\n");
-                }
-
-                for (String widener : wideners) {
-                    index++;
-                    boolean last = index == totalChildren;
-                    builder.append(last ? "\t   \\-- " : "\t   |-- ")
-                        .append(widener)
-                        .append("\n");
-                }
+                appendNested(builder, plugin.nestedData(), "\t   ");
             }
 
             LOGGER.info(builder.substring(0, builder.length() - 1));
@@ -151,6 +131,51 @@ public class EntrypointLoader {
         } catch (Throwable thrown) {
             LOGGER.error(thrown, "Plugin loading failed");
             throw new RuntimeException("Failed to load plugins", thrown);
+        }
+    }
+
+    private void appendNested(StringBuilder builder, HorizonPlugin.@NonNull NestedData nestedData, String prefix) {
+        List<HorizonPlugin> nestedPlugins = nestedData.nestedHPlugins();
+        List<FileJar> nestedSPlugins = nestedData.nestedSPlugins();
+        List<FileJar> nestedLibraries = nestedData.nestedLibraries();
+
+        int totalChildren = nestedPlugins.size() + nestedSPlugins.size() + nestedLibraries.size();
+        int index = 0;
+
+        for (HorizonPlugin nestedPlugin : nestedPlugins) {
+            index++;
+            boolean last = index == totalChildren;
+
+            builder.append(prefix)
+                .append(last ? "\\-- " : "|-- ")
+                .append(nestedPlugin.file().ioFile().getName().replace(".jar", ""))
+                .append("\n");
+
+            HorizonPlugin.NestedData childNested = nestedPlugin.nestedData();
+            if (!childNested.nestedHPlugins().isEmpty() || !childNested.nestedSPlugins().isEmpty() || !childNested.nestedLibraries().isEmpty()) {
+                String childPrefix = prefix + (last ? "    " : "|   ");
+                appendNested(builder, childNested, childPrefix);
+            }
+        }
+
+        for (FileJar sPlugin : nestedSPlugins) {
+            index++;
+            boolean last = index == totalChildren;
+
+            builder.append(prefix)
+                .append(last ? "\\-- " : "|-- ")
+                .append(sPlugin.ioFile().getName().replace(".jar", ""))
+                .append("\n");
+        }
+
+        for (FileJar library : nestedLibraries) {
+            index++;
+            boolean last = index == totalChildren;
+
+            builder.append(prefix)
+                .append(last ? "\\-- " : "|-- ")
+                .append(library.ioFile().getName().replace(".jar", ""))
+                .append("\n");
         }
     }
 

@@ -20,6 +20,10 @@ public class ValidationPhase implements Phase<Set<PluginCandidate>, Set<PluginCa
         for (PluginCandidate candidate : input) {
             if (validateCandidate(candidate)) {
                 validated.add(candidate);
+                // rebuild nested with filtered validated entries
+                Set<PluginCandidate> newNested = execute(candidate.nestedData().nestedHPlugins(), context);
+                candidate.nestedData().nestedHPlugins().removeIf((e) -> true);
+                candidate.nestedData().nestedHPlugins().addAll(newNested);
             } else {
                 LOGGER.warn("Plugin {} failed validation", candidate.metadata().name());
             }

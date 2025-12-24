@@ -24,7 +24,7 @@ public record ServerProperties(
             ObjectTree defaultTree = ObjectTree.builder()
                 .put("pluginsDirectory", "plugins")
                 .put("serverJar", "server.jar")
-                .put("cacheLocation", "cache")
+                .put("cacheLocation", "cache/horizon")
                 .put("extraPlugins", List.of())
                 .put("serverName", "horizon")
                 .build();

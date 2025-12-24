@@ -13,6 +13,8 @@ import java.util.Arrays;
 import static io.canvasmc.horizon.Horizon.LOGGER;
 
 public class Util {
+    public static final String JIJ_PATH = "META-INF/jars/";
+    public static final String JAR_SUFFIX = ".jar";
     public static MessageDigest SHA_256_DIGEST;
 
     static {

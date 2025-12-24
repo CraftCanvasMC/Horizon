@@ -7,6 +7,7 @@ import org.jspecify.annotations.NonNull;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -20,13 +21,15 @@ public final class HorizonPlugin {
     private final String identifier;
     private final FileJar file;
     private final HorizonMetadata pluginMetadata;
+    private final NestedData nestedData;
 
     private FileSystem fileSystem;
 
-    public HorizonPlugin(String identifier, FileJar file, HorizonMetadata pluginMetadata) {
+    public HorizonPlugin(String identifier, FileJar file, HorizonMetadata pluginMetadata, NestedData nestedData) {
         this.identifier = identifier;
         this.file = file;
         this.pluginMetadata = pluginMetadata;
+        this.nestedData = nestedData;
     }
 
     public String identifier() {
@@ -39,6 +42,10 @@ public final class HorizonPlugin {
 
     public HorizonMetadata pluginMetadata() {
         return pluginMetadata;
+    }
+
+    public NestedData nestedData() {
+        return nestedData;
     }
 
     public @NonNull FileSystem fileSystem() {
@@ -59,5 +66,9 @@ public final class HorizonPlugin {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (HorizonPlugin) obj;
         return Objects.equals(this.identifier, that.identifier);
+    }
+
+    public record NestedData(List<HorizonPlugin> nestedHPlugins, List<FileJar> nestedSPlugins,
+                             List<FileJar> nestedLibraries) {
     }
 }
