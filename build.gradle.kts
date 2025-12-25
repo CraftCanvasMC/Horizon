@@ -49,7 +49,7 @@ allprojects {
             include("org.ow2.asm:asm-util:9.9")
 
             // mixin libraries
-            implementation("net.fabricmc:sponge-mixin:0.16.5+mixin.0.8.7")
+            implementation("net.fabricmc:sponge-mixin:0.17.0+mixin.0.8.7")
             implementation("io.github.llamalad7:mixinextras-common:0.5.0")
             implementation("net.fabricmc:access-widener:2.1.0")
 
