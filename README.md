@@ -80,13 +80,13 @@ Another way is by checking the `/plugins` command, which is replaced with the Ho
 
 ![plugin command output](assets/plugin_command_out.png)
 
+You can learn about how to use our gradle plugin to assist in Horizon plugin development [below](#gradle-plugin), along with [JIJ](#jijjar-in-jar). It is also recommended to familiarize yourself with the new classloader hierarchy in the [New Classloading Tree](#new-classloading-tree) section
+
 ### JIJ(Jar In jar)
 Another capability Horizon plugins have is JIJ(Jar In Jar). JIJ is a feature that allows Horizon plugins to attach Horizon plugins, Paper plugins, or external libraries.
 All JIJ plugins will be loaded to the `horizon.yml:cacheLocation` configured location, which is fetchable via Horizons API, which is documented [below](#horizon-plugin-api).
 All Paper plugins will be loaded as normal, and their plugin data folders will still remain in the same place as normal. Horizon plugins will function the exact same, and will load
 mixins like normal. External libraries will just be appended to the game classpath with Ember like if it were a library added by the server jar, which is accessible after Horizon launches the game.
-
-You can learn about how to use our gradle plugin to assist in Horizon plugin development below. It is also recommended to familiarize yourself with the new classloader hierarchy in the [New Classloading Tree](#new-classloading-tree) section
 
 ### Gradle Plugin
 -- note: gradle plugin, need toffik for docs on that
