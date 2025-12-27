@@ -80,6 +80,7 @@ Another way is by checking the `/plugins` command, which is replaced with the Ho
 
 ![plugin command output](assets/plugin_command_out.png)
 
+### JIJ(Jar In jar)
 Another capability Horizon plugins have is JIJ(Jar In Jar). JIJ is a feature that allows Horizon plugins to attach Horizon plugins, Paper plugins, or external libraries.
 All JIJ plugins will be loaded to the `horizon.yml:cacheLocation` configured location, which is fetchable via Horizons API, which is documented [below](#horizon-plugin-api).
 All Paper plugins will be loaded as normal, and their plugin data folders will still remain in the same place as normal. Horizon plugins will function the exact same, and will load
