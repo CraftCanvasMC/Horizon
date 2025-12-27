@@ -22,7 +22,7 @@ public class PluginInitializerManagerMixin {
     private static void horizon$jijInject(@NonNull OptionSet optionSet, CallbackInfo ci) {
         List<File> jijCache = Horizon.INSTANCE.getPlugins().stream()
             .map(HorizonPlugin::nestedData)
-            .map(HorizonPlugin.NestedData::nestedSPlugins)
+            .map(HorizonPlugin.NestedData::allPlugins)
             .flatMap(List::stream)
             .map(FileJar::ioFile)
             .toList();

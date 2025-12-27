@@ -2,5 +2,4 @@
 - builtin runtime patches
 - api -- serviceloader? classloader access? instrumentation access?
 - outline in readme the classloader hierarchy
-- Use new API to create plugin trees which allow for sub plugins to be loaded and also dependencies
 - include mixinextras in horizon internal for logging startup plugins

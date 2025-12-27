@@ -7,6 +7,7 @@ import org.jspecify.annotations.NonNull;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -70,5 +71,12 @@ public final class HorizonPlugin {
 
     public record NestedData(List<HorizonPlugin> nestedHPlugins, List<FileJar> nestedSPlugins,
                              List<FileJar> nestedLibraries) {
+        public @NonNull List<FileJar> allPlugins() {
+            List<FileJar> paper = new ArrayList<>(nestedSPlugins);
+            nestedHPlugins.stream()
+                .map(HorizonPlugin::file)
+                .forEach(paper::add);
+            return paper;
+        }
     }
 }
