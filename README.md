@@ -93,7 +93,7 @@ mixins like normal. External libraries will just be appended to the game classpa
 -- note: mention JIJ
 
 ## New Classloading Tree
-For obvious reasons, the classloading hierarchy tree has changed. A diagram is shown below with a general visual example of what this lookslike
+For obvious reasons, the classloading hierarchy tree has changed. A diagram is shown below with a general visual example of what this looks like
 
 ![classloading tree](assets/ember.png)
 
