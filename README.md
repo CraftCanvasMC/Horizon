@@ -55,7 +55,8 @@ horizon:
   mixins:
     - "mixins.test.json"
   wideners:
-    - "widener.at"
+    - "wideners.at"
+    - "additional_wideners.at"
   load-datapack-entry: true
 ```
 Horizon reads from the `plugin.yml` or `paper-plugin.yml` from the plugin JAR entries to build the `ObjectTree` representing your plugin configuration.
@@ -107,8 +108,8 @@ dependencies {
 
 horizon {
     accessTransformerFiles.from(
-        file("build-data/first.at"),
-        file("build-data/second.at")
+        file("src/main/resources/wideners.at"),
+        file("src/main/resources/additional_wideners.at"),
     )
 }
 ```
