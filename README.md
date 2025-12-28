@@ -1,5 +1,7 @@
 # Horizon
 
+---
+
 ## Introduction
 Horizon is a MIXIN wrapper for PaperMC servers and forks, expanding plugin capabilities to allow for further customization and enhancements. Horizon is a project that is intended to supersede
 a project by one of the core team members(Dueris), the project Eclipse. Eclipse was a plugin for Paper that allowed loading Spongepowered Mixins and access wideners and transformers.
@@ -342,5 +344,113 @@ int port = config.getTreeOptional("server")
 ```
 
 ## Mixins and ATs
+For working with Mixins and ATs, it is *HIGHLY* recommended that you use IntelliJ IDEA with the [Minecraft Development plugin](https://plugins.jetbrains.com/plugin/8327-minecraft-development).
+This plugin will help autofill entries and such that will be extremely useful for development.
+
+## Access Transformers (ATs)
+
+Access Transformers (ATs) are used to widen member visibility and to add or remove the `final` modifier from classes, methods, and fields. They allow plugin developers to access and modify members that would otherwise be inaccessible.
+
+AT files are parsed line-by-line at startup and applied during class transformation at load time.
+
+> [!NOTE]
+> Any text following a `#` character until the end of the line is treated as a comment and will be ignored by the parser.
+
+#### Access Modifiers
+
+Each definition begins with an access modifier that defines the *new* visibility of the targeted member. Modifiers are listed below in decreasing order of visibility:
+
+* `public` — Accessible from all classes, regardless of package
+* `protected` — Accessible within the same package and by subclasses
+* `default` — Accessible only within the same package
+* `private` — Accessible only within the declaring class
+
+In addition, the special suffixes `+f` and `-f` may be appended to any access modifier to respectively **add** or **remove** the `final` modifier.
+
+The `final` modifier prevents:
+
+* Subclassing (for classes)
+* Method overriding (for methods)
+* Field reassignment (for fields)
+
+#### Important Semantics and JVM Constraints
+
+> [!WARNING]
+> Access Transformers apply **only** to the exact member they reference. Overriding methods are *not* implicitly transformed.
+> If a transformed method has an override with more restrictive visibility, the JVM will reject the class and fail to load it.
+> As a result, only the following categories of methods are generally safe to transform:
+> * `private` methods
+> * `final` methods (or methods declared in `final` classes)
+> * `static` methods
+
+Care should be taken when widening non-final instance methods, especially those that may be overridden.
+
+#### Targeting Elements
+
+#### Classes
+
+To target a class, use the following syntax:
+
+```
+<access modifier> <fully qualified class name>
+```
+
+Inner classes are referenced by joining the outer and inner class names using `$` as a separator:
+
+```
+com.example.OuterClass$InnerClass
+```
+
+#### Fields
+
+To target a field:
+
+```
+<access modifier> <fully qualified class name> <field name>
+```
+
+#### Methods
+
+Methods require a full JVM method descriptor, including parameter and return types:
+
+```
+<access modifier> <fully qualified class name> <method name>(<parameter types>)<return type>
+```
+
+---
+
+#### Type Descriptors
+
+ATs use standard JVM type descriptors as defined in more technical detail here - [Java Virtual Machine Specification, SE 8, sections 4.3.2 and 4.3.3](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.3.2)
+
+#### Primitive Types
+
+* `B` — `byte`
+* `C` — `char` (Unicode character code point in UTF-16)
+* `D` — `double`
+* `F` — `float`
+* `I` — `int`
+* `J` — `long`
+* `S` — `short`
+* `Z` — `boolean`
+
+#### Arrays
+
+* `[` — Indicates one dimension of an array
+  * Example: `[[S` represents `short[][]`
+
+#### Reference Types
+
+* `L<class name>;` — Reference type using internal JVM naming
+  * Example: `Ljava/lang/String;` represents `java.lang.String`
+
+#### Methods
+
+* `(<params>)<return>` — Method descriptor format
+  Example: `(I)Z` — Takes an `int`, returns `boolean`
+* `V` — Void return type (only valid as a return type)
+  Example: `()V` — No parameters, returns nothing
+
+---
 
 ## Horizon Plugin API
