@@ -1,8 +1,9 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven("https://repo.papermc.io/repository/maven-public/")
+        maven("https://maven.canvasmc.io/snapshots")
     }
+    includeBuild("kotlin-plugin")
 }
 
 plugins {
@@ -14,5 +15,4 @@ rootProject.name = "horizon"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include("core")
-include("kotlin-plugin")
 include("test-plugin")

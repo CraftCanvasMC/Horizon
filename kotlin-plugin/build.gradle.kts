@@ -1,5 +1,6 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import net.kyori.blossom.BlossomExtension
 
 plugins {
     id("net.kyori.blossom") version "2.2.0"
@@ -8,6 +9,8 @@ plugins {
     id("com.diffplug.spotless") version "8.1.0"
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
 }
+
+val USERDEV_VERSION = "2.3.12-SNAPSHOT"
 
 gradlePlugin {
     plugins.register("horizon") {
@@ -26,7 +29,7 @@ repositories {
 
 dependencies {
     compileOnly(gradleApi())
-    compileOnly("io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin:2.3.12-SNAPSHOT")
+    compileOnly("io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin:$USERDEV_VERSION")
 }
 
 java {
@@ -41,11 +44,11 @@ tasks.withType<Jar>().configureEach {
     archiveBaseName.set("horizon")
 }
 
-sourceSets.main {
-    blossom {
-        kotlinSources {
-            properties.put("jst_version", providers.gradleProperty("jstVersion"))
-        }
+sourceSets.all {
+    val blossom = extensions.findByType(BlossomExtension::class.java) ?: return@all
+
+    blossom.kotlinSources {
+        properties.put("jst_version", providers.gradleProperty("jstVersion").get())
     }
 }
 
