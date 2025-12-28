@@ -193,7 +193,7 @@ abstract class Horizon : Plugin<Project> {
         if (hasHorizonApi.isFailure || !hasHorizonApi.getOrThrow()) {
             val message =
                 "Unable to resolve the Horizon API dependency, which is required in order to work with mixins.\n" +
-                    "Specify the Horizon API version in the `horizonApi` configuration, and ensure there is a repository to resolve it from (the Canvas repository is used by default)."
+                    "Add Horizon API to the `horizonApi` configuration, and ensure there is a repository to resolve it from (the Canvas repository is used by default)."
             throw RuntimeException(message)
         }
     }
