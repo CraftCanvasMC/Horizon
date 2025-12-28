@@ -3,7 +3,7 @@
 ## Introduction
 Horizon is a MIXIN wrapper for PaperMC servers and forks, expanding plugin capabilities to allow for further customization and enhancements. Horizon is a project that is intended to supersede
 a project by one of the core team members(Dueris), the project Eclipse. Eclipse was a plugin for Paper that allowed loading Spongepowered Mixins and access wideners and transformers.
-This project, of course, came with many issues and drawbacks that made Eclipse hard to work with most of the time. And so, Dueris achrived the project and decided to create Horizon,
+This project, of course, came with many issues and drawbacks that made Eclipse hard to work with most of the time. And so, Dueris archived the project and decided to create Horizon,
 which is the successor of Eclipse.
 
 Horizon intends to fix the issues from Eclipse and create a more manageable, workable, and stable environment for plugins to work with, while incorporating plugin authors' ideas in a much more powerful and
@@ -147,12 +147,200 @@ and create interfaces in the Horizon plugin that the Paper plugin implements, of
 By implementing a system like this, you could create a Horizon plugin that can communicate with other Paper plugins. Do note, though, that all Horizon plugins are visible to the Paper
 plugin classloaders.
 
-## Launch Process
-
 ## ObjectTree API
+Horizon uses a powerful data API called the `ObjectTree` API for parsing and managing hierarchical immutable data structures. OT provides a type-safe way to work with multiple file formats including `JSON`, `YAML`, `TOML`, and `PROPERTIES`
+
+### Overview
+
+OT is an immutable, thread-safe API that represents file data as a tree structure. It provides mutli-format support, type-safe conversions, alias support, variable interpolation, custom serialization, multiple reader inputs, and strong error handling.
+
+### Basic Usage
+
+#### Reading Data
+Basic reading of a file is like so:
+```java
+// Read JSON data
+ObjectTree config = ObjectTree.read()
+    .format(Format.JSON)
+    .from(new FileInputStream("config.json"))
+    .parse();
+
+// Access values with automatic type conversion
+String serverName = config.getValue("serverName").asString();
+int port = config.getValue("port").asInt();
+boolean enabled = config.getValue("enabled").asBoolean();
+
+// Access nested structures
+ObjectTree database = config.getTree("database");
+String host = database.getValue("host").asString();
+
+// Access arrays
+ObjectArray plugins = config.getArray("plugins");
+for (int i = 0; i < plugins.size(); i++) {
+    // Converts each entry in the ObjectArray to a String and prints it
+    System.out.println(plugins.get(i).asString());
+}
+```
+
+#### Reading from JAR Resources
+When reading from JAR entries:
+```java
+// Parsing a plugin metadata for example
+try (InputStream stream = jarFile.getInputStream(entry)) {
+    ObjectTree metadata = ObjectTree.read()
+        .format(Format.YAML)
+        .from(stream)
+        .parse();
+    
+    String pluginName = metadata.getValue("name").asString();
+    String version = metadata.getValue("version").asString();
+}
+```
+
+### Type Conversions
+OT provides methods for type conversion with automatic validation:
+```java
+ObjectValue value = config.getValue("key");
+
+// Built-in type conversions
+// If unable to convert for any reason, it will throw a TypeConversionException
+String str = value.asString();
+int i = value.asInt();
+long l = value.asLong();
+double d = value.asDouble();
+float f = value.asFloat();
+boolean b = value.asBoolean();
+BigDecimal bd = value.asBigDecimal();
+BigInteger bi = value.asBigInteger();
+
+// Optional variants (returns empty Optional on failure)
+Optional<Integer> maybeInt = value.asIntOptional();
+Optional<String> maybeStr = value.asStringOptional();
+```
+
+### Custom Type Converters
+Register custom converters for your own types:
+```java
+ObjectTree config = ObjectTree.read()
+    .format(Format.JSON)
+    // Note: this is for example, both UUID and File are implemented by default
+    .registerConverter(File.class, obj -> new File(obj.toString()))
+    .registerConverter(UUID.class, obj -> UUID.fromString(obj.toString()))
+    .from(inputStream)
+    .parse();
+
+File pluginDir = config.getValue("pluginsDirectory").as(File.class);
+UUID serverId = config.getValue("serverId").as(UUID.class);
+```
+
+### Custom Object Deserialization
+For complex objects, register custom deserializers:
+```java
+// Define your data class
+record ServerConfig(String host, int port, boolean ssl) {}
+
+// Register deserializer
+ObjectTree config = ObjectTree.read()
+    .format(Format.JSON)
+    .registerDeserializer(ServerConfig.class, tree -> 
+        new ServerConfig(
+            tree.getValue("host").asString(),
+            tree.getValue("port").asInt(),
+            tree.getValueOptional("ssl")
+                .map(v -> v.asBoolean())
+                .orElse(false)
+        )
+    )
+    .from(inputStream)
+    .parse();
+
+// Deserialize directly to your type
+ServerConfig server = config.as(ServerConfig.class);
+```
+
+> [!NOTE]
+> For converting an ObjectTree -> T, register a **deserializer** and use the `ObjectTree#as` method. For converting an ObjectValue -> T, register a **type converter** and use `ObjectValue#as` method
+
+### Alias Support
+Support multiple key names that map to the same value:
+```java
+ObjectTree config = ObjectTree.read()
+        .format(Format.YAML)
+        .alias("host", "db_host", "databaseHost", "dbHost")
+        .alias("port", "db_port", "databasePort", "dbPort")
+        .from(inputStream)
+        .parse();
+
+// This makes it so your YAML file you are parsing can use `db_host`, or `dbHost` in the
+// actual YAML file, but when read it is remapped to `host`, to be fetched like below
+String host = config.getValue("host").asString();
+```
+
+> [!NOTE]
+> You cannot access values via nested keys, like "test.example", any attempts will throw a NoSuchElementException
+
+### Variable Interpolation
+ObjectTree supports variable substitution using `${variable}` syntax:
+```java
+ObjectTree config = ObjectTree.read()
+    .format(Format.YAML)
+    .withVariable("region", "us-west-2")
+    .from(inputStream)
+    .parse();
+
+// YAML file with variables:
+// server:
+//   endpoint: https://${region}.example.com
+//   dataDir: ${env.HOME}/horizon
+
+String endpoint = config.getTree("server").getValue("endpoint").asString();
+// Result: "https://us-west-2.example.com"
+
+String dataDir = config.getTree("server").getValue("dataDir").asString();
+// Result: "/home/user/horizon" (uses environment variable)
+```
+
+Builtin variable sources:
+- **Environment variables**: `${env.VARIABLE_NAME}`
+- **System properties**: `${sys.property.name}`
+- **Custom variables**: Added via `.withVariable()`
+
+### Writing and Optionals
+Create and save data programmatically:
+```java
+// Build an example data structure
+ObjectTree config = ObjectTree.builder()
+    .put("serverName", "My Server")
+    .put("port", 25565)
+    .build();
+
+// Write as JSON
+try (FileWriter writer = new FileWriter("config.json")) {
+    ObjectTree.write(config)
+        .format(Format.JSON)
+        .to(writer);
+}
+
+// Or get as string
+String yaml = ObjectTree.write(config)
+    .format(Format.YAML)
+    .toString();
+```
+
+All formats are interchangeable, you can read data in one format and write it in another. There is also safer access with optionals:
+```java
+// Get optional values
+Optional<ObjectValue> maybeValue = config.getValueOptional("optional-key");
+Optional<ObjectTree> maybeTree = config.getTreeOptional("optional-section");
+Optional<ObjectArray> maybeArray = config.getArrayOptional("optional-list");
+
+// Chain optionals for safe access
+int port = config.getTreeOptional("server")
+    .flatMap(server -> server.getValueOptional("port"))
+    .map(v -> v.asInt())
+    .orElse(25565);
+```
 
 ## Mixins and ATs
 
 ## Horizon Plugin API
-
-## Conclusion
