@@ -111,14 +111,14 @@ configurations.runtimeElements {
 publishing {
     repositories {
         maven("https://maven.canvasmc.io/snapshots") {
-            name = "CanvasMC_Snapshots"
+            name = "snapshots"
             credentials {
                 username = providers.environmentVariable("PUBLISH_USER").orNull
                 password = providers.environmentVariable("PUBLISH_TOKEN").orNull
             }
         }
         maven("https://maven.canvasmc.io/releases") {
-            name = "CanvasMC_Releases"
+            name = "canvasmc"
             credentials {
                 username = providers.environmentVariable("PUBLISH_USER").orNull
                 password = providers.environmentVariable("PUBLISH_TOKEN").orNull
