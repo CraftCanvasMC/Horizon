@@ -3,4 +3,3 @@
 - api -- serviceloader? classloader access? instrumentation access?
 - outline in readme the classloader hierarchy
 - include mixinextras in horizon internal for logging startup plugins
-- UUID and atomics for ObjectTree preset serializers
