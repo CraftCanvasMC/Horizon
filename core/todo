@@ -12,3 +12,4 @@
 - dependency declaration of horizon plugins, and incompatibilities
     - add ability to depend on JDK versions, ASM versions, Horizon versions, and maybe Mixin versions?
 - add ability to fetch ur own plugin via like HorizonPlugin.findPlugin(String name) or something
+- cleanup relocation
