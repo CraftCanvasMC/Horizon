@@ -93,9 +93,8 @@ abstract class Horizon : Plugin<Project> {
             }
             // repository for Horizon API
             if (ext.injectCanvasRepository.get()) {
-                maven(CANVAS_MAVEN_REPO_URL) {
+                maven(CANVAS_MAVEN_RELEASES_REPO_URL) {
                     name = HORIZON_API_REPO_NAME
-                    content { onlyForConfigurations(HORIZON_API_CONFIG) }
                 }
             }
         }
