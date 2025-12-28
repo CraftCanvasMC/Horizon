@@ -14,8 +14,7 @@ public record ServerProperties(
     File pluginsDirectory,
     File serverJar,
     File cacheLocation,
-    List<File> extraPlugins,
-    String serverName
+    List<File> extraPlugins
 ) {
 
     public static @NonNull ServerProperties load(String[] args) {
@@ -26,7 +25,6 @@ public record ServerProperties(
                 .put("serverJar", "server.jar")
                 .put("cacheLocation", "cache/horizon")
                 .put("extraPlugins", List.of())
-                .put("serverName", "horizon")
                 .build();
 
             // create default if not exist
@@ -51,8 +49,7 @@ public record ServerProperties(
                     tree1.getValue("pluginsDirectory").as(File.class),
                     tree1.getValue("serverJar").as(File.class),
                     tree1.getValue("cacheLocation").as(File.class),
-                    extractExtraPlugins(tree1, args),
-                    tree1.getValue("serverName").asString()
+                    extractExtraPlugins(tree1, args)
                 ))
                 .from(new FileReader(file));
 
