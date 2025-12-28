@@ -99,18 +99,6 @@ java {
     }
 }
 
-extensions.configure<PublishingExtension> {
-    repositories {
-        maven("https://maven.canvasmc.io/releases") {
-            name = "canvasmc"
-            credentials {
-                username = providers.environmentVariable("PUBLISH_USER").orNull
-                password = providers.environmentVariable("PUBLISH_TOKEN").orNull
-            }
-        }
-    }
-}
-
 fun fetchVersion(): Provider<String> {
     // fetch build number from jenkins property, if not present
     // then we can assume it is a local version
@@ -182,5 +170,22 @@ tasks.register<Jar>("createPublicationJar") {
 
     from(infoFile) {
         into("META-INF")
+    }
+}
+
+extensions.configure<PublishingExtension> {
+    repositories {
+        maven("https://maven.canvasmc.io/releases") {
+            name = "canvasmc"
+            credentials {
+                username = providers.environmentVariable("PUBLISH_USER").orNull
+                password = providers.environmentVariable("PUBLISH_TOKEN").orNull
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifact(tasks.named<Jar>("createPublicationJar"))
+        }
     }
 }

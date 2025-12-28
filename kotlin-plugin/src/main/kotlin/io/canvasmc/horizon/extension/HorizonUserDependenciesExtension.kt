@@ -27,8 +27,8 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun horizonApi(
         version: String? = null,
-        group: String = "io.canvasmc",
-        artifactId: String = "horizon",
+        group: String = "io.canvasmc.horizon",
+        artifactId: String = "core",
         horizonApiConfigurationName: String = HORIZON_API_CONFIG,
         configurationAction: Action<ExternalModuleDependency> = nullAction()
     ): ExternalModuleDependency {
@@ -66,8 +66,8 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun horizonApiDependency(
         version: String? = null,
-        group: String = "io.canvasmc",
-        artifactId: String = "horizon",
+        group: String = "io.canvasmc.horizon",
+        artifactId: String = "core",
         configurationAction: Action<ExternalModuleDependency> = nullAction()
     ): ExternalModuleDependency {
         val dep = dependencyFactory.create(buildDependencyString(group, artifactId, version))
