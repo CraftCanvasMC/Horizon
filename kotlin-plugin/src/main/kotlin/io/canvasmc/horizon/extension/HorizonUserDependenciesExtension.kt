@@ -1,0 +1,99 @@
+package io.canvasmc.horizon.extension
+
+import io.canvasmc.horizon.util.constants.HORIZON_API_CONFIG
+import org.gradle.api.Action
+import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.artifacts.dsl.DependencyFactory
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.provider.Provider
+import org.gradle.kotlin.dsl.invoke
+import javax.inject.Inject
+
+@Suppress("unused")
+abstract class HorizonUserDependenciesExtension @Inject constructor(
+    private val dependencies: DependencyHandler,
+    private val dependencyFactory: DependencyFactory,
+) {
+    /**
+     * Adds a dependency on Horizon's API to the project [org.gradle.api.artifacts.Configuration].
+     *
+     * @param version dependency version
+     * @param group dependency group
+     * @param artifactId dependency artifactId
+     * @param horizonApiConfigurationName name of the dev bundle [org.gradle.api.artifacts.Configuration]
+     * @param configurationAction action configuring the dependency
+     * @return dependency
+     */
+    @JvmOverloads
+    fun horizonApi(
+        version: String? = null,
+        group: String = "io.canvasmc",
+        artifactId: String = "horizon",
+        horizonApiConfigurationName: String = HORIZON_API_CONFIG,
+        configurationAction: Action<ExternalModuleDependency> = nullAction()
+    ): ExternalModuleDependency {
+        val dep = dependencyFactory.create(buildDependencyString(group, artifactId, version))
+        configurationAction(dep)
+        dependencies.add(horizonApiConfigurationName, dep)
+        return dep
+    }
+
+    /**
+     * Adds a dependency on Horizon API to the [HORIZON_API_CONFIG] configuration.
+     *
+     * Intended for use with Gradle version catalogs.
+     *
+     * @param version version provider
+     * @param configurationAction action configuring the dependency
+     */
+    @JvmOverloads
+    fun horizonApi(
+        version: Provider<String>,
+        configurationAction: Action<ExternalModuleDependency> = nullAction()
+    ) {
+        dependencies.addProvider(HORIZON_API_CONFIG, version.map { "io.canvasmc:horizon:$it" }, configurationAction)
+    }
+
+    /**
+     * Creates a dependency on Horizon's API without adding it to any configurations.
+     *
+     * @param version dependency version
+     * @param group dependency group
+     * @param artifactId dependency artifactId
+     * @param configurationAction action configuring the dependency
+     * @return dependency
+     */
+    @JvmOverloads
+    fun horizonApiDependency(
+        version: String? = null,
+        group: String = "io.canvasmc",
+        artifactId: String = "horizon",
+        configurationAction: Action<ExternalModuleDependency> = nullAction()
+    ): ExternalModuleDependency {
+        val dep = dependencyFactory.create(buildDependencyString(group, artifactId, version))
+        configurationAction(dep)
+        return dep
+    }
+
+    // taken from paperweight-userdev
+    @Suppress("unchecked_cast")
+    private fun <T : Any> nullAction(): Action<T> = NullAction as Action<T>
+
+    private object NullAction : Action<Any> {
+        override fun execute(t: Any) {}
+    }
+
+    private fun buildDependencyString(
+        group: String,
+        artifactId: String,
+        version: String?
+    ): String {
+        val s = StringBuilder(group)
+            .append(':')
+            .append(artifactId)
+        if (version != null) {
+            s.append(':').append(version)
+        }
+        return s.toString()
+    }
+}

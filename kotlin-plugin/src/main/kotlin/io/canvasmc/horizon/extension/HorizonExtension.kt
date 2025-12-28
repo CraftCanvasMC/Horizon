@@ -18,4 +18,9 @@ abstract class HorizonExtension @Inject constructor(objects: ObjectFactory, proj
      * The repository from which JST should be resolved.
      */
     val jstRepo: Property<String> = objects.property<String>().convention(CANVAS_MAVEN_REPO_URL)
+
+    /**
+     * Whether to automatically inject Canvas's maven repository for easier Horizon API resolution.
+     */
+    val injectCanvasRepository: Property<Boolean> = objects.property<Boolean>().convention(true)
 }

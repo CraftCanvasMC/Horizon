@@ -1,6 +1,7 @@
 package io.canvasmc.horizon
 
 import io.canvasmc.horizon.extension.HorizonExtension
+import io.canvasmc.horizon.extension.HorizonUserDependenciesExtension
 import io.canvasmc.horizon.tasks.ApplyClassAccessTransforms
 import io.canvasmc.horizon.tasks.ApplySourceAccessTransforms
 import io.canvasmc.horizon.tasks.MergeAccessTransformers
@@ -58,26 +59,44 @@ abstract class Horizon : Plugin<Project> {
             }
         }
 
+        val horizonApi = target.configurations.register(HORIZON_API_CONFIG)
+
         // configurations for JiJ
         val includeMixinPlugin = target.configurations.register(INCLUDE_MIXIN_PLUGIN)
         val includePlugin = target.configurations.register(INCLUDE_PLUGIN)
         val includeLibrary = target.configurations.register(INCLUDE_LIBRARY)
 
         target.configurations.named(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME).configure {
-            extendsFrom(includeMixinPlugin.get(), includePlugin.get(), includeLibrary.get())
+            extendsFrom(includeMixinPlugin.get(), includePlugin.get(), includeLibrary.get(), horizonApi.get())
         }
+
+        target.dependencies.extensions.create(
+            HORIZON_NAME,
+            HorizonUserDependenciesExtension::class,
+            target.dependencies,
+            target.dependencyFactory,
+        )
 
         target.afterEvaluate { setup(ext) }
     }
 
     private fun Project.setup(ext: HorizonExtension) {
+        // ensure people specify a dependency on horizon api
+        checkForHorizonApi()
         val userdevTask = tasks.named<UserdevSetupTask>(USERDEV_SETUP_TASK_NAME)
 
-        // repository for JST
         repositories {
+            // repository for JST
             maven(ext.jstRepo) {
                 name = JST_REPO_NAME
                 content { onlyForConfigurations(JST_CONFIG) }
+            }
+            // repository for Horizon API
+            if (ext.injectCanvasRepository.get()) {
+                maven(CANVAS_MAVEN_REPO_URL) {
+                    name = HORIZON_API_REPO_NAME
+                    content { onlyForConfigurations(HORIZON_API_CONFIG) }
+                }
             }
         }
 
@@ -155,12 +174,26 @@ abstract class Horizon : Plugin<Project> {
         runCatching {
             project.pluginManager.apply(Plugins.WEAVER_USERDEV_PLUGIN_ID)
         }
+
         val hasUserdev = project.pluginManager.hasPlugin(Plugins.WEAVER_USERDEV_PLUGIN_ID)
         if (!hasUserdev) {
             val message =
                 "Unable to find the weaver userdev plugin, which is needed in order for Horizon to work properly, " +
                     "due to Horizon depending on a dev bundle being present and hooking into internal weaver functionality.\n" +
                     "Please apply the weaver userdev plugin in order to resolve this issue and use Horizon."
+            throw RuntimeException(message)
+        }
+    }
+
+    private fun Project.checkForHorizonApi() {
+        val hasHorizonApi = runCatching {
+            !configurations.getByName(HORIZON_API_CONFIG).isEmpty
+        }
+
+        if (hasHorizonApi.isFailure || !hasHorizonApi.getOrThrow()) {
+            val message =
+                "Unable to resolve the Horizon API dependency, which is required in order to work with mixins.\n" +
+                    "Specify the Horizon API version in the `horizonApi` configuration, and ensure there is a repository to resolve it from (the Canvas repository is used by default)."
             throw RuntimeException(message)
         }
     }
