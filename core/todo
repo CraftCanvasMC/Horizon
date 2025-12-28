@@ -3,3 +3,4 @@
 - api -- serviceloader? classloader access? instrumentation access?
 - outline in readme the classloader hierarchy
 - include mixinextras in horizon internal for logging startup plugins
+- change JIJ impl in core to match new version of JIJ in kotlin plugin
