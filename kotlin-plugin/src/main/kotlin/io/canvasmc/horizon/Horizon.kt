@@ -82,7 +82,7 @@ abstract class Horizon : Plugin<Project> {
 
     private fun Project.setup(ext: HorizonExtension) {
         // ensure people specify a dependency on horizon api
-        checkForHorizonApi()
+        // checkForHorizonApi()
         val userdevTask = tasks.named<UserdevSetupTask>(USERDEV_SETUP_TASK_NAME)
 
         repositories {
