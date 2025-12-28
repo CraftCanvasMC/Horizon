@@ -124,10 +124,49 @@ publishing {
                 password = providers.environmentVariable("PUBLISH_TOKEN").orNull
             }
         }
-        publications {
-            create<MavenPublication>("mavenJava") {
-                artifactId = "horizon"
+    }
+    publications {
+        withType(MavenPublication::class).configureEach {
+            pom {
+                pomConfig()
             }
         }
+    }
+}
+
+fun MavenPom.pomConfig() {
+    val repoPath = "CraftCanvasMC/Horizon"
+    val repoUrl = "https://github.com/$repoPath"
+
+    name.set("horizon")
+    description.set("Gradle plugin for the CanvasMC Horizon project")
+    url.set(repoUrl)
+    inceptionYear.set("2025")
+
+    licenses {
+        license {
+            name.set("MIT")
+            url.set("$repoUrl/blob/HEAD/LICENSE")
+            distribution.set("repo")
+        }
+    }
+
+    issueManagement {
+        system.set("GitHub")
+        url.set("$repoUrl/issues")
+    }
+
+    developers {
+        developer {
+            id.set("CanvasMC")
+            name.set("Canvas")
+            url.set("https://github.com/CraftCanvasMC")
+        }
+    }
+
+    scm {
+        url.set(repoUrl)
+        connection.set("scm:git:$repoUrl.git")
+        developerConnection.set("scm:git:git@github.com:$repoPath.git")
     }
 }
