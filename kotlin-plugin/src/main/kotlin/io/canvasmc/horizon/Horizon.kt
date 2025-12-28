@@ -47,7 +47,7 @@ abstract class Horizon : Plugin<Project> {
         val ext = target.extensions.create<HorizonExtension>(HORIZON_NAME, target)
 
         target.tasks.register<Delete>("cleanHorizonCache") {
-            group = TASK_GROUP
+            group = HORIZON_NAME
             description = "Delete the project-local horizon setup cache."
             delete(target.rootProject.layout.cache.resolve(HORIZON_NAME))
         }
@@ -59,43 +59,12 @@ abstract class Horizon : Plugin<Project> {
         }
 
         // configurations for JiJ
-        val pluginApi = target.configurations.register(PLUGIN_API) {
-            attributes {
-                attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class, Usage.JAVA_API))
-                attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class, Category.LIBRARY))
-                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
-            }
-        }
+        val includeMixinPlugin = target.configurations.register(INCLUDE_MIXIN_PLUGIN)
+        val includePlugin = target.configurations.register(INCLUDE_PLUGIN)
+        val includeLibrary = target.configurations.register(INCLUDE_LIBRARY)
 
-        val pluginImplementation = target.configurations.register(PLUGIN_IMPLEMENTATION) {
-            isCanBeConsumed = false
-            extendsFrom(pluginApi.get())
-        }
-
-        val pluginCompileOnly = target.configurations.register(PLUGIN_COMPILE_ONLY) {
-            isCanBeConsumed = false
-            extendsFrom(pluginImplementation.get())
-            attributes {
-                attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class, Usage.JAVA_API))
-            }
-        }
-
-        val pluginRuntimeOnly = target.configurations.register(PLUGIN_RUNTIME_ONLY) {
-            isCanBeConsumed = false
-            extendsFrom(pluginImplementation.get())
-            attributes {
-                attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class, Usage.JAVA_RUNTIME))
-                attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class, Category.LIBRARY))
-                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.objects.named(LibraryElements.JAR))
-            }
-        }
-
-        target.configurations.named(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).configure {
-            extendsFrom(pluginRuntimeOnly.get())
-        }
-
-        target.configurations.named(JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME).configure {
-            extendsFrom(pluginCompileOnly.get())
+        target.configurations.named(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME).configure {
+            extendsFrom(includeMixinPlugin, includePlugin, includeLibrary)
         }
 
         target.afterEvaluate { setup(ext) }
@@ -138,14 +107,20 @@ abstract class Horizon : Plugin<Project> {
         }
 
         val horizonSetup by tasks.registering<Task> {
-            group = TASK_GROUP
+            group = HORIZON_NAME
             dependsOn(applyClassAccessTransforms)
         }
 
         // JiJ
         tasks.named<Jar>("jar") {
-            from(configurations.named(PLUGIN_RUNTIME_ONLY)) {
-                into(EMBEDDED_JAR_PATH)
+            from(configurations.named(INCLUDE_MIXIN_PLUGIN)) {
+                into(EMBEDDED_MIXIN_PLUGIN_JAR_PATH)
+            }
+            from(configurations.named(INCLUDE_PLUGIN)) {
+                into(EMBEDDED_PLUGIN_JAR_PATH)
+            }
+            from(configurations.named(INCLUDE_LIBRARY)) {
+                into(EMBEDDED_LIBRARY_JAR_PATH)
             }
         }
 
