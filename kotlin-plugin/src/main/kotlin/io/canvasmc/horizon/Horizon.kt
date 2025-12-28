@@ -64,7 +64,7 @@ abstract class Horizon : Plugin<Project> {
         val includeLibrary = target.configurations.register(INCLUDE_LIBRARY)
 
         target.configurations.named(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME).configure {
-            extendsFrom(includeMixinPlugin, includePlugin, includeLibrary)
+            extendsFrom(includeMixinPlugin.get(), includePlugin.get(), includeLibrary.get())
         }
 
         target.afterEvaluate { setup(ext) }

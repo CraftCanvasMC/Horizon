@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     compileOnly(gradleApi())
-    compileOnly("io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin:2.3.11-SNAPSHOT")
+    compileOnly("io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin:2.3.12-SNAPSHOT")
 }
 
 java {
