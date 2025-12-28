@@ -117,6 +117,7 @@ tasks.register<Jar>("createPublicationJar") {
     archiveFileName.set(version.map { "horizon-build.$it.jar" })
 
     from(zipTree(tasks.shadowJar.flatMap { it.archiveFile }))
+    destinationDirectory.set(rootProject.buildDir.resolve("libs"))
 
     // copy manifest from shade
     manifest {
