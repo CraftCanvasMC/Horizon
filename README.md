@@ -22,8 +22,8 @@ Horizon tries not to break much of anything; however, there are some things it's
 
 ## How To
 ### Installation and Running
-Horizon is simple to install and get running. You can download Horizon from our website, https://canvasmc.io, and from there it is as simple as dropping the downloaded jar file
-into the *same directory* as your server jar. **DO NOT REPLACE THE SERVER JAR!!** Horizon works as an external wrapper for the server jar, so the server jar needs to be present for Horizon
+Horizon is simple to install and get running. You can download Horizon from our website, https://canvasmc.io, and from there it is as simple as dropping the downloaded JAR file
+into the *same directory* as your server JAR. **DO NOT REPLACE THE SERVER JAR!!** Horizon works as an external wrapper for the server JAR, so the server JAR needs to be present for Horizon
 to function correctly. The default file Horizon will search for is `server.jar`, which is configurable wth the `horizon.yml` configuration file:
 
 ```yaml
@@ -34,15 +34,15 @@ extraPlugins: []
 serverName: horizon
 ```
 
-This `horizon.yml` file is intended for more extensive configuration of Horizon, allowing setting the server jar name, since not all servers will have their server jar named `server.jar`, or you can then
-have multiple server jars and swap between the target Horizons they use.
+This `horizon.yml` file is intended for more extensive configuration of Horizon, allowing setting the server JAR name, since not all servers will have their server JAR named `server.jar`, or you can then
+have multiple server JARs and swap between the target Horizons they use.
 - The `cacheLocation` is simply for storing JIJ plugins and such, and is cleared on each boot of Horizon. We don't recommend changing it, but
 you can if there are conflicts or some issue arises, and you need to change the location.
 - The option `extraPlugins` allows for adding additional plugins to the Horizon classpath to be loaded. Horizon also reads from the `--add-plugin` JVM argument that is passed to the server
 - The `serverName` option is an optional override for the server mod name, as it gets overridden in Horizon automatically by its internal mixin inject
 - The `pluginsDirectory` option should always point to your plugins directory for both Paper plugins and Horizon plugins; however, you can separate them if you need or want to.
 
-Once all options are configured to your liking, you can boot the Horizon jar as usual, and your server will run with Horizon as its bootstrapper!
+Once all options are configured to your liking, you can boot the Horizon JAR as usual, and your server will run with Horizon as its bootstrapper!
 
 > [!NOTE]
 > You can disable internal mixin injections by using flags like `-DHorizon.disable.mixin.{mixin package location}`
@@ -58,7 +58,7 @@ horizon:
     - "widener.at"
   load-datapack-entry: true
 ```
-Horizon reads from the `plugin.yml` or `paper-plugin.yml` from the plugin jar entries to build the `ObjectTree` representing your plugin configuration.
+Horizon reads from the `plugin.yml` or `paper-plugin.yml` from the plugin JAR entries to build the `ObjectTree` representing your plugin configuration.
 Each option in the `horizon` field is optional; the only required field is `horizon` for your plugin to be marked and loaded by Horizon.
 - `mixins` - This is a `String[]` option that defines the SpongePowered mixin configuration files in your plugin artifact. Like if it were `test.mixins.json`, the entry should be in the root of your resources, named `test.mixins.json`
 - `wideners` - This is the same as the `mixins` field, but defines Forge access transformers for your plugin. The team initially wanted to use Fabric wideners, but to keep consistency with Paper's
@@ -82,11 +82,11 @@ Another way is by checking the `/plugins` command, which is replaced with the Ho
 
 You can learn about how to use our Gradle plugin to assist in Horizon plugin development [below](#gradle-plugin), along with [JIJ](#jijjar-in-jar). It is also recommended to familiarize yourself with the new classloader hierarchy in the [New Classloading Tree](#new-classloading-tree) section
 
-### JIJ(Jar In jar)
-Another capability Horizon plugins have is JIJ(Jar In Jar). JIJ is a feature that allows Horizon plugins to attach Horizon plugins, Paper plugins, or external libraries.
+### JIJ(JAR In JAR)
+Another capability Horizon plugins have is JIJ(JAR In JAR). JIJ is a feature that allows Horizon plugins to attach Horizon plugins, Paper plugins, or external libraries.
 All JIJ plugins will be loaded from the `horizon.yml:cacheLocation` configured location, which is fetchable via Horizons API, which is documented [below](#horizon-plugin-api).
 All Paper plugins will be loaded as usual, and their plugin data folders will remain in the same place. Horizon plugins will function exactly the same, and will load
-mixins like normal. External libraries will be appended to the game classpath with Ember, as if they were libraries added by the server jar, and will be accessible after Horizon launches the game.
+mixins like normal. External libraries will be appended to the game classpath with Ember, as if they were libraries added by the server JAR, and will be accessible after Horizon launches the game.
 
 ### Gradle Plugin
 -- note: Gradle plugin, need Toffik for docs on that
@@ -102,7 +102,7 @@ is a `URLClassLoader` instance that allows modification of the URLs added to it 
 plugin in their own classloader, are linked to the Ember classloader. This **does** mean that Horizon plugins **cannot** invoke code in non-Horizon plugins.
 
 One way to get around this is by using an abstraction layer and a 2nd plugin. You could have a Paper plugin and a Horizon plugin loaded(using JIJ too for more compact file managing)
-and create interfaces in the Horizon plugin that the Paper plugin implements, of which the Paper plugin will then access code in other non-Horizon plugin jars.
+and create interfaces in the Horizon plugin that the Paper plugin implements, of which the Paper plugin will then access code in other non-Horizon plugin JARs.
 By implementing a system like this, you could create a Horizon plugin that can communicate with other Paper plugins. Do note, though, that all Horizon plugins are visible to the Paper
 plugin classloaders.
 
