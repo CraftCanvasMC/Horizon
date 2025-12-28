@@ -154,6 +154,7 @@ plugins {
 }
 
 dependencies {
+    horizonApi("1.0.0") // <- required for accesing the Horizon API in dev.
     paperDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 
@@ -170,7 +171,6 @@ dependencies by using the appropriate configurations, just like this:
 
 ```kotlin
 dependencies {
-    implementation("io.canvasmc:horizon:1.0.0") // <- required for accesing the Horizon API in dev.
     includeMixinPlugin("io.canvasmc:nice-horizon-plugin:1.0.0")
     includePlugin("io.canvasmc:nice-plugin:1.0.0")
     includeLibrary("io.canvasmc:nice-library:1.0.0")
