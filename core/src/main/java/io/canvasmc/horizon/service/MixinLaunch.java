@@ -41,8 +41,7 @@ public final class MixinLaunch {
             "org\\.spongepowered\\.asm\\." + "|" +
             "com\\.llamalad7\\.mixinextras\\." + "|" +
             "org\\.slf4j\\." + "|" +
-            "org\\.apache\\.logging\\.log4j\\." + "|" +
-            "net\\.fabricmc\\.accesswidener\\." +
+            "org\\.apache\\.logging\\.log4j\\." +
             ").*"
     );
     public static final String[] TRANSFORMATION_EXCLUDED_RESOURCES = {

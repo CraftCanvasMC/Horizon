@@ -1,4 +1,3 @@
-import org.gradle.kotlin.dsl.maven
 import java.time.LocalDateTime
 
 plugins {
@@ -42,16 +41,15 @@ allprojects {
             implementation("org.tinylog:tinylog-impl:2.7.0")
 
             // asm
-            include("org.ow2.asm:asm:9.9")
-            include("org.ow2.asm:asm-analysis:9.9")
-            include("org.ow2.asm:asm-commons:9.9")
-            include("org.ow2.asm:asm-tree:9.9")
-            include("org.ow2.asm:asm-util:9.9")
+            include("org.ow2.asm:asm:9.9.1")
+            include("org.ow2.asm:asm-analysis:9.9.1")
+            include("org.ow2.asm:asm-commons:9.9.1")
+            include("org.ow2.asm:asm-tree:9.9.1")
+            include("org.ow2.asm:asm-util:9.9.1")
 
             // mixin libraries
             implementation("net.fabricmc:sponge-mixin:0.17.0+mixin.0.8.7")
             implementation("io.github.llamalad7:mixinextras-common:0.5.0")
-            implementation("net.fabricmc:access-widener:2.1.0")
 
             // paperclip patching
             include("io.sigpipe:jbsdiff:1.0")

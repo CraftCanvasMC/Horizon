@@ -4,3 +4,5 @@
 - outline in readme the classloader hierarchy
 - include mixinextras in horizon internal for logging startup plugins
 - change JIJ impl in core to match new version of JIJ in kotlin plugin
+- rewrite plugins command override to be more version compatible
+- document which Minecraft versions work, and try and fix as many as possible
