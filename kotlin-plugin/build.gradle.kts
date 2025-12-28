@@ -1,6 +1,6 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import net.kyori.blossom.BlossomExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("net.kyori.blossom") version "2.2.0"
@@ -10,7 +10,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
 }
 
-val USERDEV_VERSION = "2.3.12-SNAPSHOT"
+val userdevVersion = "2.3.12-SNAPSHOT"
 
 gradlePlugin {
     plugins.register("horizon") {
@@ -29,7 +29,7 @@ repositories {
 
 dependencies {
     compileOnly(gradleApi())
-    compileOnly("io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin:$USERDEV_VERSION")
+    compileOnly("io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin:$userdevVersion")
 }
 
 java {

@@ -5,8 +5,8 @@ plugins {
     id("io.canvasmc.weaver.userdev")
 }
 
-val PAPER_MAVEN_PUBLIC_URL = "https://repo.papermc.io/repository/maven-public/"
-val JDK_VERSION = 21
+val paperMavenPublicUrl = "https://repo.papermc.io/repository/maven-public/"
+val jdkVersion = 21
 
 // configuration that shades and includes as an implementation for the core project
 val include by configurations.creating {
@@ -15,7 +15,7 @@ val include by configurations.creating {
 
 repositories {
     mavenCentral()
-    maven(PAPER_MAVEN_PUBLIC_URL)
+    maven(paperMavenPublicUrl)
 }
 
 dependencies {
@@ -95,7 +95,7 @@ tasks.shadowJar {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(JDK_VERSION))
+        languageVersion.set(JavaLanguageVersion.of(jdkVersion))
     }
 }
 
