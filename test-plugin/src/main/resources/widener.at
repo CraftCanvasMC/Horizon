@@ -1,9 +1,4 @@
 public net.minecraft.server.MinecraftServer hasStopped
-protected-f com.test.Foo bar(I)V
-default+f com.example.ClassName
-private com.x.MyClass fieldName
-# gay
-# private com.dddd.Test ajk
 
 public net.minecraft.server.level.ServerLevel emptyTime
 public net.minecraft.server.level.ServerLevel lastMidTickFailure

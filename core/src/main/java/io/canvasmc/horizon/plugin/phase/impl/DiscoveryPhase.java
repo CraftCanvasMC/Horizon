@@ -1,5 +1,6 @@
 package io.canvasmc.horizon.plugin.phase.impl;
 
+import com.google.common.collect.Sets;
 import io.canvasmc.horizon.Horizon;
 import io.canvasmc.horizon.plugin.LoadContext;
 import io.canvasmc.horizon.plugin.data.CandidateMetadata;
@@ -21,7 +22,10 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -29,6 +33,9 @@ import java.util.stream.Collectors;
 import static io.canvasmc.horizon.plugin.EntrypointLoader.LOGGER;
 
 public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
+    public static final String JIJ_PATH_HORIZON = "META-INF/jars/horizon/";
+    public static final String JIJ_PATH_PAPER = "META-INF/jars/plugin/";
+    public static final String JIJ_PATH_LIB = "META-INF/jars/libs/";
 
     @Override
     public Set<PluginCandidate> execute(Void input, @NonNull LoadContext context) throws PhaseException {
@@ -82,36 +89,40 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                     .format(Format.YAML).from(in);
 
                 if (!yamlTree.containsKey("horizon")) {
-                    LOGGER.debug("Not a Horizon plugin: {}", jarFile.getName());
                     return Optional.empty();
                 }
 
                 CandidateMetadata metadata = parseMetadata(yamlTree);
                 // TODO - build plugin tree structure?
 
-                LOGGER.debug("Searching for nested entries");
+                PluginCandidate.NestedData nestedData = new PluginCandidate.NestedData(
+                    Sets.newHashSet(),
+                    Sets.newHashSet(),
+                    Sets.newHashSet()
+                );
+                // Note: this loads recursively for nested horizon entries
+                locateAndExtractJIJ(jar, (nested) -> {
+                    switch (nested.type()) {
+                        case PLUGIN -> {
+                            nestedData.serverPluginEntries().add(nested.obj());
+                            break;
+                        }
+                        case LIBRARY -> {
+                            nestedData.libraryEntries().add(nested.obj());
+                            break;
+                        }
+                        case HORIZON -> {
+                            scanJarFile(nested.obj().ioFile()).ifPresent((candidate) -> {
+                                // the IO file was a horizon jar
+                                // Note: nested entries of child will be processed in the scanJarFile method
+                                nestedData.horizonEntries().add(candidate);
+                            });
+                            break;
+                        }
+                    }
+                });
 
-                List<FileJar> unpacked = new ArrayList<>();
-                searchAndExtractNested(jar, unpacked);
-
-                Set<PluginCandidate> nestedPluginCandidates = new HashSet<>();
-                List<FileJar> nestedPlugins = new ArrayList<>();
-                List<FileJar> nestedLibraries = new ArrayList<>();
-                for (FileJar fileJar : unpacked) {
-                    scanJarFile(fileJar.ioFile()).ifPresentOrElse(nestedPluginCandidates::add, () -> {
-                        if (fileJar.jarFile().getJarEntry("paper-plugin.yml") != null ||
-                            fileJar.jarFile().getJarEntry("plugin.yml") != null) {
-                            // is plugin, not horizon though
-                            LOGGER.debug("Found nested Paper plugin {}", fileJar.ioFile().getName());
-                            nestedPlugins.add(fileJar);
-                        } else nestedLibraries.add(fileJar);
-                    });
-                }
-
-                LOGGER.debug("Found Horizon plugin: {} v{}", metadata.name(), metadata.version());
-                return Optional.of(new PluginCandidate(new FileJar(jarFile, jar), metadata, new PluginCandidate.NestedData(
-                    nestedPluginCandidates, nestedPlugins, nestedLibraries
-                )));
+                return Optional.of(new PluginCandidate(new FileJar(jarFile, jar), metadata, nestedData));
             }
         } catch (Exception e) {
             LOGGER.error(e, "Error scanning jar file: {}", jarFile.getName());
@@ -119,46 +130,67 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
         }
     }
 
-    private void searchAndExtractNested(@NonNull JarFile jar, List<FileJar> nested) {
-        jar.stream().filter(e -> e.getName().startsWith(Util.JIJ_PATH) && e.getName().endsWith(Util.JAR_SUFFIX)).forEachOrdered((entry) -> {
-            // this is in META-INF/jars, so we need to extract and such
-            // first, extract to cache dir
-            File cacheDir = Horizon.INSTANCE.getProperties().cacheLocation();
-            String fileName = entry.getName().substring(Util.JIJ_PATH.length());
-            File extractedFile = new File(cacheDir, fileName);
+    private void locateAndExtractJIJ(@NonNull JarFile jar, Consumer<NestedEntry> processor) {
+        jar.stream()
+            .filter(e -> e.getName().endsWith(Util.JAR_SUFFIX))
+            .forEachOrdered(entry -> {
 
-            // defend against path traversal attempts
-            try {
-                String canonicalCachePath = cacheDir.getCanonicalPath();
-                String canonicalFilePath = extractedFile.getCanonicalPath();
-                if (!canonicalFilePath.startsWith(canonicalCachePath + File.separator)) {
-                    LOGGER.error("Path traversal attempt detected: {}", entry.getName());
+                final NestedEntry.Type type;
+                final String n;
+
+                if (entry.getName().startsWith(JIJ_PATH_HORIZON)) {
+                    type = NestedEntry.Type.HORIZON;
+                    n = JIJ_PATH_HORIZON;
+                } else if (entry.getName().startsWith(JIJ_PATH_PAPER)) {
+                    type = NestedEntry.Type.PLUGIN;
+                    n = JIJ_PATH_PAPER;
+                } else if (entry.getName().startsWith(JIJ_PATH_LIB)) {
+                    type = NestedEntry.Type.LIBRARY;
+                    n = JIJ_PATH_LIB;
+                } else {
                     return;
                 }
-            } catch (IOException e) {
-                LOGGER.error("Failed to validate path for: {}", entry.getName(), e);
-                return;
-            }
 
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                extractedFile.createNewFile();
+                File cacheDir = Horizon.INSTANCE.getProperties().cacheLocation();
+                String fileName = entry.getName().substring(n.length());
+                File extractedFile = new File(cacheDir, fileName);
 
-                try (InputStream in = jar.getInputStream(entry);
-                     FileOutputStream out = new FileOutputStream(extractedFile)) {
-                    byte[] buffer = new byte[8192];
-                    int bytesRead;
-                    while ((bytesRead = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, bytesRead);
+                // Path traversal defense
+                try {
+                    String canonicalCachePath = cacheDir.getCanonicalPath();
+                    String canonicalFilePath = extractedFile.getCanonicalPath();
+                    if (!canonicalFilePath.startsWith(canonicalCachePath + File.separator)) {
+                        LOGGER.error("Path traversal attempt detected: {}", entry.getName());
+                        return;
                     }
+                } catch (IOException e) {
+                    LOGGER.error("Failed to validate path for: {}", entry.getName(), e);
+                    return;
                 }
 
-                LOGGER.debug("Loaded extracted entry {}", extractedFile.getName());
-                nested.add(new FileJar(extractedFile, new JarFile(extractedFile)));
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to extract nested JAR: " + entry.getName(), e);
-            }
-        });
+                try {
+                    //noinspection ResultOfMethodCallIgnored
+                    extractedFile.getParentFile().mkdirs();
+                    extractedFile.createNewFile();
+
+                    try (InputStream in = jar.getInputStream(entry);
+                         FileOutputStream out = new FileOutputStream(extractedFile)) {
+
+                        byte[] buffer = new byte[8192];
+                        int read;
+                        while ((read = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, read);
+                        }
+                    }
+
+                    FileJar fileJar = new FileJar(extractedFile, new JarFile(extractedFile));
+                    processor.accept(new NestedEntry(type, fileJar));
+
+                    LOGGER.debug("Loaded extracted entry {}", extractedFile.getName());
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to extract nested JAR: " + entry.getName(), e);
+                }
+            });
     }
 
     private @NonNull CandidateMetadata parseMetadata(@NonNull ObjectTree data) {
@@ -171,5 +203,13 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
     @Override
     public String getName() {
         return "Discovery";
+    }
+
+    private record NestedEntry(Type type, FileJar obj) {
+        public enum Type {
+            HORIZON,
+            PLUGIN,
+            LIBRARY
+        }
     }
 }

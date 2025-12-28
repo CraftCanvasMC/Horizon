@@ -18,20 +18,30 @@ public class ValidationPhase implements Phase<Set<PluginCandidate>, Set<PluginCa
         Set<PluginCandidate> validated = new HashSet<>();
 
         for (PluginCandidate candidate : input) {
-            if (validateCandidate(candidate)) {
-                validated.add(candidate);
-                // rebuild nested with filtered validated entries
-                Set<PluginCandidate> newNested = execute(candidate.nestedData().nestedHPlugins(), context);
-                candidate.nestedData().nestedHPlugins().removeIf((e) -> true);
-                candidate.nestedData().nestedHPlugins().addAll(newNested);
-            } else {
+            if (!validateCandidate(candidate)) {
                 LOGGER.warn("Plugin {} failed validation", candidate.metadata().name());
+                continue;
             }
+
+            rebuildNested(candidate, context);
+            validated.add(candidate);
         }
 
         LOGGER.debug("Validated {}/{} successful plugins", validated.size(), input.size());
         return validated;
     }
+
+    private void rebuildNested(@NonNull PluginCandidate candidate, LoadContext context) throws PhaseException {
+        Set<PluginCandidate> nested = candidate.nestedData().horizonEntries();
+        if (nested.isEmpty()) {
+            return;
+        }
+
+        Set<PluginCandidate> validatedNested = execute(nested, context);
+        nested.clear();
+        nested.addAll(validatedNested);
+    }
+
 
     private boolean validateCandidate(@NonNull PluginCandidate candidate) {
         if (candidate.metadata().name() == null || candidate.metadata().name().trim().isEmpty()) {

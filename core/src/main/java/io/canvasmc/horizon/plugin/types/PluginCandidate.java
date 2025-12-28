@@ -3,7 +3,6 @@ package io.canvasmc.horizon.plugin.types;
 import io.canvasmc.horizon.plugin.data.CandidateMetadata;
 import io.canvasmc.horizon.util.FileJar;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -14,7 +13,7 @@ import java.util.Set;
  * @param nestedData the nested jars in this candidate
  */
 public record PluginCandidate(FileJar fileJar, CandidateMetadata metadata, NestedData nestedData) {
-    public record NestedData(Set<PluginCandidate> nestedHPlugins, List<FileJar> nestedSPlugins,
-                             List<FileJar> nestedLibraries) {
+    public record NestedData(Set<PluginCandidate> horizonEntries, Set<FileJar> serverPluginEntries,
+                             Set<FileJar> libraryEntries) {
     }
 }

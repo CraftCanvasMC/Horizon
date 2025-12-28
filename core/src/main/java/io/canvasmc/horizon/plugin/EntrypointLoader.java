@@ -146,9 +146,9 @@ public class EntrypointLoader {
     }
 
     private void appendNested(StringBuilder builder, HorizonPlugin.@NonNull NestedData nestedData, String prefix) {
-        List<HorizonPlugin> nestedPlugins = nestedData.nestedHPlugins();
-        List<FileJar> nestedSPlugins = nestedData.nestedSPlugins();
-        List<FileJar> nestedLibraries = nestedData.nestedLibraries();
+        List<HorizonPlugin> nestedPlugins = nestedData.horizonEntries();
+        List<FileJar> nestedSPlugins = nestedData.serverPluginEntries();
+        List<FileJar> nestedLibraries = nestedData.libraryEntries();
 
         int totalChildren = nestedPlugins.size() + nestedSPlugins.size() + nestedLibraries.size();
         int index = 0;
@@ -163,7 +163,7 @@ public class EntrypointLoader {
                 .append("\n");
 
             HorizonPlugin.NestedData childNested = nestedPlugin.nestedData();
-            if (!childNested.nestedHPlugins().isEmpty() || !childNested.nestedSPlugins().isEmpty() || !childNested.nestedLibraries().isEmpty()) {
+            if (!childNested.horizonEntries().isEmpty() || !childNested.serverPluginEntries().isEmpty() || !childNested.libraryEntries().isEmpty()) {
                 String childPrefix = prefix + (last ? "    " : "|   ");
                 appendNested(builder, childNested, childPrefix);
             }

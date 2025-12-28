@@ -148,7 +148,7 @@ public class Horizon {
         while (!queue.isEmpty()) {
             HorizonPlugin plugin = queue.poll();
             allPlugins.add(plugin);
-            queue.addAll(plugin.nestedData().nestedHPlugins());
+            queue.addAll(plugin.nestedData().horizonEntries());
         }
 
         return allPlugins;
@@ -181,7 +181,7 @@ public class Horizon {
             initalClasspath.add(plugin.file().ioFile().toPath());
 
             // add all nested libraries like we are unpacking them as normal
-            for (FileJar nestedLibrary : plugin.nestedData().nestedLibraries()) {
+            for (FileJar nestedLibrary : plugin.nestedData().libraryEntries()) {
                 try {
                     LOGGER.info("Adding nested library jar '{}'", nestedLibrary.ioFile().getName());
                     Path asPath = Path.of(nestedLibrary.ioFile().toURI());

@@ -25,9 +25,12 @@ public class BuilderPhase implements Phase<Set<PluginCandidate>, List<HorizonPlu
                 if (horizonMetadata == null) {
                     throw new PhaseException("Couldn't deserialize horizon metadata for candidate '" + candidate.metadata().name() + "'");
                 }
-                List<HorizonPlugin> newNestedHPlugins = execute(candidate.nestedData().nestedHPlugins(), context);
-                completed.add(new HorizonPlugin(horizonMetadata.name(), candidate.fileJar(), horizonMetadata,
-                    new HorizonPlugin.NestedData(newNestedHPlugins, candidate.nestedData().nestedSPlugins(), candidate.nestedData().nestedLibraries())));
+                HorizonPlugin.NestedData newNestedData = new HorizonPlugin.NestedData(
+                    execute(candidate.nestedData().horizonEntries(), context),
+                    candidate.nestedData().serverPluginEntries().stream().toList(),
+                    candidate.nestedData().libraryEntries().stream().toList()
+                );
+                completed.add(new HorizonPlugin(horizonMetadata.name(), candidate.fileJar(), horizonMetadata, newNestedData));
             }
         } catch (Throwable thrown) {
             throw new PhaseException("Couldn't execute builder phase", thrown);

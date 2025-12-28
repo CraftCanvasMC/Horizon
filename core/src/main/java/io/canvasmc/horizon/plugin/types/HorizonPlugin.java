@@ -70,17 +70,24 @@ public final class HorizonPlugin {
         return Objects.equals(this.identifier, that.identifier);
     }
 
-    public record NestedData(List<HorizonPlugin> nestedHPlugins, List<FileJar> nestedSPlugins,
-                             List<FileJar> nestedLibraries) {
-        public NestedData(List<HorizonPlugin> nestedHPlugins, List<FileJar> nestedSPlugins, List<FileJar> nestedLibraries) {
-            this.nestedHPlugins = ImmutableList.copyOf(nestedHPlugins);
-            this.nestedSPlugins = ImmutableList.copyOf(nestedSPlugins);
-            this.nestedLibraries = ImmutableList.copyOf(nestedLibraries);
+    /**
+     * A bundle of nested horizon plugins, server plugins, and libraries
+     *
+     * @param horizonEntries      horizon plugins
+     * @param serverPluginEntries server plugins
+     * @param libraryEntries      library plugins
+     */
+    public record NestedData(List<HorizonPlugin> horizonEntries, List<FileJar> serverPluginEntries,
+                             List<FileJar> libraryEntries) {
+        public NestedData(List<HorizonPlugin> horizonEntries, List<FileJar> serverPluginEntries, List<FileJar> libraryEntries) {
+            this.horizonEntries = ImmutableList.copyOf(horizonEntries);
+            this.serverPluginEntries = ImmutableList.copyOf(serverPluginEntries);
+            this.libraryEntries = ImmutableList.copyOf(libraryEntries);
         }
 
         public @NonNull List<FileJar> allPlugins() {
-            List<FileJar> paper = new ArrayList<>(nestedSPlugins);
-            nestedHPlugins.stream()
+            List<FileJar> paper = new ArrayList<>(serverPluginEntries);
+            horizonEntries.stream()
                 .map(HorizonPlugin::file)
                 .forEach(paper::add);
             return paper;
