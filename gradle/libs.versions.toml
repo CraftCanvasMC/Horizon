@@ -12,7 +12,6 @@ shadow = "9.2.2"
 userdev = "2.3.12-SNAPSHOT"
 jspecify = "1.0.0"
 
-
 [libraries]
 jbsdiff = { module = "io.sigpipe:jbsdiff", version = "1.0" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
