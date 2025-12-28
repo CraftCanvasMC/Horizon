@@ -89,7 +89,7 @@ All Paper plugins will be loaded as usual, and their plugin data folders will re
 mixins like normal. External libraries will be appended to the game classpath with Ember, as if they were libraries added by the server JAR, and will be accessible after Horizon launches the game.
 
 ### Gradle Plugin
-In order to start developing plugins for Horizon, it is required that you use the `Horizon` gradle plugin in your build scripts together with the `weaver-userdev` plugin.
+In order to start developing plugins for Horizon, it is required that you use the `horizon` gradle plugin in your build scripts together with the `weaver-userdev` plugin.
 The `horizon` plugin automatically applies your ATs to the server JAR your plugin is going to be developed against, allowing you to compile against it and access the server's internals,
 and the `userdev` plugin allows it to achieve all that.
 
