@@ -89,8 +89,47 @@ All Paper plugins will be loaded as usual, and their plugin data folders will re
 mixins like normal. External libraries will be appended to the game classpath with Ember, as if they were libraries added by the server JAR, and will be accessible after Horizon launches the game.
 
 ### Gradle Plugin
--- note: Gradle plugin, need Toffik for docs on that
--- note: mention JIJ
+In order to start developing plugins for horizon, it is required that you use the `Horizon` gradle plugin in your build scripts together with the `weaver-userdev` plugin.
+The `horizon` plugin automatically applies your ATs to the server JAR your plugin is going to be developed against, allowing you to compile against it and access the server's internals,
+and the `userdev` plugin allows it to do all that.
+
+Below is shown an example `build.gradle.kts` configuration structure to give you an idea on how to start developing!
+
+```kotlin
+plugins {
+    id("io.canvasmc.weaver.userdev") version "xxx"
+    id("io.canvasmc.horizon") version "xxx"
+}
+
+dependencies {
+    canvasDevBundle("1.21.11-R0.1-SNAPSHOT")
+}
+
+horizon {
+    accessTransformerFiles.from(
+        file("build-data/first.at"),
+        file("build-data/second.at"),
+    )
+}
+```
+
+In addition, using the `shadow` gradle plugin is *unsupported* and you should instead opt-in to JiJ'ing your dependencies by using the appropriate configurations, just like this:
+```kotlin
+dependencies {
+    implementation("io.canvasmc:horizon:1.0.0") // <- required for accesing the horizon api in dev.
+    includeMixinPlugin("io.canvasmc:nice-horizon-plugin:1.0.0")
+    includePlugin("io.canvasmc:nice-plugin:1.0.0")
+    includeLibrary("io.canvasmc:nice-library:1.0.0")
+}
+```
+The above configurations define in what directory the dependency is going to be placed in the JAR file structure, their names are pretty intuitive in themselves,
+however each one is described in detail below anyway.
+
+For a Horizon-based plugin dependency, the appropriate configuration is `includeMixinPlugin` which puts it under `META-INF/jars/horizon`.
+
+For a normal plugin dependency, aka not-horizon, you should use the `includePlugin` configuration, placing it under `META-INF/jars/plugin`.
+
+And finally, for a library, the configuration to use is `includeLibrary`, which places it under `META-INF/jars/libs`.
 
 ## New Classloading Tree
 For obvious reasons, the classloading hierarchy tree has changed. A diagram is shown below with a general visual example of what this looks like
