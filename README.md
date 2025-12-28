@@ -580,7 +580,6 @@ This is an example of a SpongePowered Mixin configuration file:
 {
   "required": true,
   "package": "io.example.myplugin.mixin",
-  "compatibilityLevel": "JAVA_17",
   "mixins": [
     "ExampleMixin",
     "AnotherExampleMixin"
