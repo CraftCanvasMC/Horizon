@@ -10,6 +10,6 @@ public class MinecraftServerMixin {
 
     @ModifyReturnValue(method = "getServerModName", at = @At("RETURN"))
     public String horizon$changeName(String original) {
-        return "(horizon) " +  original;
+        return "(horizon) " + original;
     }
 }

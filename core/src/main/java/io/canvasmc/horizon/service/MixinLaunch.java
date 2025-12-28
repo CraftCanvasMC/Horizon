@@ -74,6 +74,10 @@ public final class MixinLaunch {
         new MixinLaunch().run(context);
     }
 
+    public LaunchContext getLaunchContext() {
+        return CONTEXT;
+    }
+
     private void run(@NonNull LaunchContext context) {
         this.transformer = new ClassTransformer();
 

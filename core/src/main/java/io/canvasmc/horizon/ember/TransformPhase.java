@@ -6,6 +6,7 @@ package io.canvasmc.horizon.ember;
  * @author vectrix
  * @since 1.0.0
  */
+// TODO - rewrite
 public enum TransformPhase {
     /**
      * The transformation phase that is used when the class is loaded.

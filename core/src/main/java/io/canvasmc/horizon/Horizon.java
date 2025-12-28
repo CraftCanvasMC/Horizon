@@ -1,8 +1,6 @@
 package io.canvasmc.horizon;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.canvasmc.horizon.instrument.JvmAgent;
 import io.canvasmc.horizon.instrument.patch.ServerPatcherEntrypoint;
 import io.canvasmc.horizon.plugin.EntrypointLoader;
@@ -11,6 +9,8 @@ import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.MixinLaunch;
 import io.canvasmc.horizon.util.FileJar;
 import io.canvasmc.horizon.util.PaperclipVersion;
+import io.canvasmc.horizon.util.tree.Format;
+import io.canvasmc.horizon.util.tree.ObjectTree;
 import org.jspecify.annotations.NonNull;
 import org.objectweb.asm.Opcodes;
 import org.tinylog.Logger;
@@ -35,16 +35,9 @@ import java.util.jar.JarFile;
  * that runs the full startup and bootstrap process
  */
 public class Horizon {
-    // TODO - nuke GSON, replace with ObjectTree
-    public static final Gson GSON = new GsonBuilder()
-        .setPrettyPrinting()
-        .registerTypeAdapter(PaperclipVersion.class, new PaperclipVersion.PaperclipVersionDeserializer())
-        .registerTypeAdapter(PaperclipVersion.class, new PaperclipVersion.PaperclipVersionSerializer())
-        .create();
     public static final int ASM_VERSION = Opcodes.ASM9;
-    public static HorizonPlugin INTERNAL_PLUGIN;
-
     public static final TaggedLogger LOGGER = Logger.tag("main");
+    public static HorizonPlugin INTERNAL_PLUGIN;
     public static Horizon INSTANCE;
 
     private @NonNull
@@ -142,11 +135,9 @@ public class Horizon {
 
     /**
      * Get all the plugins in the Horizon server, including nested Horizon plugins
-     * <p>
-     * <b>Note:</b> if plugins aren't loaded yet, the list will be empty
-     * </p>
      *
      * @return all plugins
+     * @apiNote if plugins aren't loaded yet, the list will be empty
      */
     public List<HorizonPlugin> getPlugins() {
         List<HorizonPlugin> allPlugins = new ArrayList<>();
@@ -240,11 +231,14 @@ public class Horizon {
 
             try (final JarFile jarFile = new JarFile(file)) {
                 // now we need to find where the server jar is located
-                // build version info first=
-                this.paperclipVersion = Horizon.GSON.fromJson(
-                    new InputStreamReader(jarFile.getInputStream(jarFile.getJarEntry("version.json"))),
-                    PaperclipVersion.class
-                );
+                // build version info first
+                ObjectTree versionTree = ObjectTree.read()
+                    .format(Format.JSON)
+                    .registerDeserializer(PaperclipVersion.class, new PaperclipVersion.PaperclipVersionDeserializer())
+                    .registerDeserializer(PaperclipVersion.PackVersion.class, new PaperclipVersion.PackVersionDeserializer())
+                    .from(new InputStreamReader(jarFile.getInputStream(jarFile.getJarEntry("version.json"))));
+
+                this.paperclipVersion = versionTree.as(PaperclipVersion.class);
 
                 try {
                     JvmAgent.addJar(Horizon.INSTANCE.getPaperclipJar().ioFile().toPath());

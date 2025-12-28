@@ -1,5 +1,6 @@
 package io.canvasmc.horizon.plugin.types;
 
+import com.google.common.collect.ImmutableList;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
 import io.canvasmc.horizon.util.FileJar;
 import org.jspecify.annotations.NonNull;
@@ -71,6 +72,12 @@ public final class HorizonPlugin {
 
     public record NestedData(List<HorizonPlugin> nestedHPlugins, List<FileJar> nestedSPlugins,
                              List<FileJar> nestedLibraries) {
+        public NestedData(List<HorizonPlugin> nestedHPlugins, List<FileJar> nestedSPlugins, List<FileJar> nestedLibraries) {
+            this.nestedHPlugins = ImmutableList.copyOf(nestedHPlugins);
+            this.nestedSPlugins = ImmutableList.copyOf(nestedSPlugins);
+            this.nestedLibraries = ImmutableList.copyOf(nestedLibraries);
+        }
+
         public @NonNull List<FileJar> allPlugins() {
             List<FileJar> paper = new ArrayList<>(nestedSPlugins);
             nestedHPlugins.stream()

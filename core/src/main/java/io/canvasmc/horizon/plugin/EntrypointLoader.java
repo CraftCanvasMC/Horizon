@@ -47,6 +47,11 @@ public class EntrypointLoader {
     // used for 'mixin.initfix' to store the current plugin provider
     public static AtomicReference<Object> ACTIVE_PLUGIN_PROVIDER_REF = new AtomicReference<>();
     private final Map<String, HorizonPlugin> containersByConfig = new HashMap<>();
+    private boolean init = false;
+    private boolean completed = false;
+
+    private EntrypointLoader() {
+    }
 
     @SuppressWarnings("unchecked")
     private static <I, O> O executePhase(@NonNull Phase<I, O> phase, Object input, LoadContext context)
@@ -70,7 +75,26 @@ public class EntrypointLoader {
             .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_NAME);
     }
 
+    private static @NonNull LoadContext getLoadContext() {
+        File pluginsDirectory = Horizon.INSTANCE.getProperties().pluginsDirectory();
+        File cacheDirectory = Horizon.INSTANCE.getProperties().cacheLocation();
+        if (!pluginsDirectory.isDirectory()) {
+            throw new IllegalStateException(
+                "Plugins folder '" + pluginsDirectory.getPath() + "' is not a directory!"
+            );
+        }
+        if (!cacheDirectory.isDirectory()) {
+            throw new IllegalStateException(
+                "Cache folder '" + cacheDirectory.getPath() + "' is not a directory!"
+            );
+        }
+        return new LoadContext(pluginsDirectory, cacheDirectory);
+    }
+
     public @NonNull HorizonPlugin @NonNull [] init() {
+        if (!init) {
+            init = true;
+        } else throw new IllegalStateException("Cannot init plugins twice");
         LoadContext context = getLoadContext();
 
         try {
@@ -121,22 +145,6 @@ public class EntrypointLoader {
         }
     }
 
-    private static @NonNull LoadContext getLoadContext() {
-        File pluginsDirectory = Horizon.INSTANCE.getProperties().pluginsDirectory();
-        File cacheDirectory = Horizon.INSTANCE.getProperties().cacheLocation();
-        if (!pluginsDirectory.isDirectory()) {
-            throw new IllegalStateException(
-                "Plugins folder '" + pluginsDirectory.getPath() + "' is not a directory!"
-            );
-        }
-        if (!cacheDirectory.isDirectory()) {
-            throw new IllegalStateException(
-                "Cache folder '" + cacheDirectory.getPath() + "' is not a directory!"
-            );
-        }
-        return new LoadContext(pluginsDirectory, cacheDirectory);
-    }
-
     private void appendNested(StringBuilder builder, HorizonPlugin.@NonNull NestedData nestedData, String prefix) {
         List<HorizonPlugin> nestedPlugins = nestedData.nestedHPlugins();
         List<FileJar> nestedSPlugins = nestedData.nestedSPlugins();
@@ -183,6 +191,9 @@ public class EntrypointLoader {
     }
 
     public void finishPluginLoad(final @NonNull ClassTransformer transformer) {
+        if (!completed) {
+            completed = true;
+        } else throw new IllegalStateException("Cannot finish plugin load twice");
         final AccessTransformationImpl transformerService = transformer.getService(AccessTransformationImpl.class);
         if (transformerService == null) {
             throw new IllegalStateException("Access transforming impl cannot be null!");

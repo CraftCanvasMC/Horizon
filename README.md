@@ -653,4 +653,105 @@ Horizon plugins **cannot** transform classes in non-Horizon plugins due to class
 - [SpongePowered Mixin Documentation](https://github.com/SpongePowered/Mixin/wiki)
 - [MixinExtras Documentation](https://github.com/LlamaLad7/MixinExtras/wiki)
 
-## Horizon Plugin API
+## Horizon API
+
+Horizon includes API for Horizon plugins to interact with to better understand its environment and other plugins in the
+server. This part of the documentation is still a WIP, as there is more API being planned, and more API to document.
+
+### Paperclip API
+
+Horizon implements a way to view Paperclip version metadata, which contains Minecraft version info, pack info, etc.
+Currently, Horizon exposes the Paperclip version info and pack info, which can be obtained and used quite simply:
+
+```java
+// Here is an example of how to fetch the Horizon instance and read server version information
+// Note: there are *many* more methods, and it is best to look at the Javadocs for each class aswell
+Horizon horizon = Horizon.INSTANCE;
+FileJar paperclip = horizon.getPaperclipJar();
+
+getLogger().info("Paperclip JAR: " + paperclip.ioFile().getName());
+
+PaperclipVersion version = horizon.getPaperclipVersion();
+
+getLogger().info("Minecraft Version: " + version.name());
+getLogger().info("Protocol Version: " + version.protocol_version());
+getLogger().info("Java Version: " + version.java_version());
+getLogger().info("Is stable?: " + version.stable());
+
+PaperclipVersion.PackVersion pack = version.pack_version();
+getLogger().info("Pack Version(resources):" + pack.resource_major() + "." + pack.resource_minor());
+getLogger().info("Pack Version(data):" + pack.data_major() + "." + pack.data_minor());
+```
+
+There may be more things exposed in the future about the Paperclip data, but it is currenly not planned, as it isn't
+really something any plugin would need.
+
+### Instrumentation and ClassLoader Exposure
+
+Horizon exposes the JVM Instrumentation that Horizon uses for its booting of the server. It isn't really recommended
+to touch the Instrumentation directly, but there are APIs available that do call methods in it, which are more safe to
+use and are more recommended for some operations, like appending a jar file to the classloader.
+
+```java
+// Gets the MixinLaunch instance, which contains the classloader,
+// and other more advanced API like class transformers
+MixinLaunch launcher = MixinLaunch.getInstance();
+
+// This contains data like the String[] args that will be passed to the server
+// along with inital game connections, and the actual game jar
+MixinLaunch.LaunchContext launchContext = launcher.getLaunchContext();
+
+// This is the JVM Instrumentation that can be accessed for doing more advanced operations
+// although, it is recommended to use any API provided by Horizon that functions
+// similarly or as a replacement to the API that the Instrumentation provides, as it will
+// function safer and better for the Horizon environment
+java.lang.instrument.Instrumentation instrumentation = JvmAgent.INSTRUMENTATION;
+
+// This is the Ember ClassLoader, which is the primary bytecode modification
+// loader for the Horizon environment. Here you can append new jars to the classpath too!
+EmberClassLoader classLoader = launcher.getClassLoader();
+classLoader.tryAddToHorizonSystemLoader(Paths.get("test.jar"));
+```
+
+The code above is a brief showcase of some things you can access and do with the Instrumentation and ClassLoader exposure.
+If you want more information on how Instrumentations work, it is linked below:
+
+- [Instrumentation JavaDocs](https://docs.oracle.com/en/java/javase/21/docs/api/java.instrument/java/lang/instrument/Instrumentation.html)
+
+### Plugin API
+
+Horizon introduces a full plugin API that is exposed for all plugins to access. This allows for numerous things like viewing
+what other plugins are on the server, which can be used for dependency declaration(coming soon), incompatibilities, etc.
+This API also allows you to view nested data entries and more. All data in each plugin is immutable, and shouldn't be attempted
+to be modified.
+
+```java
+// Get the Horizon instance
+Horizon horizon = Horizon.INSTANCE;
+// This includes *all* Horizon plugins, nested and unnested
+List<HorizonPlugin> plugins = horizon.getPlugins();
+for (HorizonPlugin plugin : plugins) {
+    // The HorizonMetadata class acts as an object representation of the
+    // Horizon plugin yaml file. It contains the name, version, mixins,
+    // ats, api version, etc.
+    HorizonMetadata metadata = plugin.pluginMetadata();
+    getLogger().info("Hello " + metadata.name() + "!");
+
+    // The plugin identifier is the same as the 'name' entry in the metadata
+    String id = plugin.identifier();
+
+    // The HorizonPlugin also provides the FileJar instance that is tied
+    // to the plugin, and also a FileSystem via HorizonPlugin#fileSystem()
+    FileJar file = plugin.file();
+    getLogger().info("Path of \"" + id + "\": " + file.ioFile().toPath());
+}
+```
+
+The plugin API is a useful tool for when trying to get other plugins data, or even your own plugins data.
+
+### Class Transformers API
+
+Horizon contains a ClassTransformer API, which is the primary API that drives Mixins and ATs transformation of ClassNodes.
+With this API, soon, plugins can register their own TransformationServices much like the Mixin and AT transformation
+services. This API hasn't been fully exposed yet, and is currently only limited to the Mixin and AT transformers, but in
+the near future, before the initial release, this API will be fully exposed and documented.

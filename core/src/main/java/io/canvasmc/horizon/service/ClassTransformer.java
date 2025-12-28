@@ -37,6 +37,7 @@ public final class ClassTransformer {
         this.exclusionFilter = path -> true;
 
         SERVICES.forEach(service -> services.put(service.getClass(), service));
+        // TODO - plugin service registration
     }
 
     public void addExclusionFilter(final @NonNull Predicate<String> predicate) {

@@ -1,9 +1,14 @@
-- generalized logo and other branding shit -- ask team?
+- generalized logo and other branding shit -- ask team? -- should be done Wednesday
 - builtin runtime patches
-- api -- serviceloader? classloader access? instrumentation access?
-- outline in readme the classloader hierarchy
 - include mixinextras in horizon internal for logging startup plugins
 - change JIJ impl in core to match new version of JIJ in kotlin plugin
 - rewrite plugins command override to be more version compatible
 - document which Minecraft versions work, and try and fix as many as possible
 - can we try and figure out how to target normal paper plugins in mixins?
+- finish horizon api docs
+- remove reload command better
+- add immutable ObjectTree that defines the plugin tree structure for the instance
+- class transformers API -- use plugin yaml to register similar to entrypoints?
+- dependency declaration of horizon plugins, and incompatibilities
+    - add ability to depend on JDK versions, ASM versions, Horizon versions, and maybe Mixin versions?
+- add ability to fetch ur own plugin via like HorizonPlugin.findPlugin(String name) or something

@@ -1,5 +1,7 @@
 package io.canvasmc.horizon.plugin.data;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -26,7 +28,7 @@ public record HorizonMetadata(
         // we don't need to validate arguments here, as pre construction they already are
         name = name.toLowerCase();
         // setup option args so they are non-null
-        mixins = List.copyOf(mixins == null ? Collections.emptyList() : mixins);
-        accessWideners = List.copyOf(accessWideners == null ? Collections.emptyList() : accessWideners);
+        mixins = ImmutableList.copyOf(mixins == null ? Collections.emptyList() : mixins);
+        accessWideners = ImmutableList.copyOf(accessWideners == null ? Collections.emptyList() : accessWideners);
     }
 }

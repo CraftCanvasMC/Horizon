@@ -25,6 +25,12 @@ public class JvmAgent {
         if (INSTRUMENTATION != null) INSTRUMENTATION.addTransformer(transformer);
     }
 
+    /**
+     * Adds a jar to the system classloader. It is however recommended to use {@link io.canvasmc.horizon.ember.EmberClassLoader#tryAddToHorizonSystemLoader(Path)}
+     *
+     * @param path the jar path
+     * @throws IOException if the path provided isn't a jar file
+     */
     public static void addJar(final @NonNull Path path) throws IOException {
         final File file = path.toFile();
         if (!file.exists()) throw new FileNotFoundException(file.getAbsolutePath());
@@ -33,6 +39,11 @@ public class JvmAgent {
         addJar(new JarFile(file));
     }
 
+    /**
+     * Adds a jar to the system classloader. It is however recommended to use {@link io.canvasmc.horizon.ember.EmberClassLoader#tryAddToHorizonSystemLoader(Path)}
+     *
+     * @param jar the jar file
+     */
     public static void addJar(final @NonNull JarFile jar) {
         if (INSTRUMENTATION != null) {
             LOGGER.debug("Appending jar '{}' to system classloader", jar.getName());

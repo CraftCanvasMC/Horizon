@@ -1,10 +1,10 @@
 package io.canvasmc.horizon.util;
 
-import com.google.gson.*;
+import io.canvasmc.horizon.util.tree.ObjectDeserializer;
+import io.canvasmc.horizon.util.tree.ObjectTree;
 import org.jspecify.annotations.NonNull;
 
-import java.lang.reflect.Type;
-
+// TODO - javadocs
 public record PaperclipVersion(
     String id,
     String name,
@@ -27,53 +27,43 @@ public record PaperclipVersion(
     ) {
     }
 
-    public static final class PaperclipVersionSerializer implements JsonSerializer<PaperclipVersion> {
+    public static final class PaperclipVersionDeserializer implements ObjectDeserializer<PaperclipVersion> {
 
         @Override
-        public @NonNull JsonElement serialize(@NonNull PaperclipVersion src, Type typeOfSrc, @NonNull JsonSerializationContext ctx) {
-            JsonObject obj = new JsonObject();
-
-            obj.addProperty("id", src.id());
-            obj.addProperty("name", src.name());
-            obj.addProperty("world_version", src.world_version());
-            obj.addProperty("series_id", src.series_id());
-            obj.addProperty("protocol_version", src.protocol_version());
-            obj.add("pack_version", ctx.serialize(src.pack_version()));
-            obj.addProperty("build_time", src.build_time());
-            obj.addProperty("java_component", src.java_component());
-            obj.addProperty("java_version", src.java_version());
-            obj.addProperty("stable", src.stable());
-            obj.addProperty("use_editor", src.use_editor());
-
-            return obj;
-        }
-    }
-
-    public static final class PaperclipVersionDeserializer implements JsonDeserializer<PaperclipVersion> {
-
-        @Override
-        public @NonNull PaperclipVersion deserialize(@NonNull JsonElement json, Type typeOfT, @NonNull JsonDeserializationContext ctx)
-            throws JsonParseException {
-
-            JsonObject obj = json.getAsJsonObject();
-
-            PaperclipVersion.PackVersion pack = ctx.deserialize(
-                obj.get("pack_version"),
-                PaperclipVersion.PackVersion.class
+        public @NonNull PaperclipVersion deserialize(@NonNull ObjectTree tree) {
+            ObjectTree packTree = tree.getTree("pack_version");
+            PackVersion pack = new PackVersion(
+                packTree.getValue("resource_major").asInt(),
+                packTree.getValue("resource_minor").asInt(),
+                packTree.getValue("data_major").asInt(),
+                packTree.getValue("data_minor").asInt()
             );
 
             return new PaperclipVersion(
-                obj.get("id").getAsString(),
-                obj.get("name").getAsString(),
-                obj.get("world_version").getAsInt(),
-                obj.get("series_id").getAsString(),
-                obj.get("protocol_version").getAsInt(),
+                tree.getValue("id").asString(),
+                tree.getValue("name").asString(),
+                tree.getValue("world_version").asInt(),
+                tree.getValue("series_id").asString(),
+                tree.getValue("protocol_version").asInt(),
                 pack,
-                obj.get("build_time").getAsString(),
-                obj.get("java_component").getAsString(),
-                obj.get("java_version").getAsInt(),
-                obj.get("stable").getAsBoolean(),
-                obj.get("use_editor").getAsBoolean()
+                tree.getValue("build_time").asString(),
+                tree.getValue("java_component").asString(),
+                tree.getValue("java_version").asInt(),
+                tree.getValue("stable").asBoolean(),
+                tree.getValue("use_editor").asBoolean()
+            );
+        }
+    }
+
+    public static final class PackVersionDeserializer implements ObjectDeserializer<PackVersion> {
+
+        @Override
+        public @NonNull PackVersion deserialize(@NonNull ObjectTree tree) {
+            return new PackVersion(
+                tree.getValue("resource_major").asInt(),
+                tree.getValue("resource_minor").asInt(),
+                tree.getValue("data_major").asInt(),
+                tree.getValue("data_minor").asInt()
             );
         }
     }

@@ -56,6 +56,10 @@ allprojects {
 
             // minecraft setup
             paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
+
+            if (name == "test-plugin") {
+                compileOnly(rootProject.projects.core)
+            }
         }
 
         tasks.shadowJar {
