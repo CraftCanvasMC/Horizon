@@ -23,4 +23,9 @@ abstract class HorizonExtension @Inject constructor(objects: ObjectFactory, proj
      * Whether to automatically inject Canvas's maven repository for easier Horizon API resolution.
      */
     val injectCanvasRepository: Property<Boolean> = objects.property<Boolean>().convention(true)
+
+    /**
+     * Whether to fail the build if an AT fails to be applied to the Minecraft source.
+     */
+    val failFastOnUnapplicableAT: Property<Boolean> = objects.property<Boolean>().convention(true)
 }

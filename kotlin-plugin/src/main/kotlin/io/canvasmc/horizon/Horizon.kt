@@ -114,6 +114,7 @@ abstract class Horizon : Plugin<Project> {
                     )
                 )
             )
+            failFast.set(ext.failFastOnUnapplicableAT)
             atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
             ats.jst.from(project.configurations.named(JST_CONFIG))
         }
