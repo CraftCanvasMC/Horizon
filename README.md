@@ -280,7 +280,7 @@ String host = config.getValue("host").asString();
 > You cannot access values via nested keys, like "test.example", any attempts will throw a NoSuchElementException
 
 ### Variable Interpolation
-ObjectTree supports variable substitution using `${variable}` syntax:
+OT supports variable substitution using `${variable}` syntax:
 ```java
 ObjectTree config = ObjectTree.read()
     .format(Format.YAML)
