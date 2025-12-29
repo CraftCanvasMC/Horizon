@@ -11,6 +11,7 @@ paper-dev-bundle = "1.21.11-R0.1-SNAPSHOT"
 shadow = "9.2.2"
 userdev = "2.3.12-SNAPSHOT"
 jspecify = "1.0.0"
+junit = "6.0.0"
 java = "21"
 
 [libraries]
@@ -28,7 +29,13 @@ asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }
 tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
 tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
+userdev = { module = "io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin", version.ref = "userdev" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
+
+# for tests
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 
 [bundles]
 mixin = [ "fabric-mixin", "mixin-extras" ]
@@ -37,4 +44,8 @@ tinylog = [ "tinylog-api", "tinylog-impl" ]
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+blossom = { id = "net.kyori.blossom", version = "2.2.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
+plugin-publish = { id = "com.gradle.plugin-publish", version = "1.2.0" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.1.0" }
 userdev = { id = "io.canvasmc.weaver.userdev", version.ref = "userdev" }

@@ -5,22 +5,59 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("net.kyori.blossom") version "2.2.0"
     `kotlin-dsl`
-    id("com.gradle.plugin-publish") version "1.2.0"
-    id("com.diffplug.spotless") version "8.1.0"
-    id("org.jetbrains.kotlin.jvm") version "2.1.0"
+    alias(libs.plugins.blossom)
+    alias(libs.plugins.plugin.publish)
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.kotlin.jvm)
 }
 
-val userdevVersion = "2.3.12-SNAPSHOT"
+val javaVersion = 17
 
-gradlePlugin {
-    plugins.register("horizon") {
-        id = "io.canvasmc.horizon"
-        displayName = "horizon"
-        tags.set(listOf("plugins", "mixin", "minecraft", "canvas"))
-        implementationClass = "io.canvasmc.horizon.Horizon"
-        description = "Gradle plugin for developing plugins using the Horizon framework, allowing for mixin and AT usage"
+repositories {
+    mavenCentral()
+    maven("https://maven.canvasmc.io/snapshots")
+}
+
+dependencies {
+    compileOnly(gradleApi())
+    compileOnly(libs.userdev)
+}
+
+java {
+    withSourcesJar()
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(javaVersion)
+    }
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+        freeCompilerArgs = listOf("-Xjvm-default=all", "-Xjdk-release=$javaVersion")
+    }
+}
+
+tasks.withType<Jar>().configureEach {
+    manifest {
+        attributes(
+            "Implementation-Version" to project.version
+        )
+    }
+}
+
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
+
+tasks.withType<ProcessResources>().configureEach {
+    filteringCharset = Charsets.UTF_8.name()
+}
+
+sourceSets.all {
+    blossom.kotlinSources {
+        properties.put("jst_version", providers.gradleProperty("jstVersion"))
     }
 }
 
@@ -29,10 +66,10 @@ testing {
         val test by getting(JvmTestSuite::class) {
             useKotlinTest(embeddedKotlinVersion)
             dependencies {
-                implementation("org.junit.jupiter:junit-jupiter-engine:6.0.0")
-                implementation("org.junit.jupiter:junit-jupiter-params:6.0.0")
-                implementation("org.junit.platform:junit-platform-launcher:6.0.0")
-                implementation("io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin:$userdevVersion")
+                implementation(libs.junit.jupiter.engine)
+                implementation(libs.junit.jupiter.params)
+                implementation(libs.junit.platform.launcher)
+                implementation(libs.userdev)
             }
             targets.configureEach {
                 testTask {
@@ -43,61 +80,6 @@ testing {
                 }
             }
         }
-    }
-}
-
-repositories {
-    gradlePluginPortal()
-    maven("https://maven.canvasmc.io/snapshots")
-}
-
-dependencies {
-    compileOnly(gradleApi())
-    compileOnly("io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin:$userdevVersion")
-}
-
-java {
-    withSourcesJar()
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    options.release = 17
-}
-
-tasks.withType<Jar>().configureEach {
-    archiveBaseName.set("horizon")
-}
-
-sourceSets.all {
-    val blossom = extensions.findByType(BlossomExtension::class.java) ?: return@all
-
-    blossom.kotlinSources {
-        properties.put("jst_version", providers.gradleProperty("jstVersion").get())
-    }
-}
-
-kotlin {
-    jvmToolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_17
-        freeCompilerArgs = listOf("-Xjvm-default=all", "-Xjdk-release=17")
-    }
-}
-
-configurations.all {
-    if (name == "compileOnly") {
-        return@all
-    }
-    dependencies.remove(project.dependencies.gradleApi())
-}
-
-tasks.jar {
-    manifest {
-        attributes(
-            "Implementation-Version" to project.version
-        )
     }
 }
 
@@ -125,10 +107,27 @@ tasks.register("format") {
     dependsOn(tasks.named("spotlessApply"))
 }
 
+configurations.all {
+    if (name == "compileOnly") {
+        return@all
+    }
+    dependencies.remove(project.dependencies.gradleApi())
+}
+
 configurations.runtimeElements {
     attributes {
-        attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+        attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, javaVersion)
         attribute(GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, objects.named("9.0.0"))
+    }
+}
+
+gradlePlugin {
+    plugins.register("horizon") {
+        id = "io.canvasmc.horizon"
+        displayName = "horizon"
+        tags.set(listOf("plugins", "mixin", "minecraft", "canvas"))
+        implementationClass = "io.canvasmc.horizon.Horizon"
+        description = "Gradle plugin for developing plugins using the Horizon framework, allowing for mixin and AT usage"
     }
 }
 
