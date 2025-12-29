@@ -1,6 +1,8 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import net.kyori.blossom.BlossomExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     id("net.kyori.blossom") version "2.2.0"
@@ -19,6 +21,28 @@ gradlePlugin {
         tags.set(listOf("plugins", "mixin", "minecraft", "canvas"))
         implementationClass = "io.canvasmc.horizon.Horizon"
         description = "Gradle plugin for developing plugins using the Horizon framework, allowing for mixin and AT usage"
+    }
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useKotlinTest(embeddedKotlinVersion)
+            dependencies {
+                implementation("org.junit.jupiter:junit-jupiter-engine:6.0.0")
+                implementation("org.junit.jupiter:junit-jupiter-params:6.0.0")
+                implementation("org.junit.platform:junit-platform-launcher:6.0.0")
+                implementation("io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin:$userdevVersion")
+            }
+            targets.configureEach {
+                testTask {
+                    testLogging {
+                        events(TestLogEvent.FAILED)
+                        exceptionFormat = TestExceptionFormat.FULL
+                    }
+                }
+            }
+        }
     }
 }
 

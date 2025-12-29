@@ -3,7 +3,7 @@ plugins {
     id("io.canvasmc.horizon")
 }
 
-val JDK_VERSION = 21
+val jdkVersion = 21
 
 dependencies {
     // libraries required cuz we cant exactly access shaded core
@@ -25,6 +25,6 @@ horizon {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(JDK_VERSION))
+        languageVersion.set(JavaLanguageVersion.of(jdkVersion))
     }
 }

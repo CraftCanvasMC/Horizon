@@ -1,0 +1,7 @@
+public net.minecraft.CrashReport uncategorizedStackTrace
+public net.minecraft.server.level.ServerLevel EMPTY_TIME_NO_TICK
+public net.minecraft.server.level.ServerLevel LOGGER
+public net.minecraft.server.level.ServerLevel MAX_SCHEDULED_TICKS_PER_TICK
+public-f com.testingstuff.abcdefgh randomMethod
+public-f net.minecraft.CrashReport systemReport
+public-f net.minecraft.server.level.ServerLevel THUNDER_DELAY
