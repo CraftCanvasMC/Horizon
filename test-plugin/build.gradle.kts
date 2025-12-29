@@ -4,17 +4,14 @@ plugins {
 }
 
 val jdkVersion = 21
+val coreJar = project(":core").tasks.named("createPublicationJar")
 
 dependencies {
-    // libraries required cuz we cant exactly access shaded core
-    implementation(libs.bundles.mixin)
-    implementation(libs.bundles.tinylog)
-
     // minecraft setup
     paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
 
-    // horizon api
-    add("horizonHorizonApiConfig", projects.core)
+    // add horizon api manually from the core project
+    add("horizonHorizonApiConfig", project.files(coreJar.flatMap { (it as Jar).archiveFile }))
 }
 
 horizon {
