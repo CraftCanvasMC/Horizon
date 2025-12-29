@@ -3,7 +3,7 @@ plugins {
     id("io.canvasmc.horizon")
 }
 
-val jdkVersion = 21
+val jdkVersion = libs.versions.java.get()
 val coreJar = project(":core").tasks.named("createPublicationJar")
 
 dependencies {

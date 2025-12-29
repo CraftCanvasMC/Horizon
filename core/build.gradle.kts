@@ -6,7 +6,7 @@ plugins {
 }
 
 val paperMavenPublicUrl = "https://repo.papermc.io/repository/maven-public/"
-val jdkVersion = 21
+val jdkVersion = libs.versions.java.get()
 
 // configuration that shades and includes as an implementation for the core project
 val include by configurations.creating {
@@ -117,7 +117,7 @@ tasks.register<Jar>("createPublicationJar") {
     archiveFileName.set(version.map { "horizon-build.$it.jar" })
 
     from(zipTree(tasks.shadowJar.flatMap { it.archiveFile }))
-    destinationDirectory.set(rootProject.buildDir.resolve("libs"))
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
 
     // copy manifest from shade
     manifest {

@@ -11,6 +11,7 @@ paper-dev-bundle = "1.21.11-R0.1-SNAPSHOT"
 shadow = "9.2.2"
 userdev = "2.3.12-SNAPSHOT"
 jspecify = "1.0.0"
+java = "21"
 
 [libraries]
 jbsdiff = { module = "io.sigpipe:jbsdiff", version = "1.0" }
