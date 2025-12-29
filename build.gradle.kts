@@ -27,3 +27,24 @@ subprojects {
         filteringCharset = Charsets.UTF_8.name()
     }
 }
+
+// utilities for accessing the plugin project
+tasks.register("buildPlugin") {
+    dependsOn(gradle.includedBuild("kotlin-plugin").task(":build"))
+}
+
+tasks.register("publishPlugin") {
+    dependsOn(gradle.includedBuild("kotlin-plugin").task(":publishAllPublicationsToCanvasmcRepository"))
+}
+
+tasks.register("publishSnapshotPlugin") {
+    dependsOn(gradle.includedBuild("kotlin-plugin").task(":publishAllPublicationsToSnapshotsRepository"))
+}
+
+tasks.register("publishPluginLocally") {
+    dependsOn(gradle.includedBuild("kotlin-plugin").task(":publishToMavenLocal"))
+}
+
+tasks.register("formatPlugin") {
+    dependsOn(gradle.includedBuild("kotlin-plugin").task(":format"))
+}
