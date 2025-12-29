@@ -3,8 +3,6 @@ package io.canvasmc.horizon.functional
 import io.papermc.paperweight.util.*
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import org.junit.jupiter.api.io.CleanupMode
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -16,6 +14,8 @@ import kotlin.io.path.walk
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class FunctionalityTest {
 
@@ -23,7 +23,6 @@ class FunctionalityTest {
 
     @Test
     fun `test simple functionality`(@TempDir(cleanup = CleanupMode.ON_SUCCESS) tempDir: Path) {
-
         println("running tests in $tempDir")
         val testDir = Paths.get("src/test/resources/functionality")
 
@@ -47,7 +46,8 @@ class FunctionalityTest {
 
         println("\nadding broken ATs\n")
         modifyFile(tempDir.resolve("src/main/resources/wideners.at")) {
-            it.replace("# broken ats go here",
+            it.replace(
+                "# broken ats go here",
                 "public-f com.testingstuff.abcdefgh randomMethod"
             )
         }

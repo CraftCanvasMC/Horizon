@@ -1,8 +1,8 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import net.kyori.blossom.BlossomExtension
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("net.kyori.blossom") version "2.2.0"
