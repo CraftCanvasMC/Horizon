@@ -728,8 +728,8 @@ to be modified.
 // Get the Horizon instance
 Horizon horizon = Horizon.INSTANCE;
 // This includes *all* Horizon plugins, nested and unnested
-List<HorizonPlugin> plugins = horizon.getPlugins();
-for (HorizonPlugin plugin : plugins) {
+PluginTree plugins = horizon.getPlugins();
+for (HorizonPlugin plugin : plugins.getAll()) {
     // The HorizonMetadata class acts as an object representation of the
     // Horizon plugin yaml file. It contains the name, version, mixins,
     // ats, api version, etc.

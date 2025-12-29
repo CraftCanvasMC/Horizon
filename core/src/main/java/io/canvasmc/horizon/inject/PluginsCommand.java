@@ -162,7 +162,7 @@ public class PluginsCommand {
         final TreeMap<String, PluginProvider<JavaPlugin>> paperPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         final TreeMap<String, PluginProvider<JavaPlugin>> spigotPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        final List<String> horizonPluginJars = Horizon.INSTANCE.getPlugins().stream()
+        final List<String> horizonPluginJars = Horizon.INSTANCE.getPlugins().getAll().stream()
             .map(HorizonPlugin::pluginMetadata)
             .map(HorizonMetadata::name)
             .map(String::toLowerCase)

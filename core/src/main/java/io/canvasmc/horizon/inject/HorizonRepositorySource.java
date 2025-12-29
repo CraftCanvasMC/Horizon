@@ -64,7 +64,7 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
         PluginPackDetector pluginPackDetector = new PluginPackDetector(validator);
 
         // read from plugins, not folder, because technically we can include submodules in horizon jars // TODO - actually do this
-        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins()) {
+        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins().getAll()) {
             if (!plugin.pluginMetadata().loadDatapackEntry()) {
                 continue;
             }
@@ -86,7 +86,7 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
         }
     }
 
-    public class PluginPackDetector extends PackDetector<Pack.ResourcesSupplier> {
+    public class PluginPackDetector extends PackDetector<Pack.@NonNull ResourcesSupplier> {
         public PluginPackDetector(DirectoryValidator validator) {
             super(validator);
         }

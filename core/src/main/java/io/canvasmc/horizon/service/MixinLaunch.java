@@ -189,7 +189,7 @@ public final class MixinLaunch {
             if (connection instanceof JarURLConnection) {
                 final URL url = ((JarURLConnection) connection).getJarFileURL();
                 final Optional<Manifest> manifest = this.manifests.computeIfAbsent(url.toString(), key -> {
-                    for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins()) {
+                    for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins().getAll()) {
                         try {
                             if (plugin.file().ioFile().toPath().toAbsolutePath().normalize().equals(Paths.get(url.toURI()).toAbsolutePath().normalize())) {
                                 return Optional.ofNullable(plugin.file().jarFile().getManifest());

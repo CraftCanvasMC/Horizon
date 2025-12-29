@@ -1,9 +1,9 @@
 package io.canvasmc.horizon;
 
-import com.google.common.collect.ImmutableList;
 import io.canvasmc.horizon.instrument.JvmAgent;
 import io.canvasmc.horizon.instrument.patch.ServerPatcherEntrypoint;
 import io.canvasmc.horizon.plugin.EntrypointLoader;
+import io.canvasmc.horizon.plugin.PluginTree;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.MixinLaunch;
@@ -25,9 +25,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.jar.JarFile;
 
 /**
@@ -48,7 +46,7 @@ public class Horizon {
     final Instrumentation instrumentation;
     private @NonNull
     final FileJar paperclipJar;
-    private List<HorizonPlugin> plugins;
+    private PluginTree plugins;
     private PaperclipVersion paperclipVersion;
 
     public Horizon(@NonNull ServerProperties properties, @NonNull String version, @NonNull Instrumentation instrumentation, String @NonNull [] providedArgs) {
@@ -134,24 +132,14 @@ public class Horizon {
     }
 
     /**
-     * Get all the plugins in the Horizon server, including nested Horizon plugins
+     * Returns the {@link PluginTree} for the Horizon environment
      *
      * @return all plugins
-     * @apiNote if plugins aren't loaded yet, the list will be empty
+     * @throws IllegalStateException if the server hasn't loaded Horizon plugins yet
      */
-    public List<HorizonPlugin> getPlugins() {
-        List<HorizonPlugin> allPlugins = new ArrayList<>();
-        if (this.plugins == null) return List.of();
-
-        Queue<HorizonPlugin> queue = new LinkedList<>(this.plugins);
-
-        while (!queue.isEmpty()) {
-            HorizonPlugin plugin = queue.poll();
-            allPlugins.add(plugin);
-            queue.addAll(plugin.nestedData().horizonEntries());
-        }
-
-        return allPlugins;
+    public PluginTree getPlugins() {
+        if (this.plugins == null) throw new IllegalStateException("Server hasn't loaded plugins yet");
+        return this.plugins;
     }
 
     /**
@@ -161,7 +149,7 @@ public class Horizon {
      */
     private void start(String[] providedArgs) {
         LOGGER.info("Preparing Minecraft server");
-        this.plugins = ImmutableList.copyOf(EntrypointLoader.INSTANCE.init());
+        this.plugins = EntrypointLoader.INSTANCE.init();
 
         final URL[] unpacked = prepareHorizonServer();
         final List<Path> initalClasspath = new ArrayList<>();
@@ -176,7 +164,7 @@ public class Horizon {
             }
         }
 
-        for (HorizonPlugin plugin : getPlugins()) {
+        for (HorizonPlugin plugin : this.plugins.getAll()) {
             // add all plugins to initial classpath
             initalClasspath.add(plugin.file().ioFile().toPath());
 

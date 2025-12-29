@@ -11,7 +11,6 @@ import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.ClassTransformer;
 import io.canvasmc.horizon.service.MixinContainerHandle;
 import io.canvasmc.horizon.transformer.AccessTransformationImpl;
-import io.canvasmc.horizon.util.FileJar;
 import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.FabricUtil;
 import org.spongepowered.asm.mixin.Mixins;
@@ -23,7 +22,10 @@ import org.tinylog.TaggedLogger;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -60,7 +62,7 @@ public class EntrypointLoader {
     }
 
     public static HorizonPlugin getPluginFromMain(String main) throws Throwable {
-        return Horizon.INSTANCE.getPlugins().stream()
+        return Horizon.INSTANCE.getPlugins().getAll().stream()
             .filter(pl -> pl.pluginMetadata().main().equalsIgnoreCase(main))
             .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_MAIN);
     }
@@ -70,7 +72,7 @@ public class EntrypointLoader {
     }
 
     public static HorizonPlugin getPluginFromName(String name) throws Throwable {
-        return Horizon.INSTANCE.getPlugins().stream()
+        return Horizon.INSTANCE.getPlugins().getAll().stream()
             .filter(pl -> pl.pluginMetadata().name().equalsIgnoreCase(name))
             .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_NAME);
     }
@@ -91,7 +93,7 @@ public class EntrypointLoader {
         return new LoadContext(pluginsDirectory, cacheDirectory);
     }
 
-    public @NonNull HorizonPlugin @NonNull [] init() {
+    public @NonNull PluginTree init() {
         if (!init) {
             init = true;
         } else throw new IllegalStateException("Cannot init plugins twice");
@@ -115,78 +117,13 @@ public class EntrypointLoader {
             @SuppressWarnings("unchecked") final List<HorizonPlugin> fullResult = new LinkedList<>(((List<HorizonPlugin>) result));
             fullResult.add(Horizon.INTERNAL_PLUGIN);
 
-            final HorizonPlugin[] plugins = fullResult.toArray(new HorizonPlugin[0]);
-            final StringBuilder builder = new StringBuilder();
+            PluginTree tree = PluginTree.from(fullResult.toArray(new HorizonPlugin[0]));
+            LOGGER.info(tree.format());
 
-            List<HorizonPlugin> metas = new LinkedList<>(Arrays.stream(plugins).toList());
-
-            builder.append(
-                "Found {} plugin(s):\n"
-                    .replace("{}", String.valueOf(metas.size()))
-            );
-
-            for (HorizonPlugin plugin : metas.reversed()) {
-
-                builder.append("\t- ")
-                    .append(plugin.pluginMetadata().name())
-                    .append(" ")
-                    .append(plugin.pluginMetadata().version())
-                    .append("\n");
-
-                appendNested(builder, plugin.nestedData(), "\t   ");
-            }
-
-            LOGGER.info(builder.substring(0, builder.length() - 1));
-
-            return plugins;
+            return tree;
         } catch (Throwable thrown) {
             LOGGER.error(thrown, "Plugin loading failed");
             throw new RuntimeException("Failed to load plugins", thrown);
-        }
-    }
-
-    private void appendNested(StringBuilder builder, HorizonPlugin.@NonNull NestedData nestedData, String prefix) {
-        List<HorizonPlugin> nestedPlugins = nestedData.horizonEntries();
-        List<FileJar> nestedSPlugins = nestedData.serverPluginEntries();
-        List<FileJar> nestedLibraries = nestedData.libraryEntries();
-
-        int totalChildren = nestedPlugins.size() + nestedSPlugins.size() + nestedLibraries.size();
-        int index = 0;
-
-        for (HorizonPlugin nestedPlugin : nestedPlugins) {
-            index++;
-            boolean last = index == totalChildren;
-
-            builder.append(prefix)
-                .append(last ? "\\-- " : "|-- ")
-                .append(nestedPlugin.file().ioFile().getName().replace(".jar", ""))
-                .append("\n");
-
-            HorizonPlugin.NestedData childNested = nestedPlugin.nestedData();
-            if (!childNested.horizonEntries().isEmpty() || !childNested.serverPluginEntries().isEmpty() || !childNested.libraryEntries().isEmpty()) {
-                String childPrefix = prefix + (last ? "    " : "|   ");
-                appendNested(builder, childNested, childPrefix);
-            }
-        }
-
-        for (FileJar sPlugin : nestedSPlugins) {
-            index++;
-            boolean last = index == totalChildren;
-
-            builder.append(prefix)
-                .append(last ? "\\-- " : "|-- ")
-                .append(sPlugin.ioFile().getName().replace(".jar", ""))
-                .append("\n");
-        }
-
-        for (FileJar library : nestedLibraries) {
-            index++;
-            boolean last = index == totalChildren;
-
-            builder.append(prefix)
-                .append(last ? "\\-- " : "|-- ")
-                .append(library.ioFile().getName().replace(".jar", ""))
-                .append("\n");
         }
     }
 
@@ -199,7 +136,7 @@ public class EntrypointLoader {
             throw new IllegalStateException("Access transforming impl cannot be null!");
         }
 
-        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins()) {
+        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins().getAll()) {
             List<String> wideners = plugin.pluginMetadata().accessWideners();
             if (wideners.isEmpty()) {
                 continue;
@@ -215,7 +152,7 @@ public class EntrypointLoader {
         final EmberMixinService service = (EmberMixinService) MixinService.getService();
         final MixinContainerHandle handle = (MixinContainerHandle) service.getPrimaryContainer();
 
-        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins()) {
+        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins().getAll()) {
             Path pluginPath = plugin.file().ioFile().toPath();
             handle.addResource(pluginPath.getFileName().toString(), pluginPath);
 
