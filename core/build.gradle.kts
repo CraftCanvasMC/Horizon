@@ -44,8 +44,15 @@ dependencies {
     paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
 }
 
+tasks.jar {
+    archiveClassifier.set("unshaded")
+}
+
 tasks.shadowJar {
-    configurations = listOf(project.configurations.runtimeClasspath.get())
+    configurations.set(project.configurations.runtimeClasspath.map { listOf(it) })
+    filesMatching("META-INF/services/**") {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
 
     val basePackage = "horizon.libs"
 
