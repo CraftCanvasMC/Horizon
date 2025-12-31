@@ -8,9 +8,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
-import kotlin.io.path.extension
 import kotlin.io.path.readText
-import kotlin.io.path.walk
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -92,13 +90,7 @@ class FunctionalityTest {
     }
 
     class ProjectFiles(val projectDir: Path) {
-        val zipFile = projectDir.resolve("build-data/userdev.zip").toFile()
-        val unzipDir = projectDir.resolve("build-data/userdev").toFile()
-
-        val jarFile: File by lazy {
-            unzip(zipFile, unzipDir)
-            unzipDir.walk().first { it.extension == "jar" }
-        }
+        val jarFile: File = Paths.get("build/generated/horizon/resources/test/build-data/userdev.jar").toFile()
 
         val baseClasspath = GradleRunner.create().withPluginClasspath().pluginClasspath
         val weaverClasspath = listOf(jarFile)

@@ -13,6 +13,9 @@ plugins {
 }
 
 val javaVersion = 17
+val weaver by configurations.creating {
+    configurations.compileOnly.get().extendsFrom(this)
+}
 
 repositories {
     mavenCentral()
@@ -21,7 +24,7 @@ repositories {
 
 dependencies {
     compileOnly(gradleApi())
-    compileOnly(libs.userdev)
+    weaver(libs.userdev)
 }
 
 java {
@@ -35,6 +38,24 @@ kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_17
         freeCompilerArgs = listOf("-Xjvm-default=all", "-Xjdk-release=$javaVersion")
+    }
+}
+
+val generatedTestSources = layout.buildDirectory.dir("generated/horizon/resources/test")
+
+val copyWeaverForTests = tasks.register<Copy>("copyWeaverForTests") {
+    from(weaver)
+    into(generatedTestSources.map { it.dir("build-data") })
+    rename { "userdev.jar" }
+}
+
+tasks.named("processTestResources") {
+    dependsOn(copyWeaverForTests)
+}
+
+sourceSets {
+    test {
+        resources { srcDir(generatedTestSources) }
     }
 }
 
