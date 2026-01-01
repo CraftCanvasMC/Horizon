@@ -15,6 +15,7 @@ plugins {
 val javaVersion = 17
 val weaver by configurations.creating {
     configurations.compileOnly.get().extendsFrom(this)
+    configurations.testImplementation.get().extendsFrom(this)
 }
 
 repositories {
@@ -44,7 +45,7 @@ kotlin {
 val generatedTestSources = layout.buildDirectory.dir("generated/horizon/resources/test")
 
 val copyWeaverForTests = tasks.register<Copy>("copyWeaverForTests") {
-    from(weaver)
+    from(weaver.singleFile)
     into(generatedTestSources.map { it.dir("build-data") })
     rename { "userdev.jar" }
 }
@@ -67,11 +68,6 @@ tasks.withType<Jar>().configureEach {
     }
 }
 
-tasks.withType<AbstractArchiveTask>().configureEach {
-    isPreserveFileTimestamps = false
-    isReproducibleFileOrder = true
-}
-
 tasks.withType<ProcessResources>().configureEach {
     filteringCharset = Charsets.UTF_8.name()
 }
@@ -90,7 +86,6 @@ testing {
                 implementation(libs.junit.jupiter.engine)
                 implementation(libs.junit.jupiter.params)
                 implementation(libs.junit.platform.launcher)
-                implementation(libs.userdev)
             }
             targets.configureEach {
                 testTask {

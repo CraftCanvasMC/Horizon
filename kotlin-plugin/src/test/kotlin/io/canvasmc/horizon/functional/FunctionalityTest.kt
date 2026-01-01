@@ -22,7 +22,6 @@ class FunctionalityTest {
     @Test
     fun `test simple functionality`(@TempDir(cleanup = CleanupMode.ON_SUCCESS) tempDir: Path) {
         println("running tests in $tempDir")
-        val testDir = Paths.get("src/test/resources/functionality")
 
         val runner = tempDir.copyProject("functionality").gradleRunner()
 
@@ -34,12 +33,12 @@ class FunctionalityTest {
 
         assertEquals(build.task(":build")?.outcome, TaskOutcome.SUCCESS)
 
-        println("\nchecking if the jar file is correctly transformed")
+        println("\nchecking if the jar file is correctly transformed\n")
         val atLog = tempDir.resolve("build/tmp/applySourceAccessTransforms/log.txt").readText()
 
         assertFalse(atLog.contains("did not apply as its target doesn't exist"))
 
-        println("\nverifying if the merged at file matches expected")
+        println("\nverifying if the merged at file matches expected\n")
         assertEquals(tempDir.resolve(".gradle/caches/horizon/taskCache/merged.at").readText(), tempDir.resolve("build-data/expected-merged.at").readText())
 
         println("\nadding broken ATs\n")
@@ -58,7 +57,7 @@ class FunctionalityTest {
 
         assertEquals(build1.task(":applySourceAccessTransforms")?.outcome, TaskOutcome.FAILED)
 
-        println("\nverifying again if the merged at file matches expected")
+        println("\nverifying again if the merged at file matches expected\n")
         assertEquals(tempDir.resolve(".gradle/caches/horizon/taskCache/merged.at").readText(), tempDir.resolve("build-data/expected-merged2.at").readText())
 
         println("\nrunning build dependencies with ignore broken ATs\n")
@@ -72,7 +71,7 @@ class FunctionalityTest {
 
         assertEquals(build2.task(":build")?.outcome, TaskOutcome.SUCCESS)
 
-        println("\nchecking if the jar file has errors while transforming")
+        println("\nchecking if the jar file has errors while transforming\n")
         val atLog1 = tempDir.resolve("build/tmp/applySourceAccessTransforms/log.txt").readText()
 
         assertContains(atLog1, "did not apply as its target doesn't exist")
@@ -97,7 +96,6 @@ class FunctionalityTest {
 
         fun gradleRunner(): GradleRunner = GradleRunner.create()
             .forwardOutput()
-            .withPluginClasspath()
             .withPluginClasspath(baseClasspath + weaverClasspath)
             .withProjectDir(projectDir.toFile())
     }
