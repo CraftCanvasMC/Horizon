@@ -42,7 +42,7 @@ kotlin {
     }
 }
 
-val generatedTestSources = layout.buildDirectory.dir("generated/horizon/resources/test")
+val generatedTestSources = layout.buildDirectory.dir("generated/resources/horizon/test")
 
 val copyWeaverForTests = tasks.register<Copy>("copyWeaverForTests") {
     from(weaver.singleFile)

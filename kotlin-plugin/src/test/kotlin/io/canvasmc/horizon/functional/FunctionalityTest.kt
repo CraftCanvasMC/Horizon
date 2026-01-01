@@ -89,7 +89,7 @@ class FunctionalityTest {
     }
 
     class ProjectFiles(val projectDir: Path) {
-        val jarFile: File = Paths.get("build/generated/horizon/resources/test/build-data/userdev.jar").toFile()
+        val jarFile: File = Paths.get("build/generated/resources/horizon/test/build-data/userdev.jar").toFile()
 
         val baseClasspath = GradleRunner.create().withPluginClasspath().pluginClasspath
         val weaverClasspath = listOf(jarFile)
