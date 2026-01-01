@@ -32,7 +32,7 @@ public class Logger {
     }
 
     public static Builder create(@NonNull Class<?> clazz) {
-        return new Builder().name(clazz.getName());
+        return new Builder().name(clazz.getSimpleName());
     }
 
     @Contract("_, _ -> new")
