@@ -41,8 +41,6 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
     public Set<PluginCandidate> execute(Void input, @NonNull LoadContext context) throws PhaseException {
         Set<PluginCandidate> candidates = new HashSet<>();
         File pluginsDirectory = context.pluginsDirectory();
-        File cacheDirectory = context.cacheDirectory();
-        Util.clearDirectory(cacheDirectory); // cleanup directory
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(
             pluginsDirectory.toPath().toAbsolutePath(),

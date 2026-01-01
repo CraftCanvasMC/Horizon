@@ -1,5 +1,5 @@
 [versions]
-guava = "33.4.0-jre"
+guava = "33.5.0-jre"
 gson = "2.13.2"
 snakeyaml = "2.3"
 jackson = "2.16.0"
@@ -8,7 +8,6 @@ mixin-extras = "0.5.0"
 asm = "9.9.1"
 tinylog = "2.7.0"
 paper-dev-bundle = "1.21.11-R0.1-SNAPSHOT"
-shadow = "9.2.2"
 userdev = "2.3.12-SNAPSHOT"
 jspecify = "1.0.0"
 junit = "6.0.0"
@@ -43,7 +42,6 @@ asm = [ "asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util" ]
 tinylog = [ "tinylog-api", "tinylog-impl" ]
 
 [plugins]
-shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 blossom = { id = "net.kyori.blossom", version = "2.2.0" }
 spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
 plugin-publish = { id = "com.gradle.plugin-publish", version = "1.2.0" }

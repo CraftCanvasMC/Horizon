@@ -1,9 +1,9 @@
 package io.canvasmc.horizon.util.tree;
 
+import io.canvasmc.horizon.util.Util;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -25,45 +25,9 @@ public final class TypeConverterRegistry {
         registerDefaults();
     }
 
-    private static @NonNull File getOrCreateFile(String path) {
-        File file = new File(path);
-        boolean isDirectory = path.endsWith("/") || path.endsWith("\\") || !hasFileExtension(path);
-
-        try {
-            File parent = file.getParentFile();
-            if (parent != null && !parent.exists()) {
-                if (!parent.mkdirs() && !parent.exists()) {
-                    throw new IOException("Failed to create directories: " + parent);
-                }
-            }
-
-            if (!file.exists()) {
-                if (isDirectory) {
-                    if (!file.mkdirs() && !file.exists()) {
-                        throw new IOException("Failed to create directory: " + file);
-                    }
-                } else {
-                    if (!file.createNewFile()) {
-                        throw new IOException("Failed to create file: " + file);
-                    }
-                }
-            }
-
-            return file;
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to get or create file: " + path, e);
-        }
-    }
-
-    private static boolean hasFileExtension(String path) {
-        String name = new File(path).getName();
-        int lastDot = name.lastIndexOf('.');
-        return lastDot > 0 && lastDot < name.length() - 1;
-    }
-
     private void registerDefaults() {
         register(String.class, Object::toString);
-        register(File.class, obj -> getOrCreateFile(obj.toString()));
+        register(File.class, obj -> Util.getOrCreateFile(obj.toString()));
         register(UUID.class, obj -> UUID.fromString(obj.toString()));
         register(Integer.class, obj -> {
             if (obj instanceof Number n) return n.intValue();

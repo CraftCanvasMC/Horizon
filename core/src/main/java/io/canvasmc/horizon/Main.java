@@ -1,16 +1,21 @@
 package io.canvasmc.horizon;
 
-import com.google.gson.GsonBuilder;
 import io.canvasmc.horizon.instrument.JvmAgent;
+import io.canvasmc.horizon.resolver.Artifact;
+import io.canvasmc.horizon.resolver.DependencyResolver;
+import io.canvasmc.horizon.resolver.Repository;
+import io.canvasmc.horizon.util.Util;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
-import static io.canvasmc.horizon.Horizon.LOGGER;
 
 public class Main {
 
@@ -19,22 +24,47 @@ public class Main {
         if (Boolean.getBoolean("paper.useLegacyPluginLoading")) {
             throw new IllegalStateException("Legacy plugin loading is unsupported with Horizon");
         }
-        LOGGER.info("Building Horizon version metadata...");
-        Map<String, Object> metadata = new HashMap<>();
+        String version;
+        JarFile sourceJar;
         try {
             //noinspection resource
-            JarFile sourceJar = new JarFile(Main.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+            sourceJar = new JarFile(Main.class.getProtectionDomain().getCodeSource().getLocation().getFile());
             Manifest manifest = sourceJar.getManifest();
-            for (Map.Entry<Object, Object> entry : manifest.getMainAttributes().entrySet()) {
-                metadata.put(entry.getKey().toString(), entry.getValue());
-            }
+            version = manifest.getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);
         } catch (IOException e) {
             throw new RuntimeException("Couldn't fetch source jar", e);
         }
-        LOGGER.debug("Metadata:\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(metadata));
-        LOGGER.debug("Launch args: {}", Arrays.toString(args));
+
+        List<Path> initialClasspath = new ArrayList<>();
+
+        // first, boot dependency resolver so we can actually run things without dying
+        new DependencyResolver(new File("libraries"), () -> {
+            return Util.parseFrom(sourceJar, "META-INF/artifacts.context", (line) -> {
+                String[] split = line.split("\t");
+                String id = split[0];
+                String path = split[1];
+                String sha256 = split[2];
+                return new Artifact(id, path, sha256);
+            }, Artifact.class);
+        }, () -> {
+            return Util.parseFrom(sourceJar, "META-INF/repositories.context", (line) -> {
+                String[] split = line.split("\t");
+                String name = split[0];
+                URL url = URI.create(split[1]).toURL();
+                return new Repository(name, url);
+            }, Repository.class);
+        }).resolve().forEach((jar) -> {
+            initialClasspath.add(jar.ioFile().toPath());
+            JvmAgent.addJar(jar.jarFile());
+        });
 
         // load properties and start horizon init
-        new Horizon(ServerProperties.load(args), metadata.get("Implementation-Version").toString(), JvmAgent.INSTRUMENTATION, args);
+        ServerProperties properties = ServerProperties.load(args);
+
+        // cleanup directory for plugins
+        File cacheDirectory = properties.cacheLocation();
+        Util.clearDirectory(cacheDirectory);
+
+        new Horizon(properties, version, JvmAgent.INSTRUMENTATION, initialClasspath, args);
     }
 }

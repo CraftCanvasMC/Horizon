@@ -1,21 +1,33 @@
-import java.time.LocalDateTime
+import java.security.MessageDigest
 
 plugins {
-    id("com.gradleup.shadow")
     id("io.canvasmc.weaver.userdev")
 }
 
 val paperMavenPublicUrl = "https://repo.papermc.io/repository/maven-public/"
 val jdkVersion = libs.versions.java.get()
 
-// configuration that shades and includes as an implementation for the core project
+// configuration that includes as an implementation for the core project and stores fetch data
 val include by configurations.creating {
-    configurations.implementation.get().extendsFrom(this)
+    isTransitive = true // ensure transitive dependencies are included
+    isCanBeConsumed = false
+    isCanBeResolved = false
+}
+
+configurations.implementation.get().extendsFrom(include)
+
+val includeResolvable by configurations.creating {
+    extendsFrom(include)
+    isCanBeConsumed = false
+    isCanBeResolved = true
 }
 
 repositories {
     mavenCentral()
-    maven(paperMavenPublicUrl)
+    maven {
+        name = "Paper"
+        url = uri(paperMavenPublicUrl)
+    }
 }
 
 dependencies {
@@ -24,80 +36,20 @@ dependencies {
     include(libs.snakeyaml)
     include(libs.guava)
     include(libs.jackson)
+    // logger libraries
+    include(libs.bundles.tinylog)
+    // asm
+    include(libs.bundles.asm)
+    // mixin libraries
+    include(libs.bundles.mixin)
+    // paperclip patching
+    include(libs.jbsdiff)
 
     // annotations -- compileOnly
     compileOnly(libs.jspecify)
 
-    // logger libraries
-    implementation(libs.bundles.tinylog)
-
-    // asm
-    include(libs.bundles.asm)
-
-    // mixin libraries
-    implementation(libs.bundles.mixin)
-
-    // paperclip patching
-    include(libs.jbsdiff)
-
     // minecraft setup
     paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
-}
-
-tasks.jar {
-    archiveClassifier.set("unshaded")
-}
-
-tasks.shadowJar {
-    configurations.set(project.configurations.runtimeClasspath.map { listOf(it) })
-    filesMatching("META-INF/services/**") {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    }
-
-    val basePackage = "horizon.libs"
-
-    // this is realistically a *rough* relocation. this won't relocate
-    // everything, though we can't have it relocate everything
-    include.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
-        val group = artifact.moduleVersion.id.group
-        val rootPackage = group.split(".").take(2).joinToString(".")
-
-        relocate(rootPackage, "$basePackage.$rootPackage")
-    }
-
-    // relocate license files
-    eachFile {
-        if (path.endsWith("LICENSE.txt") || path.endsWith("LICENSE") ||
-            path.endsWith("NOTICE.txt") || path.endsWith("NOTICE")
-        ) {
-            path = "horizon/libs/licenses/$name"
-        }
-    }
-
-    archiveClassifier.set("")
-    mergeServiceFiles()
-
-    // configure manifest
-    val version = fetchVersion()
-    val main = project.properties["main-class"]
-    val launchAgent = project.properties["instrumentation"]
-    manifest {
-        attributes(
-            mapOf(
-                "Main-Class" to "$main",
-                "Implementation-Title" to "Horizon",
-                "Implementation-Version" to version,
-                "Specification-Title" to "Horizon",
-                "Specification-Version" to version,
-                "Specification-Vendor" to "CanvasMC Team",
-                "Brand-Id" to "canvasmc:horizon",
-                // jvm agent
-                "Launcher-Agent-Class" to "$launchAgent",
-                "Can-Redefine-Classes" to true,
-                "Can-Retransform-Classes" to true
-            )
-        )
-    }
 }
 
 java {
@@ -117,19 +69,41 @@ fun fetchVersion(): Provider<String> {
 }
 
 tasks.register<Jar>("createPublicationJar") {
+    dependsOn("collectIncludedDependencies")
     // `horizon-build.{ver}.jar`
     // ver == local ? "local" : build number
     val version = fetchVersion()
 
-    archiveFileName.set(version.map { "horizon-build.$it.jar" })
-
-    from(zipTree(tasks.shadowJar.flatMap { it.archiveFile }))
-    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
-
-    // copy manifest from shade
+    // configure manifest
+    val main = project.properties["main-class"]
+    val launchAgent = project.properties["instrumentation"]
     manifest {
-        attributes(tasks.shadowJar.get().manifest.attributes)
+        attributes(
+            mapOf(
+                "Main-Class" to "$main",
+                "Implementation-Title" to "Horizon",
+                "Implementation-Version" to version,
+                "Specification-Title" to "Horizon",
+                "Specification-Version" to version,
+                "Specification-Vendor" to "CanvasMC Team",
+                "Brand-Id" to "canvasmc:horizon",
+                // jvm agent
+                "Launcher-Agent-Class" to "$launchAgent",
+                "Can-Redefine-Classes" to true,
+                "Can-Retransform-Classes" to true
+            )
+        )
     }
+
+    archiveFileName.set(version.map { "horizon-build.$it.jar" })
+    from(tasks.named<Jar>("jar").map { zipTree(it.archiveFile) })
+
+    from(layout.buildDirectory.dir("included-deps")) {
+        include("*.context")
+        into("META-INF/")
+    }
+
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
 
     // include horizon license
     val rootLicense = rootProject.file("LICENSE")
@@ -139,46 +113,36 @@ tasks.register<Jar>("createPublicationJar") {
             rename { "HORIZON_LICENSE" }
         }
     }
+}
 
-    val shadowConf = configurations.getByName("shadow")
+tasks.register<CollectDependenciesTask>("collectIncludedDependencies") {
+    artifactFiles.from(includeResolvable)
 
-    val librariesInfo = buildString {
-        appendLine("Horizon - Shaded Libraries Information")
-        appendLine("=========================================")
-        appendLine()
-        appendLine("Build Version: ${version.get()}")
-        appendLine("Build Date: ${LocalDateTime.now()}")
-        appendLine()
-        appendLine("Shaded Libraries:")
-        appendLine("-----------------")
-
-        shadowConf.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
-            val group = artifact.moduleVersion.id.group
-            val name = artifact.moduleVersion.id.name
-            val artifactVersion = artifact.moduleVersion.id.version
-            val rootPackage = group.split(".").take(2).joinToString(".")
-
-            appendLine()
-            appendLine("Library: $group:$name:$artifactVersion")
-            appendLine("  Original Package: $rootPackage")
-            appendLine("  Relocated To: horizon.libs.$rootPackage")
+    resolvedArtifactsData.set(provider {
+        includeResolvable.resolvedConfiguration.resolvedArtifacts.map { artifact ->
+            CollectDependenciesTask.ArtifactData(
+                group = artifact.moduleVersion.id.group,
+                name = artifact.moduleVersion.id.name,
+                version = artifact.moduleVersion.id.version,
+                fileName = artifact.file.name,
+                filePath = artifact.file.absolutePath
+            )
         }
+    })
 
-        appendLine()
-        appendLine("=========================================")
-        appendLine("Note: All libraries have been relocated to the 'horizon.libs' package")
-        appendLine("to avoid conflicts with other plugins or server dependencies.")
-        appendLine()
-        appendLine("Horizon's license: META-INF/HORIZON_LICENSE")
-        appendLine("Shaded library licenses: horizon/libs/licenses/")
-    }
+    repositoryData.set(provider {
+        project.repositories.mapNotNull { repo ->
+            when (repo) {
+                is MavenArtifactRepository -> CollectDependenciesTask.RepositoryData(
+                    name = repo.name,
+                    url = repo.url.toString()
+                )
+                else -> null
+            }
+        }
+    })
 
-    val infoFile = temporaryDir.resolve("SHADED_LIBRARIES.txt")
-    infoFile.writeText(librariesInfo)
-
-    from(infoFile) {
-        into("META-INF")
-    }
+    outputDir.set(layout.buildDirectory.dir("included-deps"))
 }
 
 extensions.configure<PublishingExtension> {
@@ -195,5 +159,80 @@ extensions.configure<PublishingExtension> {
         create<MavenPublication>("mavenJava") {
             artifact(tasks.named<Jar>("createPublicationJar"))
         }
+    }
+}
+
+abstract class CollectDependenciesTask : DefaultTask() {
+    @get:InputFiles
+    @get:Classpath
+    abstract val artifactFiles: ConfigurableFileCollection
+
+    @get:Input
+    abstract val resolvedArtifactsData: ListProperty<ArtifactData>
+
+    @get:Input
+    abstract val repositoryData: ListProperty<RepositoryData>
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    data class ArtifactData(
+        val group: String,
+        val name: String,
+        val version: String,
+        val fileName: String,
+        val filePath: String
+    ) : java.io.Serializable
+
+    data class RepositoryData(
+        val name: String,
+        val url: String
+    ) : java.io.Serializable
+
+    @TaskAction
+    fun collect() {
+        val destDir = outputDir.get().asFile
+        destDir.mkdirs()
+
+        val artifacts = resolvedArtifactsData.get()
+        val repositories = repositoryData.get()
+        val filesByName = artifactFiles.files.associateBy { it.name }
+
+        val metadataLines = mutableListOf<String>()
+
+        artifacts.forEach { data ->
+            val file = filesByName[data.fileName]
+            if (file != null && file.exists()) {
+                val sha256 = calculateSha256(file)
+
+                val group = data.group.replace('.', '/')
+                val mavenPath = "$group/${data.name}/${data.version}/${data.fileName}"
+
+                metadataLines.add("${data.group}:${data.name}:${data.version}\t$mavenPath\t$sha256")
+            }
+        }
+
+        val artifactsFile = destDir.resolve("artifacts.context")
+        artifactsFile.writeText(metadataLines.joinToString("\n"))
+
+        metadataLines.clear()
+        repositories.forEach { repo ->
+            metadataLines.add("${repo.name}\t${repo.url}")
+        }
+
+        val repoFile = destDir.resolve("repositories.context")
+        repoFile.writeText(metadataLines.joinToString("\n"))
+    }
+
+    private fun calculateSha256(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(8192)
+            var read: Int
+            while (input.read(buffer).also { read = it } > 0) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 }

@@ -4,11 +4,17 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.*;
+import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static io.canvasmc.horizon.Horizon.LOGGER;
 
@@ -131,5 +137,58 @@ public class Util {
                 file.delete();
             });
         }
+    }
+
+    private static boolean hasFileExtension(String path) {
+        String name = new File(path).getName();
+        int lastDot = name.lastIndexOf('.');
+        return lastDot > 0 && lastDot < name.length() - 1;
+    }
+
+    public static @NonNull File getOrCreateFile(String path) {
+        File file = new File(path);
+        boolean isDirectory = path.endsWith("/") || path.endsWith("\\") || !hasFileExtension(path);
+
+        try {
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                if (!parent.mkdirs() && !parent.exists()) {
+                    throw new IOException("Failed to create directories: " + parent);
+                }
+            }
+
+            if (!file.exists()) {
+                if (isDirectory) {
+                    if (!file.mkdirs() && !file.exists()) {
+                        throw new IOException("Failed to create directory: " + file);
+                    }
+                } else {
+                    if (!file.createNewFile()) {
+                        throw new IOException("Failed to create file: " + file);
+                    }
+                }
+            }
+
+            return file;
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to get or create file: " + path, e);
+        }
+    }
+
+    public static <E> E @NonNull [] parseFrom(@NonNull JarFile sourceJar, String entryName, ExceptionCatchingFunction<String, E> parser, Class<E> clazz) {
+        List<E> elements = new ArrayList<>();
+        JarEntry entry = sourceJar.getJarEntry(entryName);
+        try (InputStream stream = sourceJar.getInputStream(entry)) {
+            InputStreamReader isr = new InputStreamReader(stream, StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while ((line = br.readLine()) != null) {
+                elements.add(parser.transform(line));
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to read contents from \"" + sourceJar.getName() + ":" + entryName + "\"", e);
+        }
+        //noinspection unchecked
+        return elements.toArray((E[]) Array.newInstance(clazz, 0));
     }
 }

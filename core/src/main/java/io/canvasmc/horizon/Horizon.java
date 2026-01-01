@@ -24,7 +24,6 @@ import java.lang.instrument.Instrumentation;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarFile;
 
@@ -44,15 +43,18 @@ public class Horizon {
     final String version;
     private @NonNull
     final Instrumentation instrumentation;
+    private
+    final List<Path> initialClasspath;
     private @NonNull
     final FileJar paperclipJar;
     private PluginTree plugins;
     private PaperclipVersion paperclipVersion;
 
-    public Horizon(@NonNull ServerProperties properties, @NonNull String version, @NonNull Instrumentation instrumentation, String @NonNull [] providedArgs) {
+    public Horizon(@NonNull ServerProperties properties, @NonNull String version, @NonNull Instrumentation instrumentation, List<Path> initialClasspath, String @NonNull [] providedArgs) {
         this.properties = properties;
         this.version = version;
         this.instrumentation = instrumentation;
+        this.initialClasspath = initialClasspath;
 
         INSTANCE = this;
         try {
@@ -152,13 +154,12 @@ public class Horizon {
         this.plugins = EntrypointLoader.INSTANCE.init();
 
         final URL[] unpacked = prepareHorizonServer();
-        final List<Path> initalClasspath = new ArrayList<>();
 
         for (URL url : unpacked) {
             try {
                 Path asPath = Path.of(url.toURI());
                 JvmAgent.addJar(asPath);
-                initalClasspath.add(asPath);
+                initialClasspath.add(asPath);
             } catch (URISyntaxException | IOException e) {
                 throw new RuntimeException("Couldn't unpack and attach jar: " + url, e);
             }
@@ -166,7 +167,7 @@ public class Horizon {
 
         for (HorizonPlugin plugin : this.plugins.getAll()) {
             // add all plugins to initial classpath
-            initalClasspath.add(plugin.file().ioFile().toPath());
+            initialClasspath.add(plugin.file().ioFile().toPath());
 
             // add all nested libraries like we are unpacking them as normal
             for (FileJar nestedLibrary : plugin.nestedData().libraryEntries()) {
@@ -174,7 +175,7 @@ public class Horizon {
                     LOGGER.info("Adding nested library jar '{}'", nestedLibrary.ioFile().getName());
                     Path asPath = Path.of(nestedLibrary.ioFile().toURI());
                     JvmAgent.addJar(asPath);
-                    initalClasspath.add(asPath);
+                    initialClasspath.add(asPath);
                 } catch (IOException e) {
                     throw new RuntimeException("Couldn't attach jar: " + nestedLibrary.jarFile().getName(), e);
                 }
@@ -182,12 +183,12 @@ public class Horizon {
         }
 
         try {
-            initalClasspath.add(Path.of(Horizon.class.getProtectionDomain().getCodeSource().getLocation().toURI()));
+            initialClasspath.add(Path.of(Horizon.class.getProtectionDomain().getCodeSource().getLocation().toURI()));
 
             MixinLaunch.launch(
                 new MixinLaunch.LaunchContext(
                     providedArgs,
-                    initalClasspath.stream()
+                    initialClasspath.stream()
                         .map(Path::toAbsolutePath)
                         .toList().toArray(new Path[0]),
                     Path.of(unpacked[0].toURI())
