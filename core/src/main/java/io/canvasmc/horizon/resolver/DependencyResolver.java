@@ -1,5 +1,6 @@
 package io.canvasmc.horizon.resolver;
 
+import io.canvasmc.horizon.Horizon;
 import io.canvasmc.horizon.util.FileJar;
 import io.canvasmc.horizon.util.Util;
 
@@ -26,14 +27,10 @@ public class DependencyResolver {
         this.repositorySupplier = repositorySupplier;
     }
 
-    private static void log(String str) {
-        System.out.println(str);
-    }
-
     public Stream<FileJar> resolve() {
         // we need to gather artifacts first, then repos, iterate over artifacts
         // and for each repo we try and resolve until we can't anymore
-        log("Resolving dependencies...");
+        Horizon.LOGGER.info("Resolving dependencies...");
 
         // get artifacts and repos
         Artifact[] artifacts = this.artifactSupplier.get();
