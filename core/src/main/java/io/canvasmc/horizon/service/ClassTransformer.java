@@ -1,11 +1,11 @@
 package io.canvasmc.horizon.service;
 
 import com.google.common.collect.ImmutableList;
-import io.canvasmc.horizon.Horizon;
 import io.canvasmc.horizon.ember.TransformPhase;
 import io.canvasmc.horizon.ember.TransformationService;
 import io.canvasmc.horizon.transformer.AccessTransformationImpl;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
@@ -49,7 +49,7 @@ public final class ClassTransformer {
         return (T) services.get(type);
     }
 
-    public @NonNull Collection<TransformationService> services() {
+    public @NonNull @UnmodifiableView Collection<TransformationService> services() {
         return Collections.unmodifiableCollection(this.services.values());
     }
 
@@ -61,7 +61,7 @@ public final class ClassTransformer {
             return input;
         }
 
-        ClassNode node = new ClassNode(Horizon.ASM_VERSION);
+        ClassNode node = new ClassNode(MixinTransformationImpl.ASM_VERSION);
 
         final Type type = Type.getObjectType(internalName);
         if (input.length > 0) {

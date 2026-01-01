@@ -1,11 +1,11 @@
 package io.canvasmc.horizon.service;
 
+import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.logger.Logger;
 import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.logging.Level;
 import org.spongepowered.asm.logging.LoggerAdapterAbstract;
-import org.tinylog.Logger;
-import org.tinylog.TaggedLogger;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,11 +14,11 @@ public class HorizonMixinLogger extends LoggerAdapterAbstract {
 
     private static final Map<String, ILogger> LOGGERS = new ConcurrentHashMap<>();
 
-    private final TaggedLogger logger;
+    private final Logger logger;
 
     HorizonMixinLogger(@NonNull String id) {
         super(id);
-        this.logger = Logger.tag(id);
+        this.logger = Logger.fork(Horizon.LOGGER, id);
     }
 
     public static @NonNull ILogger get(@NonNull String name) {

@@ -118,6 +118,9 @@ logs, which will look similar to this:
         - testplugin 1.0.0-SNAPSHOT
 ```
 
+> [!NOTE]
+> You can enable debug logging for Horizon with `-DHorizon.debug=true`
+
 Another way is by checking the `/plugins` command, which is replaced with the Horizon internal mixins to include Horizon
 plugins.
 

@@ -36,8 +36,6 @@ dependencies {
     include(libs.snakeyaml)
     include(libs.guava)
     include(libs.jackson)
-    // logger libraries
-    include(libs.bundles.tinylog)
     // asm
     include(libs.bundles.asm)
     // mixin libraries

@@ -2,6 +2,7 @@ package io.canvasmc.horizon.plugin;
 
 import io.canvasmc.horizon.Horizon;
 import io.canvasmc.horizon.ember.EmberMixinService;
+import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.plugin.phase.impl.BuilderPhase;
@@ -17,8 +18,6 @@ import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
 import org.spongepowered.asm.mixin.transformer.Config;
 import org.spongepowered.asm.service.MixinService;
-import org.tinylog.Logger;
-import org.tinylog.TaggedLogger;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -38,7 +37,7 @@ public class EntrypointLoader {
     // Note: we use "?" here because we don't want to load the JavaPlugin ref before we load the game
     //     and only contains mappings for horizon plugins
     public static final Map<String, Object> MAIN2JAVA_PLUGIN = new ConcurrentHashMap<>();
-    public static final TaggedLogger LOGGER = Logger.tag("pluginloader");
+    public static final Logger LOGGER = Logger.fork(Horizon.LOGGER, "pluginloader");
 
     private static final List<Phase<?, ?>> PHASES = List.of(
         new DiscoveryPhase(),

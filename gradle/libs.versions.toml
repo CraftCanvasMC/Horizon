@@ -6,7 +6,6 @@ jackson = "2.16.0"
 mixin = "0.17.0+mixin.0.8.7"
 mixin-extras = "0.5.0"
 asm = "9.9.1"
-tinylog = "2.7.0"
 paper-dev-bundle = "1.21.11-R0.1-SNAPSHOT"
 userdev = "2.3.12-SNAPSHOT"
 jspecify = "1.0.0"
@@ -26,8 +25,6 @@ asm-analysis = { module = "org.ow2.asm:asm-analysis", version.ref = "asm" }
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
 asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }
-tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
-tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
 userdev = { module = "io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin", version.ref = "userdev" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 
@@ -39,7 +36,6 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 [bundles]
 mixin = [ "fabric-mixin", "mixin-extras" ]
 asm = [ "asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util" ]
-tinylog = [ "tinylog-api", "tinylog-impl" ]
 
 [plugins]
 blossom = { id = "net.kyori.blossom", version = "2.2.0" }

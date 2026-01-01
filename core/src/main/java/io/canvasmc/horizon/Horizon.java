@@ -2,6 +2,9 @@ package io.canvasmc.horizon;
 
 import io.canvasmc.horizon.instrument.JvmAgent;
 import io.canvasmc.horizon.instrument.patch.ServerPatcherEntrypoint;
+import io.canvasmc.horizon.logger.Level;
+import io.canvasmc.horizon.logger.Logger;
+import io.canvasmc.horizon.logger.stream.OutStream;
 import io.canvasmc.horizon.plugin.EntrypointLoader;
 import io.canvasmc.horizon.plugin.PluginTree;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
@@ -12,9 +15,6 @@ import io.canvasmc.horizon.util.PaperclipVersion;
 import io.canvasmc.horizon.util.tree.Format;
 import io.canvasmc.horizon.util.tree.ObjectTree;
 import org.jspecify.annotations.NonNull;
-import org.objectweb.asm.Opcodes;
-import org.tinylog.Logger;
-import org.tinylog.TaggedLogger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,8 +32,13 @@ import java.util.jar.JarFile;
  * that runs the full startup and bootstrap process
  */
 public class Horizon {
-    public static final int ASM_VERSION = Opcodes.ASM9;
-    public static final TaggedLogger LOGGER = Logger.tag("main");
+    public static final boolean DEBUG = Boolean.getBoolean("Horizon.debug");
+    public static final Logger LOGGER = Logger.create()
+        .name("main")
+        .out(OutStream.CONSOLE.allowColors().build())
+        .pattern("[{date: HH:mm:ss}] [{level}" + (DEBUG ? "/{class}" : "") + "]: {message}")
+        .level(DEBUG ? Level.DEBUG : Level.INFO)
+        .build();
     public static HorizonPlugin INTERNAL_PLUGIN;
     public static Horizon INSTANCE;
 

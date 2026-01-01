@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
@@ -110,7 +111,7 @@ public final class MixinLaunch {
         try {
             if (Files.exists(context.gameJar)) {
                 try (final JarFile file = new JarFile(context.gameJar.toFile())) {
-                    String target = file.getManifest().getMainAttributes().getValue("Main-Class");
+                    String target = file.getManifest().getMainAttributes().getValue(Attributes.Name.MAIN_CLASS);
                     LOGGER.info("Launching {}", target);
                     Thread runThread = new Thread(() -> {
                         try {

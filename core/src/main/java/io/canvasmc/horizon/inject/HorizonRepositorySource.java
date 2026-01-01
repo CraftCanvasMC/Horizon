@@ -1,6 +1,7 @@
 package io.canvasmc.horizon.inject;
 
 import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.*;
@@ -14,8 +15,6 @@ import net.minecraft.world.level.validation.DirectoryValidator;
 import net.minecraft.world.level.validation.ForbiddenSymlinkInfo;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import org.tinylog.Logger;
-import org.tinylog.TaggedLogger;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -33,7 +32,7 @@ import java.util.function.Consumer;
  * @author dueris
  */
 public record HorizonRepositorySource(DirectoryValidator validator) implements RepositorySource {
-    private static final TaggedLogger LOGGER = Logger.tag("datapack-injection");
+    private static final Logger LOGGER = Logger.fork(Horizon.LOGGER, "datapack-injection");
     private static final PackSelectionConfig DISCOVERED_PACK_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.TOP, false);
 
     private static @NonNull String nameFromPath(@NonNull Path path) {

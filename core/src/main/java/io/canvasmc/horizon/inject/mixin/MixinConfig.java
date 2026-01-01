@@ -1,12 +1,12 @@
 package io.canvasmc.horizon.inject.mixin;
 
+import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.logger.Logger;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.tinylog.Logger;
-import org.tinylog.TaggedLogger;
 
 import java.util.List;
 import java.util.Properties;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public final class MixinConfig implements IMixinConfigPlugin {
 
-    private static final TaggedLogger LOGGER = Logger.tag("horizon-mixin");
+    private static final Logger LOGGER = Logger.fork(Horizon.LOGGER, "horizon-mixin");
 
     private static final String MIXIN_ROOT = "io.canvasmc.horizon.inject.mixin.";
     private static final String DISABLE_PREFIX = "Horizon.disable.mixin.";

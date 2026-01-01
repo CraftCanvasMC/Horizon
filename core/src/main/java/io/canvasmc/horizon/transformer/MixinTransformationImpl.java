@@ -1,11 +1,11 @@
 package io.canvasmc.horizon.transformer;
 
-import io.canvasmc.horizon.Horizon;
 import io.canvasmc.horizon.ember.TransformPhase;
 import io.canvasmc.horizon.ember.TransformationService;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -15,6 +15,8 @@ import org.spongepowered.asm.service.ISyntheticClassRegistry;
 import org.spongepowered.asm.transformers.MixinClassReader;
 
 public final class MixinTransformationImpl implements TransformationService {
+    public static final int ASM_VERSION = Opcodes.ASM9;
+
     private IMixinTransformerFactory transformerFactory;
     private IMixinTransformer transformer;
     private ISyntheticClassRegistry registry;
@@ -54,7 +56,7 @@ public final class MixinTransformationImpl implements TransformationService {
 
     public @NonNull ClassNode classNode(final @NonNull String canonicalName, final @NonNull String internalName, final byte @NonNull [] input, final int readerFlags) throws ClassNotFoundException {
         if (input.length != 0) {
-            final ClassNode node = new ClassNode(Horizon.ASM_VERSION);
+            final ClassNode node = new ClassNode(ASM_VERSION);
             final ClassReader reader = new MixinClassReader(input, canonicalName);
             reader.accept(node, readerFlags);
             return node;
@@ -62,7 +64,7 @@ public final class MixinTransformationImpl implements TransformationService {
 
         final Type type = Type.getObjectType(internalName);
         if (this.shouldGenerateClass(type)) {
-            final ClassNode node = new ClassNode(Horizon.ASM_VERSION);
+            final ClassNode node = new ClassNode(ASM_VERSION);
             if (this.generateClass(type, node)) return node;
         }
 
