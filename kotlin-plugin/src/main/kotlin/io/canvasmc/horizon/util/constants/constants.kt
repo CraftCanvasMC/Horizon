@@ -20,6 +20,8 @@ const val INCLUDE_MIXIN_PLUGIN = "includeMixinPlugin"
 const val INCLUDE_PLUGIN = "includePlugin"
 const val INCLUDE_LIBRARY = "includeLibrary"
 const val CACHE_PATH = "caches"
+const val HORIZON_API_GROUP = "io.canvasmc.horizon"
+const val HORIZON_API_ARTIFACT_ID = "core"
 private const val TASK_CACHE = "$HORIZON_NAME/taskCache"
 
 object Plugins {

@@ -19,7 +19,6 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
@@ -56,16 +55,13 @@ abstract class Horizon : Plugin<Project> {
             }
         }
 
-        val horizonApi = target.configurations.register(HORIZON_API_CONFIG)
+        // configuration for Horizon API
+        target.configurations.register(HORIZON_API_CONFIG)
 
         // configurations for JiJ
-        val includeMixinPlugin = target.configurations.register(INCLUDE_MIXIN_PLUGIN)
-        val includePlugin = target.configurations.register(INCLUDE_PLUGIN)
-        val includeLibrary = target.configurations.register(INCLUDE_LIBRARY)
-
-        target.configurations.named(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME).configure {
-            extendsFrom(includeMixinPlugin.get(), includePlugin.get(), includeLibrary.get(), horizonApi.get())
-        }
+        target.configurations.register(INCLUDE_MIXIN_PLUGIN)
+        target.configurations.register(INCLUDE_PLUGIN)
+        target.configurations.register(INCLUDE_LIBRARY)
 
         target.dependencies.extensions.create(
             HORIZON_NAME,
@@ -92,8 +88,23 @@ abstract class Horizon : Plugin<Project> {
             if (ext.injectCanvasRepository.get()) {
                 maven(CANVAS_MAVEN_RELEASES_REPO_URL) {
                     name = HORIZON_API_REPO_NAME
+                    content { includeModule(HORIZON_API_GROUP, HORIZON_API_ARTIFACT_ID) }
                 }
             }
+        }
+
+        // set up horizon api dependency
+        ext.addHorizonApiDependencyTo.get().forEach {
+            it.extendsFrom(configurations.getByName(HORIZON_API_CONFIG))
+        }
+
+        // add the JiJ dependencies to appropriate configurations
+        ext.addIncludedDependenciesTo.get().forEach {
+            it.extendsFrom(
+                configurations.getByName(INCLUDE_MIXIN_PLUGIN),
+                configurations.getByName(INCLUDE_PLUGIN),
+                configurations.getByName(INCLUDE_LIBRARY)
+            )
         }
 
         val mergeAccessTransformers by tasks.registering<MergeAccessTransformers> {

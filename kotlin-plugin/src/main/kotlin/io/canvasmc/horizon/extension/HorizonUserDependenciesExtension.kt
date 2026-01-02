@@ -1,6 +1,8 @@
 package io.canvasmc.horizon.extension
 
+import io.canvasmc.horizon.util.constants.HORIZON_API_ARTIFACT_ID
 import io.canvasmc.horizon.util.constants.HORIZON_API_CONFIG
+import io.canvasmc.horizon.util.constants.HORIZON_API_GROUP
 import org.gradle.api.Action
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.dsl.DependencyFactory
@@ -27,8 +29,8 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun horizonApi(
         version: String? = null,
-        group: String = "io.canvasmc.horizon",
-        artifactId: String = "core",
+        group: String = HORIZON_API_GROUP,
+        artifactId: String = HORIZON_API_ARTIFACT_ID,
         horizonApiConfigurationName: String = HORIZON_API_CONFIG,
         configurationAction: Action<ExternalModuleDependency> = nullAction()
     ): ExternalModuleDependency {
@@ -51,7 +53,11 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
         version: Provider<String>,
         configurationAction: Action<ExternalModuleDependency> = nullAction()
     ) {
-        dependencies.addProvider(HORIZON_API_CONFIG, version.map { "io.canvasmc:horizon:$it" }, configurationAction)
+        dependencies.addProvider(
+            HORIZON_API_CONFIG,
+            version.map { "$HORIZON_API_GROUP:$HORIZON_API_ARTIFACT_ID:$it" },
+            configurationAction
+        )
     }
 
     /**
@@ -66,8 +72,8 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun horizonApiDependency(
         version: String? = null,
-        group: String = "io.canvasmc.horizon",
-        artifactId: String = "core",
+        group: String = HORIZON_API_GROUP,
+        artifactId: String = HORIZON_API_ARTIFACT_ID,
         configurationAction: Action<ExternalModuleDependency> = nullAction()
     ): ExternalModuleDependency {
         val dep = dependencyFactory.create(buildDependencyString(group, artifactId, version))
