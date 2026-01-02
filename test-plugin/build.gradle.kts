@@ -11,7 +11,7 @@ dependencies {
     paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
 
     // add horizon api manually from the core project
-    add("horizonHorizonApiConfig", project.files(coreJar.flatMap { (it as Jar).archiveFile }))
+    add("horizonHorizonApiConfig", projects.core)
 }
 
 horizon {

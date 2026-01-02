@@ -15,6 +15,8 @@ val include by configurations.creating {
     isCanBeResolved = false
 }
 
+include.extendsFrom(configurations.api.get())
+
 val includeResolvable by configurations.creating {
     extendsFrom(include)
     isCanBeConsumed = false
@@ -38,7 +40,7 @@ dependencies {
     // asm
     include(libs.bundles.asm)
     // mixin libraries
-    include(libs.bundles.mixin)
+    api(libs.bundles.mixin)
     // paperclip patching
     include(libs.jbsdiff)
 

@@ -6,8 +6,8 @@ public class HorizonTestPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        getLog4JLogger().info("Test1: {}", JavaPlugin.getPlugin(HorizonTestPlugin.class).getName());
-        getLog4JLogger().info("Test2: {}", JavaPlugin.getProvidingPlugin(HorizonTestPlugin.class).getName());
+        getLogger().info("Test1: " + JavaPlugin.getPlugin(HorizonTestPlugin.class).getName());
+        getLogger().info("Test2: " + JavaPlugin.getProvidingPlugin(HorizonTestPlugin.class).getName());
     }
 
     @Override

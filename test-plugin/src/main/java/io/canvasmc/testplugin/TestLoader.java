@@ -2,12 +2,13 @@ package io.canvasmc.testplugin;
 
 import io.papermc.paper.plugin.loader.PluginClasspathBuilder;
 import io.papermc.paper.plugin.loader.PluginLoader;
-import org.tinylog.Logger;
+import org.jspecify.annotations.NonNull;
 
+@SuppressWarnings("UnstableApiUsage")
 public class TestLoader implements PluginLoader {
 
     @Override
-    public void classloader(PluginClasspathBuilder classpathBuilder) {
-        Logger.info("AFSDJKFLJDJOFIU($*U(*@#*(*@#$@@%$");
+    public void classloader(@NonNull PluginClasspathBuilder classpathBuilder) {
+        System.out.println("AFSDJKFLJDJOFIU($*U(*@#*(*@#$@@%$");
     }
 }
