@@ -32,16 +32,17 @@ repositories {
 }
 
 dependencies {
-    // general libraries
+    // general libraries - packaged in minecraft
     include(libs.gson)
     include(libs.snakeyaml)
     include(libs.guava)
-    include(libs.jackson)
-    // asm
-    include(libs.bundles.asm)
-    // mixin libraries
+
+    // included for plugin dev
+    api(libs.jackson)
+    api(libs.bundles.asm)
     api(libs.bundles.mixin)
-    // paperclip patching
+
+    // for paperclip impl
     include(libs.jbsdiff)
 
     // annotations -- compileOnly
