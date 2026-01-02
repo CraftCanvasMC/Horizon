@@ -68,7 +68,6 @@ fun fetchVersion(): Provider<String> {
 }
 
 tasks.register<Jar>("createPublicationJar") {
-    dependsOn("collectIncludedDependencies")
     // `horizon-build.{ver}.jar`
     // ver == local ? "local" : build number
     val version = fetchVersion()

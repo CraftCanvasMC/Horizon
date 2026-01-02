@@ -4,7 +4,6 @@ plugins {
 }
 
 val jdkVersion = libs.versions.java.get()
-val coreJar = project(":core").tasks.named("createPublicationJar")
 
 dependencies {
     // minecraft setup
