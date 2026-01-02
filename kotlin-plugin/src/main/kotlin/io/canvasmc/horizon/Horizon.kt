@@ -95,15 +95,15 @@ abstract class Horizon : Plugin<Project> {
 
         // set up horizon api dependency
         ext.addHorizonApiDependencyTo.get().forEach {
-            it.extendsFrom(configurations.getByName(HORIZON_API_CONFIG))
+            it.extendsFrom(configurations.named(HORIZON_API_CONFIG).get())
         }
 
         // add the JiJ dependencies to appropriate configurations
         ext.addIncludedDependenciesTo.get().forEach {
             it.extendsFrom(
-                configurations.getByName(INCLUDE_MIXIN_PLUGIN),
-                configurations.getByName(INCLUDE_PLUGIN),
-                configurations.getByName(INCLUDE_LIBRARY)
+                configurations.named(INCLUDE_MIXIN_PLUGIN).get(),
+                configurations.named(INCLUDE_PLUGIN).get(),
+                configurations.named(INCLUDE_LIBRARY).get()
             )
         }
 
