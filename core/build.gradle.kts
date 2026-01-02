@@ -9,12 +9,11 @@ val jdkVersion = libs.versions.java.get()
 
 // configuration that includes as an implementation for the core project and stores fetch data
 val include by configurations.creating {
+    configurations.implementation.get().extendsFrom(this)
     isTransitive = true // ensure transitive dependencies are included
     isCanBeConsumed = false
     isCanBeResolved = false
 }
-
-configurations.implementation.get().extendsFrom(include)
 
 val includeResolvable by configurations.creating {
     extendsFrom(include)
@@ -96,7 +95,7 @@ tasks.register<Jar>("createPublicationJar") {
     archiveFileName.set(version.map { "horizon-build.$it.jar" })
     from(tasks.named<Jar>("jar").map { zipTree(it.archiveFile) })
 
-    from(layout.buildDirectory.dir("included-deps")) {
+    from(collectIncludedDependencies.flatMap { it.outputDir }) {
         include("*.context")
         into("META-INF/")
     }
@@ -113,10 +112,10 @@ tasks.register<Jar>("createPublicationJar") {
     }
 }
 
-tasks.register<CollectDependenciesTask>("collectIncludedDependencies") {
+val collectIncludedDependencies = tasks.register<CollectDependenciesTask>("collectIncludedDependencies") {
     artifactFiles.from(includeResolvable)
 
-    resolvedArtifactsData.set(provider {
+    resolvedArtifactsData.set(project.provider {
         includeResolvable.resolvedConfiguration.resolvedArtifacts.map { artifact ->
             CollectDependenciesTask.ArtifactData(
                 group = artifact.moduleVersion.id.group,
@@ -128,7 +127,7 @@ tasks.register<CollectDependenciesTask>("collectIncludedDependencies") {
         }
     })
 
-    repositoryData.set(provider {
+    repositoryData.set(project.provider {
         project.repositories.mapNotNull { repo ->
             when (repo) {
                 is MavenArtifactRepository -> CollectDependenciesTask.RepositoryData(
@@ -201,7 +200,7 @@ abstract class CollectDependenciesTask : DefaultTask() {
         artifacts.forEach { data ->
             val file = filesByName[data.fileName]
             if (file != null && file.exists()) {
-                val sha256 = calculateSha256(file)
+                val sha256 = file.sha256()
 
                 val group = data.group.replace('.', '/')
                 val mavenPath = "$group/${data.name}/${data.version}/${data.fileName}"
@@ -222,9 +221,9 @@ abstract class CollectDependenciesTask : DefaultTask() {
         repoFile.writeText(metadataLines.joinToString("\n"))
     }
 
-    private fun calculateSha256(file: File): String {
+    private fun File.sha256(): String {
         val digest = MessageDigest.getInstance("SHA-256")
-        file.inputStream().use { input ->
+        inputStream().use { input ->
             val buffer = ByteArray(8192)
             var read: Int
             while (input.read(buffer).also { read = it } > 0) {
