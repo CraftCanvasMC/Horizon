@@ -142,8 +142,10 @@ gradlePlugin {
         id = "io.canvasmc.horizon"
         displayName = "horizon"
         tags.set(listOf("plugins", "mixin", "minecraft", "canvas"))
+        website.set("https://github.com/CraftCanvasMC/Horizon")
+        vcsUrl.set("https://github.com/CraftCanvasMC/Horizon")
         implementationClass = "io.canvasmc.horizon.Horizon"
-        description = "Gradle plugin for developing plugins using the Horizon framework, allowing for mixin and AT usage"
+        description = "Gradle plugin for developing plugins using the Horizon framework, allowing for MIXIN and AT usage"
     }
 }
 
