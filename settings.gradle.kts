@@ -3,7 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         maven {
             name = "Canvas"
-            url = uri("https://maven.canvasmc.io/snapshots")
+            url = uri("https://maven.canvasmc.io/releases")
         }
     }
     includeBuild("kotlin-plugin")
