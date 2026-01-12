@@ -8,6 +8,13 @@ horizon:
   wideners:
     - "widener.at"
   load-datapack-entry: true
+  service:
+    entrypoint:
+      # Note this is a list, not a map
+      - hi: "hi"
+      - test: "a"
+    transform_service:
+      - "io.canvasmc.testplugin.TransformerTest"
 api-version: "1.21.10"
 
 bootstrapper: "io.canvasmc.testplugin.TestBootstrapper"

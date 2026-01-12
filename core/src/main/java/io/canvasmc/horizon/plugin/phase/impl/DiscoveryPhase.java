@@ -6,6 +6,7 @@ import io.canvasmc.horizon.plugin.LoadContext;
 import io.canvasmc.horizon.plugin.data.CandidateMetadata;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
 import io.canvasmc.horizon.plugin.data.HorizonMetadataDeserializer;
+import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
 import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.plugin.types.PluginCandidate;
@@ -84,6 +85,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                 ObjectTree yamlTree = ObjectTree.read()
                     // we also need to register all type converters
                     .registerDeserializer(HorizonMetadata.class, new HorizonMetadataDeserializer())
+                    .registerDeserializer(PluginServiceProvider.class, PluginServiceProvider.DESERIALIZER)
                     .format(Format.YAML).from(in);
 
                 if (!yamlTree.containsKey("horizon")) {

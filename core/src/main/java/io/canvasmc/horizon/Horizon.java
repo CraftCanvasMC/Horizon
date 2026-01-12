@@ -8,6 +8,7 @@ import io.canvasmc.horizon.logger.stream.OutStream;
 import io.canvasmc.horizon.plugin.EntrypointLoader;
 import io.canvasmc.horizon.plugin.PluginTree;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
+import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.MixinLaunch;
 import io.canvasmc.horizon.util.FileJar;
@@ -76,7 +77,8 @@ public class Horizon {
                     "<void>",
                     List.of("internal.mixins.json"),
                     List.of(),
-                    false
+                    false,
+                    PluginServiceProvider.EMPTY
                 ), new HorizonPlugin.NestedData(List.of(), List.of(), List.of())
             );
         } catch (IOException e) {

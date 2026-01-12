@@ -32,7 +32,10 @@ public final class HorizonMetadataDeserializer implements ObjectDeserializer<Hor
             main,
             mixins,
             wideners,
-            loadDatapackEntry
+            loadDatapackEntry,
+            horizon.getTreeOptional("service")
+                .flatMap(ot -> ot.asOptional(PluginServiceProvider.class))
+                .orElse(PluginServiceProvider.EMPTY)
         );
     }
 

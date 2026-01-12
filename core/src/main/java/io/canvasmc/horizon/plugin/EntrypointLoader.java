@@ -37,7 +37,7 @@ public class EntrypointLoader {
     // Note: we use "?" here because we don't want to load the JavaPlugin ref before we load the game
     //     and only contains mappings for horizon plugins
     public static final Map<String, Object> MAIN2JAVA_PLUGIN = new ConcurrentHashMap<>();
-    public static final Logger LOGGER = Logger.fork(Horizon.LOGGER, "pluginloader");
+    public static final Logger LOGGER = Logger.fork(Horizon.LOGGER, "plugin_loader");
 
     private static final List<Phase<?, ?>> PHASES = List.of(
         new DiscoveryPhase(),

@@ -8,4 +8,3 @@
 - class transformers API -- use plugin yaml to register similar to entrypoints?
 - dependency declaration of horizon plugins, and incompatibilities
     - add ability to depend on JDK versions, ASM versions, Horizon versions, and maybe Mixin versions?
-- custom logger implementation

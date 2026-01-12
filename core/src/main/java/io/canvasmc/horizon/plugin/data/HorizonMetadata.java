@@ -22,7 +22,8 @@ public record HorizonMetadata(
     String main,
     List<String> mixins,
     List<String> accessWideners,
-    boolean loadDatapackEntry
+    boolean loadDatapackEntry,
+    PluginServiceProvider serviceProvider
 ) { // TODO - dependencies?
     public HorizonMetadata {
         // we don't need to validate arguments here, as pre construction they already are
