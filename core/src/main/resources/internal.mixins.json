@@ -1,7 +1,7 @@
 {
   "mixins": [
-    "commandinject.PaperCommandsMixin",
-    "commandinject.SimpleCommandMapMixin",
+    "commandinject.PaperPluginsCommandMixin",
+    "commandinject.ReloadCommandMixin",
     "datapack.PackRepositoryAccessor",
     "datapack.ServerPacksSourceMixin",
     "initfix.JavaPluginMixin",

@@ -1,5 +1,4 @@
 - generalized logo and other branding shit -- ask team? -- should be done Wednesday
-- rewrite plugins command override to be more version compatible
 - document which Minecraft versions work, and try and fix as many as possible
 - can we try and figure out how to target normal paper plugins in mixins?
 - finish horizon api docs
