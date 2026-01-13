@@ -1,10 +1,10 @@
 - generalized logo and other branding shit -- ask team? -- should be done Wednesday
-- builtin runtime patches
 - rewrite plugins command override to be more version compatible
 - document which Minecraft versions work, and try and fix as many as possible
 - can we try and figure out how to target normal paper plugins in mixins?
 - finish horizon api docs
 - remove reload command better
-- class transformers API -- use plugin yaml to register similar to entrypoints?
 - dependency declaration of horizon plugins, and incompatibilities
     - add ability to depend on JDK versions, ASM versions, Horizon versions, and maybe Mixin versions?
+- make ObjectTree not store maps as values, use ObjectTrees, and when passed a map, parse it
+- go through internal todos

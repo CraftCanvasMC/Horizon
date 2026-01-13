@@ -11,6 +11,8 @@ import io.canvasmc.horizon.plugin.data.HorizonMetadata;
 import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.MixinLaunch;
+import io.canvasmc.horizon.transformer.AccessTransformationImpl;
+import io.canvasmc.horizon.transformer.MixinTransformationImpl;
 import io.canvasmc.horizon.util.FileJar;
 import io.canvasmc.horizon.util.PaperclipVersion;
 import io.canvasmc.horizon.util.tree.Format;
@@ -31,6 +33,8 @@ import java.util.jar.JarFile;
 /**
  * The main class for Horizon that acts as a base
  * that runs the full startup and bootstrap process
+ *
+ * @author dueris
  */
 public class Horizon {
     public static final boolean DEBUG = Boolean.getBoolean("Horizon.debug");
@@ -67,9 +71,11 @@ public class Horizon {
             File paperclipIOFile = properties.serverJar();
             this.paperclipJar = new FileJar(paperclipIOFile, new JarFile(paperclipIOFile));
 
+            File horizonIOFile = Path.of(Horizon.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
+
             INTERNAL_PLUGIN = new HorizonPlugin(
                 "horizon",
-                this.paperclipJar,
+                new FileJar(horizonIOFile, new JarFile(horizonIOFile)),
                 new HorizonMetadata(
                     "horizon",
                     this.version,
@@ -78,11 +84,15 @@ public class Horizon {
                     List.of("internal.mixins.json"),
                     List.of(),
                     false,
-                    PluginServiceProvider.EMPTY
+                    PluginServiceProvider.DESERIALIZER.deserialize(ObjectTree.builder()
+                        .put(PluginServiceProvider.ClassTransformer.INST.getYamlEntryName(), List.of(
+                            AccessTransformationImpl.class.getName(),
+                            MixinTransformationImpl.class.getName()
+                        )).build())
                 ), new HorizonPlugin.NestedData(List.of(), List.of(), List.of())
             );
-        } catch (IOException e) {
-            throw new RuntimeException("Couldn't build FileJar", e);
+        } catch (Throwable thrown) {
+            throw new RuntimeException("Couldn't build internal plugin", thrown);
         }
 
         try {

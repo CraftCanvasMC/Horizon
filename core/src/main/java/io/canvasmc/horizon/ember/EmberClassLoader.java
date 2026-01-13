@@ -1,7 +1,8 @@
 package io.canvasmc.horizon.ember;
 
 import io.canvasmc.horizon.instrument.JvmAgent;
-import io.canvasmc.horizon.service.ClassTransformer;
+import io.canvasmc.horizon.service.transform.ClassTransformer;
+import io.canvasmc.horizon.service.transform.TransformPhase;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -43,25 +44,26 @@ public final class EmberClassLoader extends ClassLoader {
     private final Object lock = new Object();
     private final ClassLoader parent;
     private final DynamicClassLoader dynamic;
-    private final ClassTransformer transformer;
+    public final ClassTransformer transformer;
     private final Function<URLConnection, CodeSource> sourceLocator;
     private Function<URLConnection, Manifest> manifestLocator;
     private Predicate<String> transformationFilter;
 
-    public EmberClassLoader(final @NonNull ClassTransformer transformer, @NonNull List<Path> paths) {
+    public EmberClassLoader(@NonNull List<Path> paths) {
         super("ember", new DynamicClassLoader(new URL[0]));
 
         this.parent = EmberClassLoader.class.getClassLoader();
         this.dynamic = (DynamicClassLoader) this.getParent();
 
-        this.transformer = transformer;
+        // add libraries, self, and game jar to classpath
+        paths.forEach(this::tryAddToHorizonSystemLoader);
+
+        // after loading all of that, create the transformer services
+        this.transformer = new ClassTransformer();
 
         this.manifestLocator = connection -> this.locateManifest(connection).orElse(null);
         this.sourceLocator = connection -> this.locateSource(connection).orElse(null);
         this.transformationFilter = name -> EmberClassLoader.EXCLUDE_PACKAGES.stream().noneMatch(name::startsWith);
-
-        // add libraries, self, and game jar to classpath
-        paths.forEach(this::tryAddToHorizonSystemLoader);
     }
 
     /**

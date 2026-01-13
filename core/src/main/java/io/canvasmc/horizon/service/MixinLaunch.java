@@ -3,9 +3,10 @@ package io.canvasmc.horizon.service;
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import io.canvasmc.horizon.Horizon;
 import io.canvasmc.horizon.ember.EmberClassLoader;
-import io.canvasmc.horizon.ember.TransformationService;
 import io.canvasmc.horizon.plugin.EntrypointLoader;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
+import io.canvasmc.horizon.service.transform.ClassTransformer;
+import io.canvasmc.horizon.service.transform.TransformationService;
 import io.canvasmc.horizon.util.ClassLoaders;
 import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.launch.MixinBootstrap;
@@ -71,6 +72,7 @@ public final class MixinLaunch {
     }
 
     public static void launch(LaunchContext context) {
+        if (MixinLaunch.CONTEXT != null) throw new UnsupportedOperationException("Already launched");
         MixinLaunch.CONTEXT = context;
         new MixinLaunch().run(context);
     }
@@ -80,9 +82,8 @@ public final class MixinLaunch {
     }
 
     private void run(@NonNull LaunchContext context) {
-        this.transformer = new ClassTransformer();
-
-        this.classLoader = new EmberClassLoader(this.transformer, Arrays.asList(context.initialGameConnections));
+        this.classLoader = new EmberClassLoader(Arrays.asList(context.initialGameConnections));
+        this.transformer = this.classLoader.transformer;
 
         // set context classloader to ember classloader
         Thread.currentThread().setContextClassLoader(this.classLoader);

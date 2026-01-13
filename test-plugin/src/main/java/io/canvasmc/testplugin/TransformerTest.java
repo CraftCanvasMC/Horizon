@@ -1,7 +1,7 @@
 package io.canvasmc.testplugin;
 
-import io.canvasmc.horizon.ember.TransformPhase;
-import io.canvasmc.horizon.ember.TransformationService;
+import io.canvasmc.horizon.service.transform.TransformPhase;
+import io.canvasmc.horizon.service.transform.TransformationService;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;

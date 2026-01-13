@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.transformer;
 
-import io.canvasmc.horizon.ember.TransformPhase;
-import io.canvasmc.horizon.ember.TransformationService;
+import io.canvasmc.horizon.service.transform.TransformPhase;
+import io.canvasmc.horizon.service.transform.TransformationService;
 import io.canvasmc.horizon.transformer.widener.TransformerContainer;
 import org.jspecify.annotations.NonNull;
 import org.objectweb.asm.Type;

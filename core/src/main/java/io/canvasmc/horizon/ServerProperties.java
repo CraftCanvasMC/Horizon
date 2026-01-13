@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO - javadocs
 public record ServerProperties(
     File pluginsDirectory,
     File serverJar,

@@ -6,8 +6,10 @@
 
 Horizon is a MIXIN wrapper for PaperMC servers and forks, expanding plugin capabilities to allow for further
 customization and enhancements. Horizon is a project that is intended to supersede
-a project by one of the core team members(Dueris), the project Eclipse. Eclipse was a plugin for Paper that allowed
-loading SpongePowered Mixins and access wideners and transformers.
+a project by one of the core team members(Dueris), the project Eclipse. Eclipse was a plugin for Paper based
+off the program Ignite that allowed loading SpongePowered Mixins and access wideners and transformers. Eclipse
+and Ignite code are contained within Horizon since obviously, Horizon supersedes Eclipse, and as such has a
+similar concept and similar/derived code, and Eclipse is based off/forked from Ignite directly.
 This project, of course, came with many issues and drawbacks that made Eclipse hard to work with most of the time. And
 so, Dueris archived the project and decided to create Horizon, which is the successor of Eclipse.
 
@@ -32,6 +34,13 @@ Horizon tries not to break much of anything; however, there are some things it's
   not ask CanvasMC or Universe for support; it will not work and is not planned to work.
 - **Spigot and Bukkit.** Horizon strictly works only for Paper servers and forks, and is untested on Spigot and Bukkit,
   and you will not receive support for using Spigot or Bukkit with Horizon
+- **Ignite and Eclipse.** Eclipse is a fork of Ignite, and Horizon derives some source from Eclipse since this project
+  supersedes Eclipse. As such, they are both completely and fundamentally incompatible with Horizon. Horizon, in comparison
+  to Ignite, is generally more inclined and intended for expanding upon Ignites initial structure and idea aimed for
+  specifically plugin usage, to match closer to things like Papers patching style and such(transformers as an example).
+  This also uses things like the plugin yaml and such, and is compatible with using the `main` entrypoint in plugins,
+  unlike Ignite. Horizon is intended to expand plugin capabilities further for Paper, while Ignite is meant for a more
+  universal MIXIN launcher for Java servers.
 
 ## How To
 
@@ -754,6 +763,41 @@ The plugin API is a useful tool for when trying to get other plugins data, or ev
 ### Class Transformers API
 
 Horizon contains a ClassTransformer API, which is the primary API that drives Mixins and ATs transformation of ClassNodes.
-With this API, soon, plugins can register their own TransformationServices much like the Mixin and AT transformation
-services. This API hasn't been fully exposed yet, and is currently only limited to the Mixin and AT transformers, but in
-the near future, before the initial release, this API will be fully exposed and documented.
+With this API, plugins can register their own `TransformationService`s much like the Mixin and AT transformation
+services. The internal plugin includes the Mixin and AT transformers, and plugins can register their own via their service loader.
+The plugin YAML structure should be something like this:
+```yaml
+horizon:
+  service:
+    transform_service:
+      - "io.canvasmc.example.TransformerExample"
+```
+The Class Transformers API uses a list of `String` values that, upon accessing the values in `ClassTransformer#<init>`,
+is parsed into `Class<? extends TransformationService>`. It is then immediately instantiated, using a **no-args constructor**.
+Class transformers can be used to perform bytecode modifications on class nodes during the game lifecycle. An example:
+```java
+public class TransformerExample implements TransformationService {
+    @Override
+    public void preboot() {
+        // called before game launch, after mixin bootstrap
+    }
+
+    @Override
+    public int priority(@NonNull TransformPhase phase) {
+        // return the integer priority of this service, including the current phase
+    }
+
+    @Override
+    public boolean shouldTransform(@NonNull Type type, @NonNull ClassNode node) {
+        // return if this should transform or not
+    }
+
+    @Override
+    public @Nullable ClassNode transform(@NonNull Type type, @NonNull ClassNode node, @NonNull TransformPhase phase) throws Throwable {
+        // return 'null' if the class node was not transformed, and return the modified class node if modified
+    }
+}
+```
+That is an example of how a transformation service should be made. They are extremely powerful and can transform the entire
+class on any class on load. This is used internally for inital patches by Horizon, and for service implementations for plugins
+like Mixins and ATs. It is generally recommended to just use Mixins, but if seriously needed, this API is exposed to plugins.

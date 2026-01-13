@@ -1,9 +1,8 @@
-package io.canvasmc.horizon.service;
+package io.canvasmc.horizon.service.transform;
 
-import com.google.common.collect.ImmutableList;
-import io.canvasmc.horizon.ember.TransformPhase;
-import io.canvasmc.horizon.ember.TransformationService;
-import io.canvasmc.horizon.transformer.AccessTransformationImpl;
+import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
+import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.jspecify.annotations.NonNull;
@@ -14,6 +13,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -21,10 +21,6 @@ import java.util.function.Predicate;
 import static io.canvasmc.horizon.Horizon.LOGGER;
 
 public final class ClassTransformer {
-    private static final List<TransformationService> SERVICES = ImmutableList.of(
-        new AccessTransformationImpl(),
-        new MixinTransformationImpl()
-    );
 
     private final Map<Class<? extends TransformationService>, TransformationService> services;
     private final Map<TransformPhase, List<TransformationService>> orderedCache;
@@ -33,11 +29,29 @@ public final class ClassTransformer {
 
     public ClassTransformer() {
         this.orderedCache = new ConcurrentHashMap<>();
-        this.services = new IdentityHashMap<>(SERVICES.size());
+        this.services = new IdentityHashMap<>();
         this.exclusionFilter = path -> true;
 
-        SERVICES.forEach(service -> services.put(service.getClass(), service));
-        // TODO - plugin service registration
+        for (HorizonPlugin horizonPlugin : Horizon.INSTANCE.getPlugins().getAll()) {
+            for (PluginServiceProvider.Service<String> service : horizonPlugin.pluginMetadata()
+                .serviceProvider()
+                .findServices(PluginServiceProvider.CLASS_TRANSFORMER)
+            ) {
+                try {
+                    Class<?> serviceClazz = Class.forName(service.obj());
+                    if (TransformationService.class.isAssignableFrom(serviceClazz)) {
+                        TransformationService transformerObj = (TransformationService) serviceClazz.getDeclaredConstructor().newInstance();
+                        services.put(transformerObj.getClass(), transformerObj);
+                        LOGGER.info("Registered class transformer from {}, \"{}\"", horizonPlugin.identifier(), serviceClazz.getName());
+                    } else throw new IllegalArgumentException("Declared service class '" + service.obj() + "' is not instanceof a TransformationService");
+                } catch (ClassNotFoundException exe) {
+                    throw new IllegalArgumentException("The service '" + service.obj() + "' was not found or is invalid", exe);
+                } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException |
+                         InstantiationException exe) {
+                    throw new RuntimeException("Couldn't create transformer class '" + service.obj() + "'", exe);
+                }
+            }
+        }
     }
 
     public void addExclusionFilter(final @NonNull Predicate<String> predicate) {
