@@ -22,9 +22,57 @@ public final class ObjectTree {
     private final RemappingContext remappingContext;
 
     ObjectTree(Map<String, Object> data, TypeConverterRegistry converters, RemappingContext remappingContext) {
-        this.data = Collections.unmodifiableMap(new LinkedHashMap<>(data));
+        this.data = Collections.unmodifiableMap(normalizeData(data, converters, remappingContext));
         this.converters = converters;
         this.remappingContext = remappingContext;
+    }
+
+    /**
+     * Normalizes the data map by converting all Map instances to ObjectTree instances
+     */
+    private static @NonNull Map<String, Object> normalizeData(@NonNull Map<String, Object> data, TypeConverterRegistry converters, RemappingContext remappingContext) {
+        Map<String, Object> normalized = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            normalized.put(entry.getKey(), normalizeValue(entry.getValue(), converters, remappingContext));
+        }
+        return normalized;
+    }
+
+    /**
+     * Normalizes a value by converting Maps to ObjectTrees and recursively normalizing nested structures
+     */
+    private static Object normalizeValue(Object value, TypeConverterRegistry converters, RemappingContext remappingContext) {
+        if (value instanceof Map) {
+            //noinspection unchecked
+            return new ObjectTree((Map<String, Object>) value, converters, remappingContext);
+        } else if (value instanceof List) {
+            //noinspection unchecked
+            List<Object> list = (List<Object>) value;
+            List<Object> normalized = new ArrayList<>();
+            for (Object item : list) {
+                normalized.add(normalizeValue(item, converters, remappingContext));
+            }
+            return normalized;
+        }
+        return value;
+    }
+
+    /**
+     * Converts ObjectTree instances back to Maps for serialization
+     */
+    private static Object denormalizeValue(Object value) {
+        if (value instanceof ObjectTree) {
+            return ((ObjectTree) value).toRawMap();
+        } else if (value instanceof List) {
+            //noinspection unchecked
+            List<Object> list = (List<Object>) value;
+            List<Object> denormalized = new ArrayList<>();
+            for (Object item : list) {
+                denormalized.add(denormalizeValue(item));
+            }
+            return denormalized;
+        }
+        return value;
     }
 
     /**
@@ -46,6 +94,17 @@ public final class ObjectTree {
      */
     public static @NonNull Builder builder() {
         return new Builder();
+    }
+
+    /**
+     * Converts this tree back to a raw map structure (for serialization)
+     */
+    @NonNull Map<String, Object> toRawMap() {
+        Map<String, Object> raw = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            raw.put(entry.getKey(), denormalizeValue(entry.getValue()));
+        }
+        return raw;
     }
 
     /**
@@ -85,11 +144,10 @@ public final class ObjectTree {
             throw new NoSuchElementException("Key not found: " + key);
         }
         Object value = data.get(key);
-        if (!(value instanceof Map)) {
+        if (!(value instanceof ObjectTree)) {
             throw new ClassCastException("Value at key '" + key + "' is not a tree structure");
         }
-        //noinspection unchecked
-        return new ObjectTree((Map<String, Object>) value, converters, remappingContext);
+        return (ObjectTree) value;
     }
 
     /**
@@ -98,10 +156,9 @@ public final class ObjectTree {
      * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedtree"} to find a nested tree within a nested tree
      */
     public Optional<ObjectTree> getTreeOptional(String key) {
-        //noinspection unchecked
         return Optional.ofNullable(data.get(key))
-            .filter(v -> v instanceof Map)
-            .map(v -> new ObjectTree((Map<String, Object>) v, converters, remappingContext));
+            .filter(v -> v instanceof ObjectTree)
+            .map(v -> (ObjectTree) v);
     }
 
     /**

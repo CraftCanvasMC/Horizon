@@ -6,5 +6,4 @@
 - remove reload command better
 - dependency declaration of horizon plugins, and incompatibilities
     - add ability to depend on JDK versions, ASM versions, Horizon versions, and maybe Mixin versions?
-- make ObjectTree not store maps as values, use ObjectTrees, and when passed a map, parse it
 - go through internal todos

@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -126,6 +127,31 @@ public final class ObjectValue {
     }
 
     /**
+     * Converts to ObjectTree if the value is a tree structure
+     *
+     * @throws TypeConversionException if the value is not an ObjectTree
+     */
+    public ObjectTree asTree() {
+        if (value == null) {
+            throw new TypeConversionException("Cannot convert null to ObjectTree");
+        }
+        if (!(value instanceof ObjectTree)) {
+            throw new TypeConversionException("Value is not an ObjectTree");
+        }
+        return (ObjectTree) value;
+    }
+
+    /**
+     * Converts to ObjectTree if the value is a tree structure, returns empty Optional otherwise
+     */
+    public Optional<ObjectTree> asTreeOptional() {
+        if (value instanceof ObjectTree) {
+            return Optional.of((ObjectTree) value);
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Converts to a custom type using registered converter
      */
     public <T> T as(Class<T> type) {
@@ -139,6 +165,12 @@ public final class ObjectValue {
     private <T> T convert(Class<T> type) {
         if (value == null) {
             throw new TypeConversionException("Cannot convert null to " + type.getSimpleName());
+        }
+
+        // Handle ObjectTree specially - if someone asks for Map, give them the raw map
+        if (value instanceof ObjectTree && type == Map.class) {
+            //noinspection unchecked
+            return (T) ((ObjectTree) value).toRawMap();
         }
 
         if (type.isInstance(value)) {
