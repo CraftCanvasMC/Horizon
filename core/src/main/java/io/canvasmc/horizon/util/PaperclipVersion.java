@@ -24,21 +24,7 @@ public record PaperclipVersion(
         int resource_minor,
         int data_major,
         int data_minor
-    ) {
-        @Override
-        public int resource_major() {
-            if (resource_major == Integer.MIN_VALUE)
-                throw new UnsupportedOperationException("'resource_major' isn't included in this Minecraft version");
-            return resource_major;
-        }
-
-        @Override
-        public int resource_minor() {
-            if (resource_minor == Integer.MIN_VALUE)
-                throw new UnsupportedOperationException("'resource_minor' isn't included in this Minecraft version");
-            return resource_minor;
-        }
-    }
+    ) {}
 
     public static final class PaperclipVersionDeserializer implements ObjectDeserializer<PaperclipVersion> {
 
@@ -47,10 +33,10 @@ public record PaperclipVersion(
             ObjectTree packTree = tree.getTree("pack_version");
             PackVersion pack = new PackVersion(
                 // resource major/minor as optionals, older Minecraft versions do not have these values
-                packTree.getValue("resource_major").asIntOptional().orElse(Integer.MIN_VALUE),
-                packTree.getValue("resource_minor").asIntOptional().orElse(Integer.MIN_VALUE),
-                packTree.getValue("data_major").asInt(),
-                packTree.getValue("data_minor").asInt()
+                packTree.getValue("resource_major").asIntOptional().orElseGet(() -> packTree.getValue("resource").asInt()),
+                packTree.getValue("resource_minor").asIntOptional().orElseGet(() -> packTree.getValue("resource").asInt()),
+                packTree.getValue("data_major").asIntOptional().orElseGet(() -> packTree.getValue("data").asInt()),
+                packTree.getValue("data_minor").asIntOptional().orElseGet(() -> packTree.getValue("data").asInt())
             );
 
             return new PaperclipVersion(
