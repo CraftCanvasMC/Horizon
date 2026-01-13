@@ -2,7 +2,7 @@
 - document which Minecraft versions work, and try and fix as many as possible
 - can we try and figure out how to target normal paper plugins in mixins?
 - finish horizon api docs
-- remove reload command better
 - dependency declaration of horizon plugins, and incompatibilities
     - add ability to depend on JDK versions, ASM versions, Horizon versions, and maybe Mixin versions?
 - go through internal todos
+- make all plugin patches much better
