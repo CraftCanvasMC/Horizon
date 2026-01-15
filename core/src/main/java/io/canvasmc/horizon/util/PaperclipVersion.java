@@ -32,11 +32,10 @@ public record PaperclipVersion(
         public @NonNull PaperclipVersion deserialize(@NonNull ObjectTree tree) {
             ObjectTree packTree = tree.getTree("pack_version");
             PackVersion pack = new PackVersion(
-                // resource major/minor as optionals, older Minecraft versions do not have these values
                 packTree.getValue("resource_major").asIntOptional().orElseGet(() -> packTree.getValue("resource").asInt()),
-                packTree.getValue("resource_minor").asIntOptional().orElseGet(() -> packTree.getValue("resource").asInt()),
+                packTree.getValue("resource_minor").asIntOptional().orElse(0),
                 packTree.getValue("data_major").asIntOptional().orElseGet(() -> packTree.getValue("data").asInt()),
-                packTree.getValue("data_minor").asIntOptional().orElseGet(() -> packTree.getValue("data").asInt())
+                packTree.getValue("data_minor").asIntOptional().orElse(0)
             );
 
             return new PaperclipVersion(
