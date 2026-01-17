@@ -24,21 +24,7 @@ public record PaperclipVersion(
         int resource_minor,
         int data_major,
         int data_minor
-    ) {
-        @Override
-        public int resource_major() {
-            if (resource_major == Integer.MIN_VALUE)
-                throw new UnsupportedOperationException("'resource_major' isn't included in this Minecraft version");
-            return resource_major;
-        }
-
-        @Override
-        public int resource_minor() {
-            if (resource_minor == Integer.MIN_VALUE)
-                throw new UnsupportedOperationException("'resource_minor' isn't included in this Minecraft version");
-            return resource_minor;
-        }
-    }
+    ) {}
 
     public static final class PaperclipVersionDeserializer implements ObjectDeserializer<PaperclipVersion> {
 
@@ -46,11 +32,10 @@ public record PaperclipVersion(
         public @NonNull PaperclipVersion deserialize(@NonNull ObjectTree tree) {
             ObjectTree packTree = tree.getTree("pack_version");
             PackVersion pack = new PackVersion(
-                // resource major/minor as optionals, older Minecraft versions do not have these values
-                packTree.getValue("resource_major").asIntOptional().orElse(Integer.MIN_VALUE),
-                packTree.getValue("resource_minor").asIntOptional().orElse(Integer.MIN_VALUE),
-                packTree.getValue("data_major").asInt(),
-                packTree.getValue("data_minor").asInt()
+                packTree.getValueOptional("resource_major").orElseGet(() -> packTree.getValue("resource")).asInt(),
+                packTree.containsKey("resource_minor") ? packTree.getValue("resource_minor").asInt() : 0,
+                packTree.getValueOptional("data_major").orElseGet(() -> packTree.getValue("data")).asInt(),
+                packTree.containsKey("data_minor") ? packTree.getValue("data_minor").asInt() : 0
             );
 
             return new PaperclipVersion(
@@ -65,19 +50,6 @@ public record PaperclipVersion(
                 tree.getValue("java_version").asInt(),
                 tree.getValue("stable").asBoolean(),
                 tree.getValue("use_editor").asBoolean()
-            );
-        }
-    }
-
-    public static final class PackVersionDeserializer implements ObjectDeserializer<PackVersion> {
-
-        @Override
-        public @NonNull PackVersion deserialize(@NonNull ObjectTree tree) {
-            return new PackVersion(
-                tree.getValue("resource_major").asInt(),
-                tree.getValue("resource_minor").asInt(),
-                tree.getValue("data_major").asInt(),
-                tree.getValue("data_minor").asInt()
             );
         }
     }

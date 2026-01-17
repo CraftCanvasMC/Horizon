@@ -241,7 +241,6 @@ public class Horizon {
                 ObjectTree versionTree = ObjectTree.read()
                     .format(Format.JSON)
                     .registerDeserializer(PaperclipVersion.class, new PaperclipVersion.PaperclipVersionDeserializer())
-                    .registerDeserializer(PaperclipVersion.PackVersion.class, new PaperclipVersion.PackVersionDeserializer())
                     .from(new InputStreamReader(jarFile.getInputStream(jarFile.getJarEntry("version.json"))));
 
                 this.paperclipVersion = versionTree.as(PaperclipVersion.class);
