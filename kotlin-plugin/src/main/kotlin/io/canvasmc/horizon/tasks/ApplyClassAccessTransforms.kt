@@ -24,9 +24,10 @@
 
 package io.canvasmc.horizon.tasks
 
+import io.canvasmc.horizon.util.*
 import io.canvasmc.horizon.util.defaultOutput
 import io.canvasmc.horizon.util.formatNs
-import io.papermc.paperweight.util.*
+import io.papermc.paperweight.util.AsmUtil
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property

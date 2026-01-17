@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.extension
 
-import io.canvasmc.horizon.util.constants.CANVAS_MAVEN_REPO_URL
 import io.canvasmc.horizon.util.providerSet
+import io.papermc.paperweight.util.constants.PAPER_MAVEN_REPO_URL
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.ConfigurableFileCollection
@@ -22,7 +22,7 @@ abstract class HorizonExtension @Inject constructor(objects: ObjectFactory, proj
     /**
      * The repository from which JST should be resolved.
      */
-    val jstRepo: Property<String> = objects.property<String>().convention(CANVAS_MAVEN_REPO_URL)
+    val jstRepo: Property<String> = objects.property<String>().convention(PAPER_MAVEN_REPO_URL)
 
     /**
      * Whether to automatically inject Canvas's maven repository for easier Horizon API resolution.

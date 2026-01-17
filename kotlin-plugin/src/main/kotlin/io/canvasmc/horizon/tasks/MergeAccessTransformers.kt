@@ -24,8 +24,8 @@
 
 package io.canvasmc.horizon.tasks
 
-import io.canvasmc.horizon.util.defaultOutput
-import io.papermc.paperweight.util.*
+import io.canvasmc.horizon.util.*
+import io.papermc.paperweight.util.writeLF
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFiles

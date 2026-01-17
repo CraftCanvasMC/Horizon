@@ -9,8 +9,6 @@ import io.canvasmc.horizon.util.*
 import io.canvasmc.horizon.util.constants.*
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
-import io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_CONFIG
-import io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -51,7 +49,7 @@ abstract class Horizon : Plugin<Project> {
 
         target.configurations.register(JST_CONFIG) {
             defaultDependencies {
-                add(target.dependencies.create("io.canvasmc.jst:jst-cli-bundle:${LibraryVersions.JST}"))
+                add(target.dependencies.create("io.papermc.jst:jst-cli-bundle:${LibraryVersions.JST}"))
             }
         }
 
@@ -76,7 +74,7 @@ abstract class Horizon : Plugin<Project> {
     private fun Project.setup(ext: HorizonExtension) {
         // ensure people specify a dependency on horizon api
         // checkForHorizonApi()
-        val userdevTask = tasks.named<UserdevSetupTask>(USERDEV_SETUP_TASK_NAME)
+        val userdevTask = tasks.named<UserdevSetupTask>(Paperweight.USERDEV_SETUP_TASK_NAME)
 
         repositories {
             // repository for JST
@@ -162,10 +160,10 @@ abstract class Horizon : Plugin<Project> {
         }
 
         // attach sources into original paperweight configurations for compatibility reasons
-        configurations.named(MOJANG_MAPPED_SERVER_CONFIG).configure {
+        configurations.named(Paperweight.MOJANG_MAPPED_SERVER_CONFIG).configure {
             extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
         }
-        configurations.named(MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).configure {
+        configurations.named(Paperweight.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).configure {
             extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).get())
         }
     }
