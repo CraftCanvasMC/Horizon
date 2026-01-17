@@ -53,17 +53,4 @@ public record PaperclipVersion(
             );
         }
     }
-
-    public static final class PackVersionDeserializer implements ObjectDeserializer<PackVersion> {
-
-        @Override
-        public @NonNull PackVersion deserialize(@NonNull ObjectTree tree) {
-            return new PackVersion(
-                tree.getValue("resource_major").asInt(),
-                tree.getValue("resource_minor").asInt(),
-                tree.getValue("data_major").asInt(),
-                tree.getValue("data_minor").asInt()
-            );
-        }
-    }
 }
