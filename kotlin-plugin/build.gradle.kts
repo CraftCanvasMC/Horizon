@@ -1,5 +1,4 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
-import net.kyori.blossom.BlossomExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -10,10 +9,11 @@ plugins {
     alias(libs.plugins.plugin.publish)
     alias(libs.plugins.spotless)
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.shadow)
 }
 
 val javaVersion = 17
-val weaver by configurations.creating {
+val userdev by configurations.creating {
     configurations.compileOnly.get().extendsFrom(this)
     configurations.testImplementation.get().extendsFrom(this)
 }
@@ -25,7 +25,13 @@ repositories {
 
 dependencies {
     compileOnly(gradleApi())
-    weaver(libs.userdev)
+    implementation(libs.cadix.at)
+    implementation(libs.cadix.bombe)
+    implementation(libs.cadix.bombe.asm)
+    implementation(libs.cadix.atlas)
+    implementation(libs.asm)
+    implementation(libs.asm.tree)
+    userdev(libs.userdev)
 }
 
 java {
@@ -44,14 +50,14 @@ kotlin {
 
 val generatedTestSources = layout.buildDirectory.dir("generated/resources/horizon/test")
 
-val copyWeaverForTests = tasks.register<Copy>("copyWeaverForTests") {
-    from(weaver.singleFile)
+val copyUserdevForTests = tasks.register<Copy>("copyUserdevForTests") {
+    from(userdev.singleFile)
     into(generatedTestSources.map { it.dir("build-data") })
     rename { "userdev.jar" }
 }
 
 tasks.named("processTestResources") {
-    dependsOn(copyWeaverForTests)
+    dependsOn(copyUserdevForTests)
 }
 
 sourceSets {
@@ -65,6 +71,17 @@ tasks.withType<Jar>().configureEach {
         attributes(
             "Implementation-Version" to project.version
         )
+    }
+}
+
+tasks.shadowJar {
+    archiveClassifier.set(null as String?)
+    val prefix = "horizon.libs"
+    listOf(
+        "org.objectweb.asm",
+        "org.cadixdev",
+    ).forEach { pack ->
+        relocate(pack, "$prefix.$pack")
     }
 }
 
@@ -130,7 +147,7 @@ configurations.all {
     dependencies.remove(project.dependencies.gradleApi())
 }
 
-configurations.runtimeElements {
+configurations.shadowRuntimeElements {
     attributes {
         attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, javaVersion)
         attribute(GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, objects.named("9.0.0"))

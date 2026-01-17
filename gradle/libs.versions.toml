@@ -11,6 +11,7 @@ userdev = "2.3.12"
 jspecify = "1.0.0"
 junit = "6.0.0"
 java = "21"
+shadow = "9.2.2"
 
 [libraries]
 jbsdiff = { module = "io.sigpipe:jbsdiff", version = "1.0" }
@@ -25,6 +26,10 @@ asm-analysis = { module = "org.ow2.asm:asm-analysis", version.ref = "asm" }
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
 asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }
+cadix-at = { module = "org.cadixdev:at", version = "0.1.0-rc1" }
+cadix-bombe = { module = "org.cadixdev:bombe", version = "0.3.4" }
+cadix-bombe-asm = { module = "org.cadixdev:bombe-asm", version = "0.3.4" }
+cadix-atlas = { module = "org.cadixdev:atlas", version = "0.2.1" }
 userdev = { module = "io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin", version.ref = "userdev" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 
@@ -38,6 +43,7 @@ mixin = [ "fabric-mixin", "mixin-extras" ]
 asm = [ "asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util" ]
 
 [plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 blossom = { id = "net.kyori.blossom", version = "2.2.0" }
 spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
 plugin-publish = { id = "com.gradle.plugin-publish", version = "1.2.0" }

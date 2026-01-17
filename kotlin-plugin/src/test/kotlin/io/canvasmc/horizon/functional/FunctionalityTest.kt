@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.functional
 
-import io.papermc.paperweight.util.*
+import io.canvasmc.horizon.util.*
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.io.CleanupMode
@@ -84,7 +84,6 @@ class FunctionalityTest {
     fun Path.copyProject(resourcesProjectName: String): ProjectFiles {
         Paths.get("src/test/resources/$resourcesProjectName")
             .copyRecursivelyTo(this)
-        Git(this)("init").executeSilently()
         return ProjectFiles(this)
     }
 
