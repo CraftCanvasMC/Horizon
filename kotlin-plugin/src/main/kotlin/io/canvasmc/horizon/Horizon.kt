@@ -12,26 +12,13 @@ import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.dsl.DependencyFactory
-import org.gradle.api.file.ProjectLayout
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.LogLevel
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
-import javax.inject.Inject
 
 abstract class Horizon : Plugin<Project> {
-    @get:Inject
-    abstract val layout: ProjectLayout
-
-    @get:Inject
-    abstract val dependencyFactory: DependencyFactory
-
-    @get:Inject
-    abstract val objects: ObjectFactory
-
     override fun apply(target: Project) {
         printId<Horizon>(HORIZON_NAME, target.gradle)
         // check for userdev
