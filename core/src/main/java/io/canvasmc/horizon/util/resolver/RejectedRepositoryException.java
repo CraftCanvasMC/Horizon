@@ -1,4 +1,4 @@
-package io.canvasmc.horizon.resolver;
+package io.canvasmc.horizon.util.resolver;
 
 public class RejectedRepositoryException extends RuntimeException {
     public RejectedRepositoryException() {

@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.service;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.ember.EmberClassLoader;
 import io.canvasmc.horizon.plugin.EntrypointLoader;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
@@ -33,7 +33,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 
-import static io.canvasmc.horizon.Horizon.LOGGER;
+import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 public final class MixinLaunch {
     public static final Pattern TRANSFORMATION_EXCLUDED_PATTERN = Pattern.compile(
@@ -191,7 +191,7 @@ public final class MixinLaunch {
             if (connection instanceof JarURLConnection) {
                 final URL url = ((JarURLConnection) connection).getJarFileURL();
                 final Optional<Manifest> manifest = this.manifests.computeIfAbsent(url.toString(), key -> {
-                    for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins().getAll()) {
+                    for (HorizonPlugin plugin : HorizonLoader.INSTANCE.getPlugins().getAll()) {
                         try {
                             if (plugin.file().ioFile().toPath().toAbsolutePath().normalize().equals(Paths.get(url.toURI()).toAbsolutePath().normalize())) {
                                 return Optional.ofNullable(plugin.file().jarFile().getManifest());

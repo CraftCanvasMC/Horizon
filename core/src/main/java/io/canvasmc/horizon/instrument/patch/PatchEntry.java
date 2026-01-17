@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.instrument.patch;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.util.Util;
 import io.sigpipe.jbsdiff.InvalidHeaderException;
 import io.sigpipe.jbsdiff.Patch;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
 
-import static io.canvasmc.horizon.Horizon.LOGGER;
+import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 import static java.nio.file.StandardOpenOption.*;
 
 record PatchEntry(
@@ -122,7 +122,7 @@ record PatchEntry(
 
     private byte @NonNull [] readPatchBytes() throws IOException {
         String fullPatchPath = "META-INF/" + Util.endingSlash(location) + patchPath;
-        JarFile jar = Horizon.INSTANCE.getPaperclipJar().jarFile();
+        JarFile jar = HorizonLoader.INSTANCE.getPaperclipJar().jarFile();
 
         InputStream in = jar.getInputStream(jar.getEntry(fullPatchPath));
         if (in == null) {

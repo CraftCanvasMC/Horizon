@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.inject;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import net.minecraft.network.chat.Component;
@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  * @author dueris
  */
 public record HorizonRepositorySource(DirectoryValidator validator) implements RepositorySource {
-    private static final Logger LOGGER = Logger.fork(Horizon.LOGGER, "datapack-injection");
+    private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "datapack-injection");
     private static final PackSelectionConfig DISCOVERED_PACK_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.TOP, false);
 
     private static @NonNull String nameFromPath(@NonNull Path path) {
@@ -63,7 +63,7 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
         PluginPackDetector pluginPackDetector = new PluginPackDetector(validator);
 
         // read from plugins, not folder, because technically we can include submodules in horizon jars // TODO - actually do this
-        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins().getAll()) {
+        for (HorizonPlugin plugin : HorizonLoader.INSTANCE.getPlugins().getAll()) {
             if (!plugin.pluginMetadata().loadDatapackEntry()) {
                 continue;
             }

@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.plugin.data;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.util.tree.ObjectArray;
 import io.canvasmc.horizon.util.tree.ObjectDeserializer;
@@ -15,7 +15,7 @@ public class PluginServiceProvider {
     public static final Class<? extends ServiceType<String>> CLASS_TRANSFORMER = ClassTransformer.class;
     public static final Class<? extends ServiceType<Entrypoints.Entrypoint>> CUSTOM = Entrypoints.class;
 
-    public static final Logger LOGGER = Logger.fork(Horizon.LOGGER, "plugin_service_provider");
+    public static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "plugin_service_provider");
     public static final PluginServiceProvider EMPTY = new PluginServiceProvider(new Service[0]);
 
     public static final ObjectDeserializer<PluginServiceProvider> DESERIALIZER = new ObjectDeserializer<>() {

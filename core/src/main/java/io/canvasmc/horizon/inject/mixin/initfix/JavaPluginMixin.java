@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static io.canvasmc.horizon.Horizon.LOGGER;
+import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 @Mixin(JavaPlugin.class)
 public abstract class JavaPluginMixin implements PluginClassloaderHolder {

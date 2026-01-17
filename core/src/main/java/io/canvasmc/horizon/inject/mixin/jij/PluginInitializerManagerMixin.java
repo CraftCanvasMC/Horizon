@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.inject.mixin.jij;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.util.FileJar;
 import io.papermc.paper.plugin.PluginInitializerManager;
@@ -20,7 +20,7 @@ import java.util.List;
 public class PluginInitializerManagerMixin {
     @Inject(method = "load", at = @At(value = "INVOKE", target = "Lio/papermc/paper/plugin/util/EntrypointUtil;registerProvidersFromSource(Lio/papermc/paper/plugin/provider/source/ProviderSource;Ljava/lang/Object;)V", ordinal = 0))
     private static void horizon$jijInject(@NonNull OptionSet optionSet, CallbackInfo ci) {
-        List<File> jijCache = Horizon.INSTANCE.getPlugins().getAll().stream()
+        List<File> jijCache = HorizonLoader.INSTANCE.getPlugins().getAll().stream()
             .map(HorizonPlugin::nestedData)
             .map(HorizonPlugin.NestedData::allPlugins)
             .flatMap(List::stream)

@@ -1,9 +1,9 @@
 package io.canvasmc.horizon;
 
 import io.canvasmc.horizon.instrument.JvmAgent;
-import io.canvasmc.horizon.resolver.Artifact;
-import io.canvasmc.horizon.resolver.DependencyResolver;
-import io.canvasmc.horizon.resolver.Repository;
+import io.canvasmc.horizon.util.resolver.Artifact;
+import io.canvasmc.horizon.util.resolver.DependencyResolver;
+import io.canvasmc.horizon.util.resolver.Repository;
 import io.canvasmc.horizon.util.Util;
 
 import java.io.File;
@@ -65,6 +65,6 @@ public class Main {
         File cacheDirectory = properties.cacheLocation();
         Util.clearDirectory(cacheDirectory);
 
-        new Horizon(properties, version, JvmAgent.INSTRUMENTATION, initialClasspath, args);
+        new HorizonLoader(properties, version, JvmAgent.INSTRUMENTATION, initialClasspath, args);
     }
 }

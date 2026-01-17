@@ -30,7 +30,7 @@ public record ServerProperties(
 
             // create default if not exist
             if (!file.exists()) {
-                Horizon.LOGGER.info("Configuration hasn't been loaded yet, building default and returning");
+                HorizonLoader.LOGGER.info("Configuration hasn't been loaded yet, building default and returning");
                 //noinspection ResultOfMethodCallIgnored
                 file.createNewFile();
 
@@ -40,7 +40,7 @@ public record ServerProperties(
                         .to(writer);
                 }
             } else {
-                Horizon.LOGGER.info("Configuration exists, loading...");
+                HorizonLoader.LOGGER.info("Configuration exists, loading...");
             }
 
             // read and parse configuration
@@ -57,9 +57,9 @@ public record ServerProperties(
             // deserialize
             return configTree.as(ServerProperties.class);
         } catch (ParseException e) {
-            Horizon.LOGGER.error("Failed to parse configuration file");
+            HorizonLoader.LOGGER.error("Failed to parse configuration file");
             for (ParseError error : e.getErrors()) {
-                Horizon.LOGGER.error("  - {}", error);
+                HorizonLoader.LOGGER.error("  - {}", error);
             }
             throw Util.kill("Couldn't parse horizon properties, exiting", e);
         } catch (Throwable thrown) {

@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.plugin;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.ember.EmberMixinService;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.plugin.phase.Phase;
@@ -37,7 +37,7 @@ public class EntrypointLoader {
     // Note: we use "?" here because we don't want to load the JavaPlugin ref before we load the game
     //     and only contains mappings for horizon plugins
     public static final Map<String, Object> MAIN2JAVA_PLUGIN = new ConcurrentHashMap<>();
-    public static final Logger LOGGER = Logger.fork(Horizon.LOGGER, "plugin_loader");
+    public static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "plugin_loader");
 
     private static final List<Phase<?, ?>> PHASES = List.of(
         new DiscoveryPhase(),
@@ -61,7 +61,7 @@ public class EntrypointLoader {
     }
 
     public static HorizonPlugin getPluginFromMain(String main) throws Throwable {
-        return Horizon.INSTANCE.getPlugins().getAll().stream()
+        return HorizonLoader.INSTANCE.getPlugins().getAll().stream()
             .filter(pl -> pl.pluginMetadata().main().equalsIgnoreCase(main))
             .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_MAIN);
     }
@@ -71,14 +71,14 @@ public class EntrypointLoader {
     }
 
     public static HorizonPlugin getPluginFromName(String name) throws Throwable {
-        return Horizon.INSTANCE.getPlugins().getAll().stream()
+        return HorizonLoader.INSTANCE.getPlugins().getAll().stream()
             .filter(pl -> pl.pluginMetadata().name().equalsIgnoreCase(name))
             .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_NAME);
     }
 
     private static @NonNull LoadContext getLoadContext() {
-        File pluginsDirectory = Horizon.INSTANCE.getProperties().pluginsDirectory();
-        File cacheDirectory = Horizon.INSTANCE.getProperties().cacheLocation();
+        File pluginsDirectory = HorizonLoader.INSTANCE.getProperties().pluginsDirectory();
+        File cacheDirectory = HorizonLoader.INSTANCE.getProperties().cacheLocation();
         if (!pluginsDirectory.isDirectory()) {
             throw new IllegalStateException(
                 "Plugins folder '" + pluginsDirectory.getPath() + "' is not a directory!"
@@ -114,7 +114,7 @@ public class EntrypointLoader {
             }
 
             @SuppressWarnings("unchecked") final List<HorizonPlugin> fullResult = new LinkedList<>(((List<HorizonPlugin>) result));
-            fullResult.add(Horizon.INTERNAL_PLUGIN);
+            fullResult.add(HorizonLoader.INTERNAL_PLUGIN);
 
             PluginTree tree = PluginTree.from(fullResult.toArray(new HorizonPlugin[0]));
             LOGGER.info(tree.format());
@@ -135,7 +135,7 @@ public class EntrypointLoader {
             throw new IllegalStateException("Access transforming impl cannot be null!");
         }
 
-        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins().getAll()) {
+        for (HorizonPlugin plugin : HorizonLoader.INSTANCE.getPlugins().getAll()) {
             List<String> wideners = plugin.pluginMetadata().accessWideners();
             if (wideners.isEmpty()) {
                 continue;
@@ -151,7 +151,7 @@ public class EntrypointLoader {
         final EmberMixinService service = (EmberMixinService) MixinService.getService();
         final MixinContainerHandle handle = (MixinContainerHandle) service.getPrimaryContainer();
 
-        for (HorizonPlugin plugin : Horizon.INSTANCE.getPlugins().getAll()) {
+        for (HorizonPlugin plugin : HorizonLoader.INSTANCE.getPlugins().getAll()) {
             Path pluginPath = plugin.file().ioFile().toPath();
             handle.addResource(pluginPath.getFileName().toString(), pluginPath);
 

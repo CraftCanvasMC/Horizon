@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.plugin.phase.impl;
 
 import com.google.common.collect.Sets;
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.plugin.LoadContext;
 import io.canvasmc.horizon.plugin.data.CandidateMetadata;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
@@ -48,7 +48,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
             path -> Files.isRegularFile(path) && path.toString().endsWith(".jar"))) {
 
             // also try and parse extra plugins
-            Set<Path> files = Horizon.INSTANCE.getProperties().extraPlugins().stream().map(File::toPath).collect(Collectors.toSet());
+            Set<Path> files = HorizonLoader.INSTANCE.getProperties().extraPlugins().stream().map(File::toPath).collect(Collectors.toSet());
             stream.forEach(files::add);
 
             for (Path path : files) {
@@ -151,7 +151,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                     return;
                 }
 
-                File cacheDir = Horizon.INSTANCE.getProperties().cacheLocation();
+                File cacheDir = HorizonLoader.INSTANCE.getProperties().cacheLocation();
                 String fileName = entry.getName().substring(n.length());
                 File extractedFile = new File(cacheDir, fileName);
 

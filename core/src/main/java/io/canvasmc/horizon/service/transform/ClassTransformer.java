@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.service.transform;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-import static io.canvasmc.horizon.Horizon.LOGGER;
+import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 public final class ClassTransformer {
 
@@ -32,7 +32,7 @@ public final class ClassTransformer {
         this.services = new IdentityHashMap<>();
         this.exclusionFilter = path -> true;
 
-        for (HorizonPlugin horizonPlugin : Horizon.INSTANCE.getPlugins().getAll()) {
+        for (HorizonPlugin horizonPlugin : HorizonLoader.INSTANCE.getPlugins().getAll()) {
             for (PluginServiceProvider.Service<String> service : horizonPlugin.pluginMetadata()
                 .serviceProvider()
                 .findServices(PluginServiceProvider.CLASS_TRANSFORMER)

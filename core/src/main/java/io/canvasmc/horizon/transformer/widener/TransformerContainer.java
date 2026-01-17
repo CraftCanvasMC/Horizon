@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.transformer.widener;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -45,7 +45,7 @@ public class TransformerContainer {
     private static final Pattern MODIFIER_PREFIX =
         Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\b");
 
-    private static final Logger LOGGER = Logger.fork(Horizon.LOGGER, "widener");
+    private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "widener");
 
     private static final int VIS_PUBLIC = 3;
     private static final int VIS_PROTECTED = 2;

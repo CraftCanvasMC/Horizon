@@ -682,7 +682,7 @@ FileJar paperclip = horizon.getPaperclipJar();
 
 getLogger().info("Paperclip JAR: " + paperclip.ioFile().getName());
 
-PaperclipVersion version = horizon.getPaperclipVersion();
+PaperclipVersion version = horizon.getVersionMeta();
 
 getLogger().info("Minecraft Version: " + version.name());
 getLogger().info("Protocol Version: " + version.protocol_version());

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static io.canvasmc.horizon.Horizon.LOGGER;
+import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 public class Util {
     public static final String JAR_SUFFIX = ".jar";

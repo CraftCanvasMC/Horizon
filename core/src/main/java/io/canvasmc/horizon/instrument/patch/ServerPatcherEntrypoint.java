@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.instrument.patch;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.util.Util;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static io.canvasmc.horizon.Horizon.LOGGER;
+import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 import static java.nio.file.StandardOpenOption.*;
 
 public final class ServerPatcherEntrypoint {
@@ -224,7 +224,7 @@ public final class ServerPatcherEntrypoint {
             filePath = filePath.substring(1);
         }
 
-        JarFile patcherJar = Horizon.INSTANCE.getPaperclipJar().jarFile();
+        JarFile patcherJar = HorizonLoader.INSTANCE.getPaperclipJar().jarFile();
 
         JarEntry entry = patcherJar.getJarEntry(filePath);
         if (entry != null) {

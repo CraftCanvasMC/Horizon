@@ -1,6 +1,6 @@
 package io.canvasmc.testplugin;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import org.jspecify.annotations.NonNull;
@@ -10,6 +10,6 @@ public class TestBootstrapper implements PluginBootstrap {
 
     @Override
     public void bootstrap(@NonNull BootstrapContext context) {
-        Horizon.LOGGER.info("ADJFHLSJDHFLSKJDFSDF");
+        HorizonLoader.LOGGER.info("ADJFHLSJDHFLSKJDFSDF");
     }
 }

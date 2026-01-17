@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.instrument;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;
@@ -16,7 +16,7 @@ public class JvmAgent {
     public static Instrumentation INSTRUMENTATION;
 
     public static void agentmain(String agentArgs, java.lang.instrument.Instrumentation inst) {
-        Horizon.LOGGER.info("Booted from agent main");
+        HorizonLoader.LOGGER.info("Booted from agent main");
         INSTRUMENTATION = inst;
     }
 
@@ -45,7 +45,7 @@ public class JvmAgent {
      */
     public static void addJar(final @NonNull JarFile jar) {
         if (INSTRUMENTATION != null) {
-            Horizon.LOGGER.debug("Appending jar '{}' to system classloader", jar.getName());
+            HorizonLoader.LOGGER.debug("Appending jar '{}' to system classloader", jar.getName());
             INSTRUMENTATION.appendToSystemClassLoaderSearch(jar);
             return;
         }

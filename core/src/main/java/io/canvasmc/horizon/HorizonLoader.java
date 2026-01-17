@@ -36,7 +36,7 @@ import java.util.jar.JarFile;
  *
  * @author dueris
  */
-public class Horizon {
+public class HorizonLoader {
     public static final boolean DEBUG = Boolean.getBoolean("Horizon.debug");
     public static final Logger LOGGER = Logger.create()
         .name("main")
@@ -45,7 +45,7 @@ public class Horizon {
         .level(DEBUG ? Level.DEBUG : Level.INFO)
         .build();
     public static HorizonPlugin INTERNAL_PLUGIN;
-    public static Horizon INSTANCE;
+    public static HorizonLoader INSTANCE;
 
     private @NonNull
     final ServerProperties properties;
@@ -60,7 +60,7 @@ public class Horizon {
     private PluginTree plugins;
     private PaperclipVersion paperclipVersion;
 
-    public Horizon(@NonNull ServerProperties properties, @NonNull String version, @NonNull Instrumentation instrumentation, List<Path> initialClasspath, String @NonNull [] providedArgs) {
+    public HorizonLoader(@NonNull ServerProperties properties, @NonNull String version, @NonNull Instrumentation instrumentation, List<Path> initialClasspath, String @NonNull [] providedArgs) {
         this.properties = properties;
         this.version = version;
         this.instrumentation = instrumentation;
@@ -71,7 +71,7 @@ public class Horizon {
             File paperclipIOFile = properties.serverJar();
             this.paperclipJar = new FileJar(paperclipIOFile, new JarFile(paperclipIOFile));
 
-            File horizonIOFile = Path.of(Horizon.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
+            File horizonIOFile = Path.of(HorizonLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
 
             INTERNAL_PLUGIN = new HorizonPlugin(
                 "horizon",
@@ -104,6 +104,15 @@ public class Horizon {
     }
 
     /**
+     * The launch service for Horizon
+     *
+     * @return the Mixin launch service
+     */
+    public @NonNull MixinLaunch getLaunchService() {
+        return MixinLaunch.getInstance();
+    }
+
+    /**
      * The optionset parsed for Horizon
      *
      * @return the Horizon optionset
@@ -118,7 +127,7 @@ public class Horizon {
      *
      * @return the Paperclip {@code version.json}
      */
-    public PaperclipVersion getPaperclipVersion() {
+    public PaperclipVersion getVersionMeta() {
         return paperclipVersion;
     }
 
@@ -200,7 +209,7 @@ public class Horizon {
         }
 
         try {
-            initialClasspath.add(Path.of(Horizon.class.getProtectionDomain().getCodeSource().getLocation().toURI()));
+            initialClasspath.add(Path.of(HorizonLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI()));
 
             MixinLaunch.launch(
                 new MixinLaunch.LaunchContext(
@@ -247,7 +256,7 @@ public class Horizon {
                 this.paperclipVersion = versionTree.as(PaperclipVersion.class);
 
                 try {
-                    JvmAgent.addJar(Horizon.INSTANCE.getPaperclipJar().ioFile().toPath());
+                    JvmAgent.addJar(HorizonLoader.INSTANCE.getPaperclipJar().ioFile().toPath());
                 } catch (final IOException exception) {
                     throw new IllegalStateException("Unable to add paperclip jar to classpath!", exception);
                 }

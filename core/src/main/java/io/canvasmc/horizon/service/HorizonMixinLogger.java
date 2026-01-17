@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.service;
 
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.logger.Logger;
 import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.logging.ILogger;
@@ -18,7 +18,7 @@ public class HorizonMixinLogger extends LoggerAdapterAbstract {
 
     HorizonMixinLogger(@NonNull String id) {
         super(id);
-        this.logger = Logger.fork(Horizon.LOGGER, id);
+        this.logger = Logger.fork(HorizonLoader.LOGGER, id);
     }
 
     public static @NonNull ILogger get(@NonNull String name) {

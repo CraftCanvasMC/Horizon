@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.inject.mixin.commandinject;
 
 import com.mojang.brigadier.context.CommandContext;
-import io.canvasmc.horizon.Horizon;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.papermc.paper.command.PaperPluginsCommand;
@@ -55,7 +55,7 @@ public abstract class PaperPluginsCommandMixin {
         final TreeMap<String, PluginProvider<JavaPlugin>> paperPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         final TreeMap<String, PluginProvider<JavaPlugin>> spigotPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        final List<String> horizonPluginJars = Horizon.INSTANCE.getPlugins().getAll().stream()
+        final List<String> horizonPluginJars = HorizonLoader.INSTANCE.getPlugins().getAll().stream()
             .map(HorizonPlugin::pluginMetadata)
             .map(HorizonMetadata::name)
             .map(String::toLowerCase)

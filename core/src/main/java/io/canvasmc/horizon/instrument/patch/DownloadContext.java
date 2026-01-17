@@ -14,7 +14,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static io.canvasmc.horizon.Horizon.LOGGER;
+import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 import static java.nio.file.StandardOpenOption.*;
 
 record DownloadContext(byte[] hash, URL url, String fileName) {
