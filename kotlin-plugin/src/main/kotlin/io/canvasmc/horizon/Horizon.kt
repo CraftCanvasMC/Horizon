@@ -12,8 +12,6 @@ import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.invocation.Gradle
-import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
@@ -153,14 +151,6 @@ abstract class Horizon : Plugin<Project> {
         configurations.named(Paperweight.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).configure {
             extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).get())
         }
-    }
-
-    // taken from paperweight
-    inline fun <reified P> printId(pluginId: String, gradle: Gradle) {
-        if (gradle.startParameter.logLevel == LogLevel.QUIET) {
-            return
-        }
-        println("$pluginId v${P::class.java.`package`.implementationVersion} (running on '${System.getProperty("os.name")}')")
     }
 
     private fun Project.checkForWeaverUserdev() {
