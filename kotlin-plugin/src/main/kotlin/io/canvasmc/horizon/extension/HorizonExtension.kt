@@ -30,7 +30,7 @@ abstract class HorizonExtension @Inject constructor(objects: ObjectFactory, proj
     val injectCanvasRepository: Property<Boolean> = objects.property<Boolean>().convention(true)
 
     /**
-     * Whether to fail the build if an AT fails to be applied to the Minecraft source.
+     * Whether to fail the build if an AT fails to be applied to the dev bundle sources.
      */
     val failFastOnUnapplicableAT: Property<Boolean> = objects.property<Boolean>().convention(true)
 

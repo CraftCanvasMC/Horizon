@@ -31,7 +31,7 @@ abstract class Horizon : Plugin<Project> {
         target.tasks.register<Delete>("cleanHorizonCache") {
             group = HORIZON_NAME
             description = "Delete the project-local horizon setup cache."
-            delete(target.rootProject.layout.cache.resolve(HORIZON_NAME))
+            delete(target.layout.cache.resolve(HORIZON_NAME))
         }
 
         target.configurations.register(JST_CONFIG) {
