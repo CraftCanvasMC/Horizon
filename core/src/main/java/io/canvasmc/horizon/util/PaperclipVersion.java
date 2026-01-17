@@ -32,10 +32,10 @@ public record PaperclipVersion(
         public @NonNull PaperclipVersion deserialize(@NonNull ObjectTree tree) {
             ObjectTree packTree = tree.getTree("pack_version");
             PackVersion pack = new PackVersion(
-                packTree.getValue("resource_major").asIntOptional().orElseGet(() -> packTree.getValue("resource").asInt()),
-                packTree.getValue("resource_minor").asIntOptional().orElse(0),
-                packTree.getValue("data_major").asIntOptional().orElseGet(() -> packTree.getValue("data").asInt()),
-                packTree.getValue("data_minor").asIntOptional().orElse(0)
+                packTree.getValueOptional("resource_major").orElseGet(() -> packTree.getValue("resource")).asInt(),
+                packTree.containsKey("resource_minor") ? packTree.getValue("resource_minor").asInt() : 0,
+                packTree.getValueOptional("data_major").orElseGet(() -> packTree.getValue("data")).asInt(),
+                packTree.containsKey("data_minor") ? packTree.getValue("data_minor").asInt() : 0
             );
 
             return new PaperclipVersion(
