@@ -5,6 +5,7 @@ import io.canvasmc.horizon.util.constants.HORIZON_API_CONFIG
 import io.canvasmc.horizon.util.constants.HORIZON_API_GROUP
 import org.gradle.api.Action
 import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyFactory
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.provider.Provider
@@ -22,7 +23,7 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
      * @param version dependency version
      * @param group dependency group
      * @param artifactId dependency artifactId
-     * @param horizonApiConfigurationName name of the dev bundle [org.gradle.api.artifacts.Configuration]
+     * @param horizonApiConfigurationName name of the Horizon API [org.gradle.api.artifacts.Configuration]
      * @param configurationAction action configuring the dependency
      * @return dependency
      */
@@ -58,6 +59,26 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
             version.map { "$HORIZON_API_GROUP:$HORIZON_API_ARTIFACT_ID:$it" },
             configurationAction
         )
+    }
+
+    /**
+     * Adds a dependency on Horizon's API to the project [org.gradle.api.artifacts.Configuration].
+     *
+     * Intended for use in builds containing Horizon API as a subproject.
+     *
+     * @param project project dependency [org.gradle.api.artifacts.ProjectDependency]
+     * @param horizonApiConfigurationName name of the Horizon API [org.gradle.api.artifacts.Configuration]
+     * @param configurationAction action configuring the dependency
+     */
+    @JvmOverloads
+    fun horizonApi(
+        project: ProjectDependency,
+        horizonApiConfigurationName: String = HORIZON_API_CONFIG,
+        configurationAction: Action<ProjectDependency> = nullAction()
+    ): ProjectDependency {
+        configurationAction(project)
+        dependencies.add(horizonApiConfigurationName, project)
+        return project
     }
 
     /**

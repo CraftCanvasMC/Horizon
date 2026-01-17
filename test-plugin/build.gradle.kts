@@ -9,8 +9,8 @@ dependencies {
     // minecraft setup
     paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
 
-    // add horizon api manually from the core project
-    add("horizonHorizonApiConfig", projects.core)
+    // add horizon api from the core project
+    horizon.horizonApi(projects.core)
 }
 
 horizon {
