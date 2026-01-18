@@ -43,7 +43,8 @@ public final class ClassTransformer {
                         TransformationService transformerObj = (TransformationService) serviceClazz.getDeclaredConstructor().newInstance();
                         services.put(transformerObj.getClass(), transformerObj);
                         LOGGER.info("Registered class transformer from {}, \"{}\"", horizonPlugin.identifier(), serviceClazz.getName());
-                    } else throw new IllegalArgumentException("Declared service class '" + service.obj() + "' is not instanceof a TransformationService");
+                    } else
+                        throw new IllegalArgumentException("Declared service class '" + service.obj() + "' is not instanceof a TransformationService");
                 } catch (ClassNotFoundException exe) {
                     throw new IllegalArgumentException("The service '" + service.obj() + "' was not found or is invalid", exe);
                 } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException |

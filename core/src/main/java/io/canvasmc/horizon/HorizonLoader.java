@@ -250,7 +250,8 @@ public class HorizonLoader {
                 ObjectTree versionTree = ObjectTree.read()
                     .format(Format.JSON)
                     .registerDeserializer(PaperclipVersion.class, new PaperclipVersion.PaperclipVersionDeserializer())
-                    .registerDeserializer(PaperclipVersion.PackVersion.class, new PaperclipVersion.PackVersionDeserializer())
+                    .alias("resource_major", "resource")
+                    .alias("data_major", "data")
                     .from(new InputStreamReader(jarFile.getInputStream(jarFile.getJarEntry("version.json"))));
 
                 this.paperclipVersion = versionTree.as(PaperclipVersion.class);

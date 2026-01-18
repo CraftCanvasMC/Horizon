@@ -1,6 +1,8 @@
 package io.canvasmc.horizon.ember;
 
-import io.canvasmc.horizon.service.*;
+import io.canvasmc.horizon.service.HorizonMixinLogger;
+import io.canvasmc.horizon.service.MixinContainerHandle;
+import io.canvasmc.horizon.service.MixinLaunch;
 import io.canvasmc.horizon.service.transform.ClassTransformer;
 import io.canvasmc.horizon.service.transform.TransformPhase;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;

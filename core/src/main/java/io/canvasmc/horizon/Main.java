@@ -1,10 +1,10 @@
 package io.canvasmc.horizon;
 
 import io.canvasmc.horizon.instrument.JvmAgent;
+import io.canvasmc.horizon.util.Util;
 import io.canvasmc.horizon.util.resolver.Artifact;
 import io.canvasmc.horizon.util.resolver.DependencyResolver;
 import io.canvasmc.horizon.util.resolver.Repository;
-import io.canvasmc.horizon.util.Util;
 
 import java.io.File;
 import java.io.IOException;

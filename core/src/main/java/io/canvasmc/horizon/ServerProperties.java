@@ -47,9 +47,9 @@ public record ServerProperties(
             ObjectTree configTree = ObjectTree.read()
                 .format(Format.YAML)
                 .registerDeserializer(ServerProperties.class, tree1 -> new ServerProperties(
-                    tree1.getValue("pluginsDirectory").as(File.class),
-                    tree1.getValue("serverJar").as(File.class),
-                    tree1.getValue("cacheLocation").as(File.class),
+                    tree1.getValueOrThrow("pluginsDirectory").as(File.class),
+                    tree1.getValueOrThrow("serverJar").as(File.class),
+                    tree1.getValueOrThrow("cacheLocation").as(File.class),
                     extractExtraPlugins(tree1, args)
                 ))
                 .from(new FileReader(file));

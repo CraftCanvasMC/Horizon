@@ -115,7 +115,7 @@ public final class ObjectTree {
      * @throws NoSuchElementException if the key does not exist
      * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedthing"} to find a nested value
      */
-    public @NonNull ObjectValue getValue(String key) {
+    public @NonNull Value<?> getValueOrThrow(String key) {
         if (!data.containsKey(key)) {
             throw new NoSuchElementException("Key not found: " + key);
         }
@@ -123,13 +123,30 @@ public final class ObjectTree {
     }
 
     /**
-     * Gets an optional value from this tree
+     * Gets an optional value from this tree. Will return {@link Optional#empty()} if the key does not exist
      *
      * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedthing"} to find a nested value
      */
-    public Optional<ObjectValue> getValueOptional(String key) {
+    public Optional<Value<?>> getValueOptional(String key) {
         return Optional.ofNullable(data.get(key))
             .map(v -> new ObjectValue(v, converters));
+    }
+
+    /**
+     * Gets a value from the tree safely.
+     * <p>
+     * What quantifies "safely" is that this doesn't throw a {@link NoSuchElementException} if not found,
+     * and instead it returns an {@link EmptyValue}, which essentially is a wrapper of "null".
+     * This is generally recommended for when trying to access keys that may not exist. It is always recommended
+     * to use {@link Value#asOptional(Class)} after parsing this to avoid potential parse issues, since
+     * this can potentially be an empty value.
+     *
+     * @param key the key to retrieve
+     * @return the value wrapper
+     * @see EmptyValue
+     */
+    public @NonNull Value<?> getValueSafe(String key) {
+        return getValueOptional(key).orElse(new EmptyValue<>());
     }
 
     /**
@@ -209,7 +226,7 @@ public final class ObjectTree {
     /**
      * Returns all values in this tree as ObjectValue wrappers
      */
-    public @NonNull @Unmodifiable Collection<ObjectValue> values() {
+    public @NonNull @Unmodifiable Collection<? extends Value<?>> values() {
         return data.values().stream()
             .map(v -> new ObjectValue(v, converters))
             .toList();
@@ -303,7 +320,7 @@ public final class ObjectTree {
         }
 
         /**
-         * Registers a type converter. Should be used when using {@link ObjectValue#as(Class)} to parse your object
+         * Registers a type converter. Should be used when using {@link Value#as(Class)} to parse your object
          */
         public <T> ReadBuilder registerConverter(Class<T> type, TypeConverter<T> converter) {
             converters.register(type, converter);

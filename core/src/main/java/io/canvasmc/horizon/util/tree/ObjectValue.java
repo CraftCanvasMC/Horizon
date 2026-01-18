@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * Wrapper for a value in the ObjectTree type conversion methods.
  */
-public final class ObjectValue {
+public final class ObjectValue implements Value<Object> {
     private final @Nullable Object value;
     private final TypeConverterRegistry converters;
 
@@ -20,117 +20,97 @@ public final class ObjectValue {
         this.converters = converters;
     }
 
-    /**
-     * Gets the raw value
-     */
+    @Override
     public @Nullable Object raw() {
         return value;
     }
 
-    /**
-     * Checks if the value is null
-     */
+    @Override
     public boolean isNull() {
         return value == null;
     }
 
-    /**
-     * Converts to String
-     *
-     * @throws TypeConversionException if conversion fails
-     */
+    @Override
     public String asString() {
         return convert(String.class);
     }
 
+    @Override
     public Optional<String> asStringOptional() {
         return convertOptional(String.class);
     }
 
-    /**
-     * Converts to integer
-     *
-     * @throws TypeConversionException if conversion fails
-     */
+    @Override
     public int asInt() {
         return convert(Integer.class);
     }
 
+    @Override
     public Optional<Integer> asIntOptional() {
         return convertOptional(Integer.class);
     }
 
-    /**
-     * Converts to long
-     */
+    @Override
     public long asLong() {
         return convert(Long.class);
     }
 
+    @Override
     public Optional<Long> asLongOptional() {
         return convertOptional(Long.class);
     }
 
-    /**
-     * Converts to double
-     */
+    @Override
     public double asDouble() {
         return convert(Double.class);
     }
 
+    @Override
     public Optional<Double> asDoubleOptional() {
         return convertOptional(Double.class);
     }
 
-    /**
-     * Converts to float
-     */
+    @Override
     public float asFloat() {
         return convert(Float.class);
     }
 
+    @Override
     public Optional<Float> asFloatOptional() {
         return convertOptional(Float.class);
     }
 
-    /**
-     * Converts to boolean
-     */
+    @Override
     public boolean asBoolean() {
         return convert(Boolean.class);
     }
 
+    @Override
     public Optional<Boolean> asBooleanOptional() {
         return convertOptional(Boolean.class);
     }
 
-    /**
-     * Converts to {@link BigDecimal}
-     */
+    @Override
     public BigDecimal asBigDecimal() {
         return convert(BigDecimal.class);
     }
 
+    @Override
     public Optional<BigDecimal> asBigDecimalOptional() {
         return convertOptional(BigDecimal.class);
     }
 
-    /**
-     * Converts to {@link BigInteger}
-     */
+    @Override
     public BigInteger asBigInteger() {
         return convert(BigInteger.class);
     }
 
+    @Override
     public Optional<BigInteger> asBigIntegerOptional() {
         return convertOptional(BigInteger.class);
     }
 
-    /**
-     * Converts to ObjectTree if the value is a tree structure
-     *
-     * @throws TypeConversionException if the value is not an ObjectTree
-     */
+    @Override
     public ObjectTree asTree() {
         if (value == null) {
             throw new TypeConversionException("Cannot convert null to ObjectTree");
@@ -141,9 +121,7 @@ public final class ObjectValue {
         return (ObjectTree) value;
     }
 
-    /**
-     * Converts to ObjectTree if the value is a tree structure, returns empty Optional otherwise
-     */
+    @Override
     public Optional<ObjectTree> asTreeOptional() {
         if (value instanceof ObjectTree) {
             return Optional.of((ObjectTree) value);
@@ -151,13 +129,12 @@ public final class ObjectValue {
         return Optional.empty();
     }
 
-    /**
-     * Converts to a custom type using registered converter
-     */
+    @Override
     public <T> T as(Class<T> type) {
         return convert(type);
     }
 
+    @Override
     public <T> Optional<T> asOptional(Class<T> type) {
         return convertOptional(type);
     }

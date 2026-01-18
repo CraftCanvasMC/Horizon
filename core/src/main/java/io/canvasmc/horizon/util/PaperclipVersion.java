@@ -2,7 +2,11 @@ package io.canvasmc.horizon.util;
 
 import io.canvasmc.horizon.util.tree.ObjectDeserializer;
 import io.canvasmc.horizon.util.tree.ObjectTree;
+import io.canvasmc.horizon.util.tree.ParseError;
+import io.canvasmc.horizon.util.tree.ParseException;
 import org.jspecify.annotations.NonNull;
+
+import java.util.List;
 
 // TODO - javadocs
 public record PaperclipVersion(
@@ -25,60 +29,40 @@ public record PaperclipVersion(
         int data_major,
         int data_minor
     ) {
-        @Override
-        public int resource_major() {
-            if (resource_major == Integer.MIN_VALUE)
-                throw new UnsupportedOperationException("'resource_major' isn't included in this Minecraft version");
-            return resource_major;
-        }
-
-        @Override
-        public int resource_minor() {
-            if (resource_minor == Integer.MIN_VALUE)
-                throw new UnsupportedOperationException("'resource_minor' isn't included in this Minecraft version");
-            return resource_minor;
-        }
     }
 
     public static final class PaperclipVersionDeserializer implements ObjectDeserializer<PaperclipVersion> {
 
         @Override
-        public @NonNull PaperclipVersion deserialize(@NonNull ObjectTree tree) {
-            ObjectTree packTree = tree.getTree("pack_version");
-            PackVersion pack = new PackVersion(
-                // resource major/minor as optionals, older Minecraft versions do not have these values
-                packTree.getValue("resource_major").asIntOptional().orElse(Integer.MIN_VALUE),
-                packTree.getValue("resource_minor").asIntOptional().orElse(Integer.MIN_VALUE),
-                packTree.getValue("data_major").asInt(),
-                packTree.getValue("data_minor").asInt()
-            );
+        public @NonNull PaperclipVersion deserialize(@NonNull ObjectTree tree) throws ParseException {
+            try {
+                ObjectTree pack_version = tree.getTree("pack_version");
+                PackVersion pack = new PackVersion(
+                    // we use an alias mapping to remap 'resource' -> 'resource_major', and 'data' -> 'data_major'
+                    // that way older Minecraft versions won't die when trying to parse this version data
+                    pack_version.getValueOrThrow("resource_major").asInt(),
+                    pack_version.getValueSafe("resource_minor").asIntOptional().orElse(0),
+                    pack_version.getValueOrThrow("data_major").asInt(),
+                    pack_version.getValueSafe("data_minor").asIntOptional().orElse(0)
+                );
 
-            return new PaperclipVersion(
-                tree.getValue("id").asString(),
-                tree.getValue("name").asString(),
-                tree.getValue("world_version").asInt(),
-                tree.getValue("series_id").asString(),
-                tree.getValue("protocol_version").asInt(),
-                pack,
-                tree.getValue("build_time").asString(),
-                tree.getValue("java_component").asString(),
-                tree.getValue("java_version").asInt(),
-                tree.getValue("stable").asBoolean(),
-                tree.getValue("use_editor").asBoolean()
-            );
-        }
-    }
-
-    public static final class PackVersionDeserializer implements ObjectDeserializer<PackVersion> {
-
-        @Override
-        public @NonNull PackVersion deserialize(@NonNull ObjectTree tree) {
-            return new PackVersion(
-                tree.getValue("resource_major").asInt(),
-                tree.getValue("resource_minor").asInt(),
-                tree.getValue("data_major").asInt(),
-                tree.getValue("data_minor").asInt()
-            );
+                return new PaperclipVersion(
+                    tree.getValueOrThrow("id").asString(),
+                    tree.getValueOrThrow("name").asString(),
+                    tree.getValueOrThrow("world_version").asInt(),
+                    tree.getValueOrThrow("series_id").asString(),
+                    tree.getValueOrThrow("protocol_version").asInt(),
+                    pack,
+                    tree.getValueOrThrow("build_time").asString(),
+                    tree.getValueOrThrow("java_component").asString(),
+                    tree.getValueOrThrow("java_version").asInt(),
+                    tree.getValueOrThrow("stable").asBoolean(),
+                    tree.getValueOrThrow("use_editor").asBoolean()
+                );
+            } catch (Exception exe) {
+                String out = tree.toString();
+                throw new ParseException(List.of(new ParseError("Couldn't read paperclip version: " + out), new ParseError(exe.getMessage())));
+            }
         }
     }
 }

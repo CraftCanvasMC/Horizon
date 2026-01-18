@@ -41,10 +41,10 @@ public final class EmberClassLoader extends ClassLoader {
         ClassLoader.registerAsParallelCapable();
     }
 
+    public final ClassTransformer transformer;
     private final Object lock = new Object();
     private final ClassLoader parent;
     private final DynamicClassLoader dynamic;
-    public final ClassTransformer transformer;
     private final Function<URLConnection, CodeSource> sourceLocator;
     private Function<URLConnection, Manifest> manifestLocator;
     private Predicate<String> transformationFilter;

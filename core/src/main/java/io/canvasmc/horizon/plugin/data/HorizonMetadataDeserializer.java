@@ -2,7 +2,7 @@ package io.canvasmc.horizon.plugin.data;
 
 import io.canvasmc.horizon.util.tree.ObjectDeserializer;
 import io.canvasmc.horizon.util.tree.ObjectTree;
-import io.canvasmc.horizon.util.tree.ObjectValue;
+import io.canvasmc.horizon.util.tree.Value;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
@@ -11,10 +11,10 @@ public final class HorizonMetadataDeserializer implements ObjectDeserializer<Hor
 
     @Override
     public @NonNull HorizonMetadata deserialize(@NonNull ObjectTree tree) {
-        String name = tree.getValue("name").asString();
-        String version = tree.getValue("version").asString();
-        String apiVersion = tree.getValue("api-version").asString();
-        String main = tree.getValue("main").asString();
+        String name = tree.getValueOrThrow("name").asString();
+        String version = tree.getValueOrThrow("version").asString();
+        String apiVersion = tree.getValueOrThrow("api-version").asString();
+        String main = tree.getValueOrThrow("main").asString();
 
         ObjectTree horizon = tree.getTreeOptional("horizon")
             .orElseThrow(() -> new IllegalArgumentException("'horizon' key not found!"));
@@ -22,7 +22,7 @@ public final class HorizonMetadataDeserializer implements ObjectDeserializer<Hor
         List<String> mixins = getStringList(horizon, "mixins");
         List<String> wideners = getStringList(horizon, "wideners");
         boolean loadDatapackEntry = horizon.getValueOptional("load-datapack-entry")
-            .map(ObjectValue::asBoolean)
+            .map(Value::asBoolean)
             .orElse(false);
 
         return new HorizonMetadata(

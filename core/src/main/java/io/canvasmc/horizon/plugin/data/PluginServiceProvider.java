@@ -95,7 +95,7 @@ public class PluginServiceProvider {
                 if (raw.keys().size() > 1)
                     throw new IllegalArgumentException("Entrypoint entry cannot contain more than 1 key/value pair");
                 String entryId = raw.keys().stream().findFirst().orElseThrow();
-                String target = raw.getValue(entryId).asString();
+                String target = raw.getValueOrThrow(entryId).asString();
                 services[i] = new Service(this, new Entrypoints.Entrypoint(entryId, target));
             }
             return services;

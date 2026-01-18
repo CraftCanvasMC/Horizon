@@ -47,7 +47,7 @@ public interface TransformationService {
      * @param type the ASM type representing the class
      * @param node the class node
      * @return {@code true} if the class should be transformed;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean shouldTransform(final @NonNull Type type, final @NonNull ClassNode node);
 
