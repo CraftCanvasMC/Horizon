@@ -56,6 +56,8 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(jdkVersion))
     }
+    withSourcesJar()
+    withJavadocJar()
 }
 
 fun fetchVersion(): Provider<String> {
@@ -154,6 +156,8 @@ val publicationJar = configurations.consumable("publicationJar") {
         attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
     }
     outgoing.artifact(tasks.named<Jar>("createPublicationJar").flatMap { it.archiveFile })
+    outgoing.artifact(tasks.named<Jar>("javadocJar").flatMap { it.archiveFile })
+    outgoing.artifact(tasks.named<Jar>("sourcesJar").flatMap { it.archiveFile })
 }
 
 val publicationComponent = publishing.softwareComponentFactory.adhoc("publicationComponent")

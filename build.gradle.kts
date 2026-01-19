@@ -15,6 +15,7 @@ subprojects {
 
     tasks.withType<Javadoc>().configureEach {
         options.encoding = Charsets.UTF_8.name()
+        (options as StandardJavadocDocletOptions).tags("apiNote:a:API Note:")
     }
 
     tasks.withType<ProcessResources>().configureEach {
