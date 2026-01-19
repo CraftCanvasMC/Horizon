@@ -19,6 +19,7 @@ val userdev by configurations.creating {
 }
 
 repositories {
+    gradlePluginPortal()
     mavenCentral()
     maven("https://maven.canvasmc.io/releases")
 }
@@ -31,6 +32,7 @@ dependencies {
     implementation(libs.cadix.atlas)
     implementation(libs.asm)
     implementation(libs.asm.tree)
+    compileOnly(libs.run.paper)
     userdev(libs.userdev)
 }
 

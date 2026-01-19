@@ -8,6 +8,7 @@ mixin-extras = "0.5.0"
 asm = "9.9.1"
 paper-dev-bundle = "1.21.11-R0.1-SNAPSHOT"
 userdev = "2.3.12"
+run-paper = "3.0.2"
 jspecify = "1.0.0"
 junit = "6.0.0"
 java = "21"
@@ -31,6 +32,7 @@ cadix-bombe = { module = "org.cadixdev:bombe", version = "0.3.4" }
 cadix-bombe-asm = { module = "org.cadixdev:bombe-asm", version = "0.3.4" }
 cadix-atlas = { module = "org.cadixdev:atlas", version = "0.2.1" }
 userdev = { module = "io.canvasmc.weaver.userdev:io.canvasmc.weaver.userdev.gradle.plugin", version.ref = "userdev" }
+run-paper = { module = "xyz.jpenilla.run-paper:xyz.jpenilla.run-paper.gradle.plugin", version.ref = "run-paper" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 
 # for tests

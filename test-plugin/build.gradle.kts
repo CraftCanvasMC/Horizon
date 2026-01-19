@@ -1,6 +1,7 @@
 plugins {
     id("io.canvasmc.weaver.userdev")
     id("io.canvasmc.horizon")
+    id("xyz.jpenilla.run-paper") version "3.0.2"
 }
 
 val jdkVersion = libs.versions.java.get()
@@ -10,7 +11,13 @@ dependencies {
     paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
 
     // add horizon api from the core project
-    horizon.horizonApi(projects.core)
+    horizon.horizonApi(project(":core", configuration = "publicationJar"))
+}
+
+tasks {
+    runServer {
+        minecraftVersion("1.21.11")
+    }
 }
 
 horizon {

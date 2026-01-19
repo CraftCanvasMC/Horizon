@@ -14,15 +14,29 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import org.gradle.kotlin.dsl.*
+import xyz.jpenilla.runpaper.task.RunServer
+import javax.inject.Inject
+import kotlin.io.path.copyTo
+import kotlin.io.path.createDirectories
+import kotlin.io.path.isDirectory
 
 abstract class Horizon : Plugin<Project> {
+
+    @get:Inject
+    protected abstract val progressLoggerFactory: ProgressLoggerFactory
+
     override fun apply(target: Project) {
         printId<Horizon>(HORIZON_NAME, target.gradle)
         // check for userdev
         target.checkForWeaverUserdev()
         val userdevExt = target.extensions.getByType(PaperweightUserExtension::class)
         userdevExt.injectServerJar.set(false) // dont add the server jar to the configurations as we override it
+        // setup run task compat layer
+        target.plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
+            target.setupRunTaskCompat()
+        }
 
         val ext = target.extensions.create<HorizonExtension>(HORIZON_NAME, target)
 
@@ -178,6 +192,35 @@ abstract class Horizon : Plugin<Project> {
                 "Unable to resolve the Horizon API dependency, which is required in order to work with mixins.\n" +
                     "Add Horizon API to the `horizonHorizonApiConfig` configuration, and ensure there is a repository to resolve it from (the Canvas repository is used by default)."
             throw RuntimeException(message)
+        }
+    }
+
+    private fun Project.setupRunTaskCompat() {
+        val runTask = tasks.named<RunServer>(RunTask.RUN_SERVER_TASK_NAME)
+
+        runTask.configure {
+            runClasspath.from(configurations.named(HORIZON_API_CONFIG))
+            mainClass.set(HORIZON_API_MAIN_CLASS)
+
+            doFirst {
+                if (!version.isPresent) {
+                    error("No version was specified for the '$name' task. Don't know what version to download.")
+                }
+                // download server jar ourselves
+                val serverJar = downloadsApiService.get().resolveBuild(
+                    progressLoggerFactory,
+                    version.get(),
+                    build.get(),
+                )
+                // make sure the dir exists
+                val workingDir = runDirectory.path
+                if (!workingDir.isDirectory()) {
+                    workingDir.createDirectories()
+                }
+                // copy the downloaded jar as server.jar
+                val workDirDest = workingDir.resolve("server.jar")
+                serverJar.copyTo(workDirDest, overwrite = true)
+            }
         }
     }
 }
