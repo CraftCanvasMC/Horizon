@@ -52,8 +52,13 @@ abstract class Horizon : Plugin<Project> {
             }
         }
 
-        // configuration for Horizon API
+        // configuration for Horizon API for compile-time
         target.configurations.register(HORIZON_API_CONFIG)
+
+        // configuration for Horizon API for run tasks
+        target.configurations.register(HORIZON_API_SINGLE_CONFIG) {
+            isTransitive = false
+        }
 
         // configurations for JiJ
         target.configurations.register(INCLUDE_MIXIN_PLUGIN)
@@ -199,8 +204,7 @@ abstract class Horizon : Plugin<Project> {
         val runTask = tasks.named<RunServer>(RunTask.RUN_SERVER_TASK_NAME)
 
         runTask.configure {
-            runClasspath.from(configurations.named(HORIZON_API_CONFIG))
-            mainClass.set(HORIZON_API_MAIN_CLASS)
+            runClasspath.from(configurations.named(HORIZON_API_SINGLE_CONFIG))
 
             doFirst {
                 if (!version.isPresent) {
