@@ -40,7 +40,7 @@ abstract class MergeAccessTransformers : BaseTask() {
 
     @get:Optional
     @get:InputFiles
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:PathSensitive(PathSensitivity.NONE)
     abstract val files: ConfigurableFileCollection
 
     @get:OutputFile
