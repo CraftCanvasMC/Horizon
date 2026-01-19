@@ -202,8 +202,6 @@ abstract class Horizon : Plugin<Project> {
 
     private fun Project.setupRunTaskCompat() {
         tasks.withType<RunServer>().configureEach {
-            // for horizon plugins to load properly
-            legacyPluginLoading.set(true)
             // filter out javadoc and sources jars from the configuration as not to mess with the classpath
             val horizonApiSingleConfig = configurations.named(HORIZON_API_SINGLE_CONFIG)
             runClasspath.from(
