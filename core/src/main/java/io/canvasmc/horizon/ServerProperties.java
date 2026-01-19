@@ -9,6 +9,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // TODO - javadocs
 public record ServerProperties(
@@ -17,6 +19,8 @@ public record ServerProperties(
     File cacheLocation,
     List<File> extraPlugins
 ) {
+    private static final Pattern ADD_PLUGIN_PATTERN =
+        Pattern.compile("^--?add-(plugin|extra-plugin-jar)=(.+)$");
 
     public static @NonNull ServerProperties load(String[] args) {
         File file = new File("horizon.yml");
@@ -73,6 +77,7 @@ public record ServerProperties(
         ObjectArray extraPluginsArray = tree.getArray("extraPlugins");
         for (int i = 0; i < extraPluginsArray.size(); i++) {
             String path = extraPluginsArray.get(i).asString();
+            if (path == null) throw new IllegalArgumentException("Extra plugins array had a null entry at index " + i);
             initial.add(new File(path));
         }
 
@@ -80,12 +85,9 @@ public record ServerProperties(
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
 
-            if (arg.startsWith("--add-plugin=")) {
-                addedFromArgs.add(new File(arg.substring("--add-plugin=".length())));
-                continue;
-            }
-            if (arg.startsWith("--add-extra-plugin-jar=")) {
-                addedFromArgs.add(new File(arg.substring("--add-extra-plugin-jar=".length())));
+            Matcher matcher = ADD_PLUGIN_PATTERN.matcher(arg);
+            if (matcher.matches()) {
+                addedFromArgs.add(new File(matcher.group(2)));
                 continue;
             }
 
