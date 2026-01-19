@@ -14,16 +14,15 @@ abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
     @get:Nested
     val ats: ApplySourceATs = objects.newInstance()
 
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.NONE)
+    @get:Classpath
     abstract val mappedServerJar: RegularFileProperty
 
     @get:OutputFile
     abstract val sourceTransformedMappedServerJar: RegularFileProperty
 
-    @get:InputFile
     @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
     abstract val atFile: RegularFileProperty
 
     @get:Input
