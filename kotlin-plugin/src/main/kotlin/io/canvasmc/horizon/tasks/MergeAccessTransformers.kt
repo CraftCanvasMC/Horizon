@@ -52,9 +52,7 @@ abstract class MergeAccessTransformers : BaseTask() {
 
     @TaskAction
     fun run() {
-        val ats = files.asFileTree
-            .files
-            .asSequence()
+        val ats = files.asFileTree.files
             .filter { it.exists() }
             .map { AccessTransformFormats.FML.read(it.toPath()) }
 
