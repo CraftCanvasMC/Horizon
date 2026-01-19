@@ -27,10 +27,6 @@ object Paperweight {
     const val MOJANG_MAPPED_SERVER_RUNTIME_CONFIG = io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG
 }
 
-object RunTask {
-    const val RUN_SERVER_TASK_NAME = "runServer"
-}
-
 object Plugins {
     const val WEAVER_USERDEV_PLUGIN_ID = "io.canvasmc.weaver.userdev"
     const val RUN_TASK_PAPER_PLUGIN_ID = "xyz.jpenilla.run-paper"

@@ -201,9 +201,7 @@ abstract class Horizon : Plugin<Project> {
     }
 
     private fun Project.setupRunTaskCompat() {
-        val runTask = tasks.named<RunServer>(RunTask.RUN_SERVER_TASK_NAME)
-
-        runTask.configure {
+        tasks.withType<RunServer>().configureEach {
             runClasspath.from(configurations.named(HORIZON_API_SINGLE_CONFIG))
 
             doFirst {
