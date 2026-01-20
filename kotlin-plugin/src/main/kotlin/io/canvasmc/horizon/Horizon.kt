@@ -218,9 +218,7 @@ abstract class Horizon : Plugin<Project> {
                 if (userJar.isPresent && userJar.get().asFile.exists()) {
                     systemProperty("Horizon.serverJar", userJar.path.toAbsolutePath())
                     logger.lifecycle("Using user-provider server jar.")
-                } else if (!version.isPresent) {
-                    error("No version was specified for the '$name' task. Don't know what version to download.")
-                } else if (!offline) {
+                } else if (!offline && version.isPresent) {
                     // download the server jar ourselves
                     val serverJar = downloadsApiService.get().resolveBuild(
                         progressLoggerFactory,
@@ -228,6 +226,8 @@ abstract class Horizon : Plugin<Project> {
                         build.get(),
                     )
                     systemProperty("Horizon.serverJar", serverJar.toAbsolutePath())
+                } else if (!offline && !version.isPresent) {
+                    error("No version was specified for the '$name' task. Don't know what version to download.")
                 }
                 logger.lifecycle("Starting Horizon...")
             }
