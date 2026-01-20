@@ -218,11 +218,9 @@ abstract class Horizon : Plugin<Project> {
                 if (userJar.isPresent && userJar.get().asFile.exists()) {
                     systemProperty("Horizon.serverJar", userJar.path.toAbsolutePath())
                     logger.lifecycle("Using user-provider server jar.")
-                } else if (offline) {
-                    logger.lifecycle("Offline mode is enabled. Not downloading a server jar for the '$name' task.")
                 } else if (!version.isPresent) {
                     error("No version was specified for the '$name' task. Don't know what version to download.")
-                } else {
+                } else if (!offline) {
                     // download the server jar ourselves
                     val serverJar = downloadsApiService.get().resolveBuild(
                         progressLoggerFactory,
