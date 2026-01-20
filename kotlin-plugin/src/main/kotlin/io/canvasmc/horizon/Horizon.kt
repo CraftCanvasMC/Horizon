@@ -218,7 +218,7 @@ abstract class Horizon : Plugin<Project> {
                     require(userJar.get().asFile.exists()) {
                         "customRunServerJar was set but path does not exist: ${userJar.get().asFile.absolutePath}"
                     }
-                    systemProperty("Horizon.serverJar", userJar.path.toAbsolutePath())
+                    systemProperty("Horizon.serverJar", userJar.get().asFile.absolutePath)
                     logger.lifecycle("Using user-provided server jar.")
                 } else if (version.isPresent) {
                     val serverJar = downloadsApiService.get().resolveBuild(
