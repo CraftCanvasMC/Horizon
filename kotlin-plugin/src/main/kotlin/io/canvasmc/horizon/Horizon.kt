@@ -216,6 +216,8 @@ abstract class Horizon : Plugin<Project> {
             doFirst {
                 if (offline) {
                     logger.lifecycle("Offline mode is enabled. Not downloading a server jar for the '$name' task.")
+                } else if (systemProperties.containsKey("Horizon.serverJar")) {
+                    logger.lifecycle("Using user-provider server jar.")
                 } else if (!version.isPresent) {
                     error("No version was specified for the '$name' task. Don't know what version to download.")
                 } else {
