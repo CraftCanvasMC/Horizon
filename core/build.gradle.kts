@@ -90,6 +90,7 @@ tasks.register<Jar>("createPublicationJar") {
                 "Brand-Id" to "canvasmc:horizon",
                 // jvm agent
                 "Launcher-Agent-Class" to "$launchAgent",
+                "Premain-Class" to "$launchAgent",
                 "Can-Redefine-Classes" to true,
                 "Can-Retransform-Classes" to true
             )

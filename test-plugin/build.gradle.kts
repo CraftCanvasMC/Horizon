@@ -14,12 +14,6 @@ dependencies {
     horizon.horizonApi(project(":core", configuration = "publicationJar"))
 }
 
-tasks {
-    runServer {
-        minecraftVersion("1.21.11")
-    }
-}
-
 horizon {
     accessTransformerFiles.from(
         file("src/main/resources/widener.at")

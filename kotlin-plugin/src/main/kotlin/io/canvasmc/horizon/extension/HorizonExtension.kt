@@ -53,4 +53,9 @@ abstract class HorizonExtension @Inject constructor(objects: ObjectFactory, proj
             project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
         )
     )
+
+    /**
+     * Whether to set up the run-paper compatibility layer.
+     */
+    val setupRunPaperCompatibility: Property<Boolean> = objects.property<Boolean>().convention(true)
 }

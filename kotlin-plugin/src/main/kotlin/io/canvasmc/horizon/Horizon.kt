@@ -29,16 +29,11 @@ abstract class Horizon : Plugin<Project> {
 
     override fun apply(target: Project) {
         printId<Horizon>(HORIZON_NAME, target.gradle)
+        val ext = target.extensions.create<HorizonExtension>(HORIZON_NAME, target)
         // check for userdev
         target.checkForWeaverUserdev()
         val userdevExt = target.extensions.getByType(PaperweightUserExtension::class)
         userdevExt.injectServerJar.set(false) // dont add the server jar to the configurations as we override it
-        // setup run task compat layer
-        target.plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
-            target.setupRunTaskCompat()
-        }
-
-        val ext = target.extensions.create<HorizonExtension>(HORIZON_NAME, target)
 
         target.tasks.register<Delete>("cleanHorizonCache") {
             group = HORIZON_NAME
@@ -78,7 +73,15 @@ abstract class Horizon : Plugin<Project> {
     private fun Project.setup(ext: HorizonExtension) {
         // ensure people specify a dependency on horizon api
         // checkForHorizonApi()
+        val userdevExt = extensions.getByType(PaperweightUserExtension::class)
         val userdevTask = tasks.named<UserdevSetupTask>(Paperweight.USERDEV_SETUP_TASK_NAME)
+
+        // setup run paper compat layer
+        if (ext.setupRunPaperCompatibility.get()) {
+            plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
+                setupRunPaperCompat(userdevExt)
+            }
+        }
 
         repositories {
             // repository for JST
@@ -200,36 +203,38 @@ abstract class Horizon : Plugin<Project> {
         }
     }
 
-    private fun Project.setupRunTaskCompat() {
+    private fun Project.setupRunPaperCompat(userdevExt: PaperweightUserExtension) {
+        val horizonApiSingleConfig = configurations.named(HORIZON_API_SINGLE_CONFIG)
+        // filter out javadoc and sources jars from the configuration as not to mess with the classpath
+        val horizonJar = horizonApiSingleConfig.map { files ->
+            files.filter { f -> !f.name.endsWith("-sources.jar") && !f.name.endsWith("-javadoc.jar") }
+        }
         tasks.withType<RunServer>().configureEach {
-            // filter out javadoc and sources jars from the configuration as not to mess with the classpath
-            val horizonApiSingleConfig = configurations.named(HORIZON_API_SINGLE_CONFIG)
-            runClasspath.from(
-                horizonApiSingleConfig.map {
-                    it.filter { file ->
-                        !file.name.endsWith("-sources.jar") && !file.name.endsWith("-javadoc.jar")
-                    }
-                }
-            )
-
+            val offline = offlineMode()
+            version.convention(userdevExt.minecraftVersion)
+            runClasspath.from(horizonJar).disallowChanges()
             doFirst {
                 if (!version.isPresent) {
                     error("No version was specified for the '$name' task. Don't know what version to download.")
+                } else if (offline) {
+                    logger.lifecycle("Offline mode is enabled. Not downloading a server jar for the '$name' task.")
+                } else {
+                    // download the server jar ourselves
+                    val serverJar = downloadsApiService.get().resolveBuild(
+                        progressLoggerFactory,
+                        version.get(),
+                        build.get(),
+                    )
+                    // make sure the dir exists
+                    val workingDir = runDirectory.path
+                    if (!workingDir.isDirectory()) {
+                        workingDir.createDirectories()
+                    }
+                    // copy the downloaded jar
+                    val workDirDest = workingDir.resolve("server.jar")
+                    serverJar.copyTo(workDirDest, overwrite = true)
                 }
-                // download server jar ourselves
-                val serverJar = downloadsApiService.get().resolveBuild(
-                    progressLoggerFactory,
-                    version.get(),
-                    build.get(),
-                )
-                // make sure the dir exists
-                val workingDir = runDirectory.path
-                if (!workingDir.isDirectory()) {
-                    workingDir.createDirectories()
-                }
-                // copy the downloaded jar as server.jar
-                val workDirDest = workingDir.resolve("server.jar")
-                serverJar.copyTo(workDirDest, overwrite = true)
+                logger.lifecycle("Starting Horizon...")
             }
         }
     }

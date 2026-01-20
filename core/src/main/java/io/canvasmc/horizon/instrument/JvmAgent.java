@@ -15,6 +15,10 @@ public class JvmAgent {
     // Note: non-null guaranteed when accessed outside this class
     public static Instrumentation INSTRUMENTATION;
 
+    public static void premain(String agentArgs, Instrumentation inst) {
+        agentmain(agentArgs, inst);
+    }
+
     public static void agentmain(String agentArgs, java.lang.instrument.Instrumentation inst) {
         HorizonLoader.LOGGER.info("Booted from agent main");
         INSTRUMENTATION = inst;
