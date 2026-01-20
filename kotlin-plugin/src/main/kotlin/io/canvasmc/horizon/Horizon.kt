@@ -216,7 +216,7 @@ abstract class Horizon : Plugin<Project> {
             doFirst {
                 if (userJar.isPresent && userJar.get().asFile.exists()) {
                     systemProperty("Horizon.serverJar", userJar.path.toAbsolutePath())
-                    logger.lifecycle("Using user-provider server jar.")
+                    logger.lifecycle("Using user-provided server jar.")
                 } else if (version.isPresent) {
                     val serverJar = downloadsApiService.get().resolveBuild(
                         progressLoggerFactory,
