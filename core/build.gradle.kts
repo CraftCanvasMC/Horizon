@@ -61,13 +61,13 @@ java {
 }
 
 fun fetchVersion(): Provider<String> {
-    // fetch build number from jenkins property, if not present
-    // then we can assume it is a local version
-    return providers.gradleProperty("buildNumber").orElse(
-        providers.environmentVariable("BUILD_NUMBER").orElse(
-            "local"
-        )
-    )
+    val numberProvider =
+        providers.gradleProperty("buildNumber")
+            .orElse(providers.environmentVariable("BUILD_NUMBER"))
+            .orElse("local")
+
+    val channel = rootProject.version.toString()
+    return numberProvider.map { "$channel.$it" }
 }
 
 tasks.register<Jar>("createPublicationJar") {
@@ -97,7 +97,7 @@ tasks.register<Jar>("createPublicationJar") {
         )
     }
 
-    archiveFileName.set(version.map { "horizon-build.$it.jar" })
+    archiveFileName.set(version.map { "horizon.$it.jar" })
     from(tasks.named<Jar>("jar").map { zipTree(it.archiveFile) })
 
     from(collectIncludedDependencies.flatMap { it.outputDir }) {
