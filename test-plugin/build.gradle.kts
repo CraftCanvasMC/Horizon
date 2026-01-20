@@ -4,6 +4,7 @@ plugins {
     id("xyz.jpenilla.run-paper") version "3.0.2"
 }
 
+version = "1.0.0-SNAPSHOT"
 val jdkVersion = libs.versions.java.get()
 
 dependencies {
