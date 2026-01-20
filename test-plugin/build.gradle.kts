@@ -17,7 +17,6 @@ dependencies {
 /*
 tasks {
     runServer {
-        systemProperty("Horizon.serverJar", "server.jar") // allows us to override the server jar to use for run task
         minecraftVersion("1.21.11") // uses the dev bundle version by default
     }
 }
@@ -27,6 +26,7 @@ horizon {
     accessTransformerFiles.from(
         file("src/main/resources/widener.at")
     )
+    // customRunServerJar = file(...) // allows supplying a custom server jar instead of downloading one
 }
 
 java {

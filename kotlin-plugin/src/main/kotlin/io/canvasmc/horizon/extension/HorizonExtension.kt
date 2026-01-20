@@ -5,6 +5,7 @@ import io.papermc.paperweight.util.constants.PAPER_MAVEN_REPO_URL
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
@@ -58,4 +59,9 @@ abstract class HorizonExtension @Inject constructor(objects: ObjectFactory, proj
      * Whether to set up the run-paper compatibility layer.
      */
     val setupRunPaperCompatibility: Property<Boolean> = objects.property<Boolean>().convention(true)
+
+    /**
+     * A custom server jar override for run-paper. Allows you to use your own jar as the server jar.
+     */
+    abstract val customRunServerJar: RegularFileProperty
 }

@@ -79,7 +79,7 @@ abstract class Horizon : Plugin<Project> {
         // setup run paper compat layer
         if (ext.setupRunPaperCompatibility.get()) {
             plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
-                setupRunPaperCompat(userdevExt)
+                setupRunPaperCompat(userdevExt, ext)
             }
         }
 
@@ -203,7 +203,7 @@ abstract class Horizon : Plugin<Project> {
         }
     }
 
-    private fun Project.setupRunPaperCompat(userdevExt: PaperweightUserExtension) {
+    private fun Project.setupRunPaperCompat(userdevExt: PaperweightUserExtension, horizonExt: HorizonExtension) {
         val horizonApiSingleConfig = configurations.named(HORIZON_API_SINGLE_CONFIG)
         // filter out javadoc and sources jars from the configuration as not to mess with the classpath
         val horizonJar = horizonApiSingleConfig.map { files ->
@@ -211,13 +211,15 @@ abstract class Horizon : Plugin<Project> {
         }
         tasks.withType<RunServer>().configureEach {
             val offline = offlineMode()
+            val userJar = horizonExt.customRunServerJar
             version.convention(userdevExt.minecraftVersion)
             runClasspath.from(horizonJar).disallowChanges()
             doFirst {
-                if (offline) {
-                    logger.lifecycle("Offline mode is enabled. Not downloading a server jar for the '$name' task.")
-                } else if (systemProperties.containsKey("Horizon.serverJar")) {
+                if (userJar.isPresent && userJar.get().asFile.exists()) {
+                    systemProperty("Horizon.serverJar", userJar.path.toAbsolutePath())
                     logger.lifecycle("Using user-provider server jar.")
+                } else if (offline) {
+                    logger.lifecycle("Offline mode is enabled. Not downloading a server jar for the '$name' task.")
                 } else if (!version.isPresent) {
                     error("No version was specified for the '$name' task. Don't know what version to download.")
                 } else {
@@ -227,14 +229,7 @@ abstract class Horizon : Plugin<Project> {
                         version.get(),
                         build.get(),
                     )
-                    // make sure the dir exists
-                    val workingDir = runDirectory.path
-                    if (!workingDir.isDirectory()) {
-                        workingDir.createDirectories()
-                    }
-                    // copy the downloaded jar
-                    val workDirDest = workingDir.resolve("server.jar")
-                    serverJar.copyTo(workDirDest, overwrite = true)
+                    systemProperty("Horizon.serverJar", serverJar.toAbsolutePath())
                 }
                 logger.lifecycle("Starting Horizon...")
             }
