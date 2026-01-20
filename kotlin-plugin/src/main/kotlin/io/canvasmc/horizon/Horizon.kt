@@ -214,7 +214,10 @@ abstract class Horizon : Plugin<Project> {
             version.convention(userdevExt.minecraftVersion)
             runClasspath.from(horizonJar).disallowChanges()
             doFirst {
-                if (userJar.isPresent && userJar.get().asFile.exists()) {
+                if (userJar.isPresent) {
+                    require(userJar.get().asFile.exists()) {
+                        "customRunServerJar was set but path does not exist: ${userJar.get().asFile.absolutePath}"
+                    }
                     systemProperty("Horizon.serverJar", userJar.path.toAbsolutePath())
                     logger.lifecycle("Using user-provided server jar.")
                 } else if (version.isPresent) {
