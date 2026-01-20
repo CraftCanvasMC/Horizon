@@ -50,6 +50,10 @@ public record ServerProperties(
             // read and parse configuration
             ObjectTree configTree = ObjectTree.read()
                 .format(Format.YAML)
+                // really should only be used for the runServer
+                .registerOverrideKey("serverJar", "Horizon.serverJar")
+                .registerOverrideKey("pluginsDirectory", "Horizon.pluginsDirectory")
+                .registerOverrideKey("cacheLocation", "Horizon.cacheLocation")
                 .registerDeserializer(ServerProperties.class, tree1 -> new ServerProperties(
                     tree1.getValueOrThrow("pluginsDirectory").as(File.class),
                     tree1.getValueOrThrow("serverJar").as(File.class),

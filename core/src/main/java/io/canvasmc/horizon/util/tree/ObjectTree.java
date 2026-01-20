@@ -297,6 +297,7 @@ public final class ObjectTree {
         private final TypeConverterRegistry converters = new TypeConverterRegistry();
         private final Map<String, Set<String>> aliases = new HashMap<>();
         private final Map<String, String> remapVars = new HashMap<>();
+        private final Map<String, String> overrideKeys = new HashMap<>();
         private Format format;
         private @Nullable FormatParser customParser;
 
@@ -380,6 +381,18 @@ public final class ObjectTree {
          */
         public @NonNull ObjectTree fromString(String content) throws ParseException {
             return parse(content);
+        }
+
+        /**
+         * Registers an override for a key-value pair using a JVM system property.
+         * If the system property exists, its value will replace the parsed value.
+         *
+         * @param property   the config key to override
+         * @param systemProp the JVM system property name
+         */
+        public @NonNull ReadBuilder registerOverrideKey(String property, String systemProp) {
+            overrideKeys.put(property, systemProp);
+            return this;
         }
 
         private @NonNull ObjectTree parse(Object source) throws ParseException {
@@ -471,6 +484,14 @@ public final class ObjectTree {
             for (Map.Entry<String, Object> entry : data.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
+
+                String systemProp = overrideKeys.get(key);
+                if (systemProp != null) {
+                    String overrideValue = System.getProperty(systemProp);
+                    if (overrideValue != null) {
+                        value = overrideValue;
+                    }
+                }
 
                 if (value instanceof String) {
                     try {
