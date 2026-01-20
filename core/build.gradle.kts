@@ -4,6 +4,8 @@ plugins {
     id("io.canvasmc.weaver.userdev")
 }
 
+version = project.version.toString() + "." + fetchBuild().get()
+
 val paperMavenPublicUrl = "https://repo.papermc.io/repository/maven-public/"
 val jdkVersion = libs.versions.java.get()
 
@@ -60,23 +62,19 @@ java {
     withJavadocJar()
 }
 
-fun fetchVersion(): Provider<String> {
-    val numberProvider =
-        providers.gradleProperty("buildNumber")
-            .orElse(providers.environmentVariable("BUILD_NUMBER"))
-            .orElse("local")
-
-    val channel = rootProject.version.toString()
-    return numberProvider.map { "$channel.$it" }
+fun fetchBuild(): Provider<String> {
+    return providers.gradleProperty("buildNumber")
+        .orElse(providers.environmentVariable("BUILD_NUMBER"))
+        .orElse("local")
 }
 
 tasks.register<Jar>("createPublicationJar") {
-    // `horizon-build.{ver}.jar`
+    // `horizon-{ver[-channel]}.{build}.jar`
     // ver == local ? "local" : build number
-    val version = fetchVersion()
+    val version = project.version
 
     // configure manifest
-    val main = project.properties["main-class"]
+    val main = project.properties["mainClass"]
     val launchAgent = project.properties["instrumentation"]
     manifest {
         attributes(
@@ -97,7 +95,7 @@ tasks.register<Jar>("createPublicationJar") {
         )
     }
 
-    archiveFileName.set(version.map { "horizon.$it.jar" })
+    archiveFileName.set("horizon.$version.jar")
     from(tasks.named<Jar>("jar").map { zipTree(it.archiveFile) })
 
     from(collectIncludedDependencies.flatMap { it.outputDir }) {
