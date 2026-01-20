@@ -210,7 +210,6 @@ abstract class Horizon : Plugin<Project> {
             files.filter { f -> !f.name.endsWith("-sources.jar") && !f.name.endsWith("-javadoc.jar") }
         }
         tasks.withType<RunServer>().configureEach {
-            val offline = offlineMode()
             val userJar = horizonExt.customRunServerJar
             version.convention(userdevExt.minecraftVersion)
             runClasspath.from(horizonJar).disallowChanges()
@@ -218,15 +217,14 @@ abstract class Horizon : Plugin<Project> {
                 if (userJar.isPresent && userJar.get().asFile.exists()) {
                     systemProperty("Horizon.serverJar", userJar.path.toAbsolutePath())
                     logger.lifecycle("Using user-provider server jar.")
-                } else if (!offline && version.isPresent) {
-                    // download the server jar ourselves
+                } else if (version.isPresent) {
                     val serverJar = downloadsApiService.get().resolveBuild(
                         progressLoggerFactory,
                         version.get(),
                         build.get(),
                     )
                     systemProperty("Horizon.serverJar", serverJar.toAbsolutePath())
-                } else if (!offline && !version.isPresent) {
+                } else {
                     error("No version was specified for the '$name' task. Don't know what version to download.")
                 }
                 logger.lifecycle("Starting Horizon...")
