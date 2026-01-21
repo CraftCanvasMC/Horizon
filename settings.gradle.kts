@@ -6,7 +6,8 @@ pluginManagement {
             url = uri("https://maven.canvasmc.io/releases")
         }
     }
-    includeBuild("kotlin-plugin")
+    includeBuild("build-logic")
+    includeBuild("gradle-plugin")
 }
 
 plugins {
