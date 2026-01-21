@@ -89,6 +89,21 @@ val createPublicationJar = tasks.register<Jar>("createPublicationJar") {
     }
 }
 
+// setup custom publishing
+val publicationJar = configurations.consumable("publicationJar") {
+    extendsFrom(includeResolvable)
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
+        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+        attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
+    }
+}
+
+val publicationComponent = publishing.softwareComponentFactory.adhoc("publicationComponent")
+components.add(publicationComponent)
+publicationComponent.addVariantsFromConfiguration(publicationJar) {}
+
 extensions.configure<PublishingExtension> {
     repositories {
         maven("https://maven.canvasmc.io/releases") {
@@ -98,5 +113,19 @@ extensions.configure<PublishingExtension> {
                 password = providers.environmentVariable("PUBLISH_TOKEN").orNull
             }
         }
+    }
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["publicationComponent"])
+        }
+    }
+}
+
+// this has to be after evaluate, otherwise things break for some reason
+afterEvaluate {
+    configurations.named("publicationJar") {
+        outgoing.artifact(tasks.named<Jar>("createPublicationJar").flatMap { it.archiveFile })
+        outgoing.artifact(tasks.named<Jar>("javadocJar").flatMap { it.archiveFile })
+        outgoing.artifact(tasks.named<Jar>("sourcesJar").flatMap { it.archiveFile })
     }
 }
