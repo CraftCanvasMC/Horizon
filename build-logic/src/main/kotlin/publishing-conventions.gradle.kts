@@ -28,8 +28,7 @@ val includeResolvable by configurations.creating {
 }
 
 val collectIncludedDependencies = tasks.register<CollectDependenciesTask>("collectIncludedDependencies") {
-    setFrom(configurations.named("includeResolvable"))
-
+    dependencies.setFrom(configurations.named("includeResolvable"))
     repositoryData.set(
         providers.provider {
             repositories.withType<MavenArtifactRepository>()
@@ -38,7 +37,6 @@ val collectIncludedDependencies = tasks.register<CollectDependenciesTask>("colle
                 .distinctBy { it.url }
         }
     )
-
     outputDir.set(layout.buildDirectory.dir("included-deps"))
 }
 

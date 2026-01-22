@@ -18,6 +18,7 @@
  * limitations under the License.
  */
 import org.gradle.api.DefaultTask
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.artifacts.ArtifactCollection
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ComponentArtifactIdentifier
@@ -26,10 +27,12 @@ import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.artifacts.result.ResolvedVariantResult
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.internal.artifacts.repositories.resolver.MavenUniqueSnapshotComponentIdentifier
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.newInstance
 
 import java.io.File
 import java.security.MessageDigest
@@ -41,7 +44,7 @@ abstract class CollectDependenciesTask : DefaultTask() {
     abstract val objects: ObjectFactory
 
     @get:Nested
-    val artifacts: Artifacts = objects.newInstance(Artifacts::class.java)
+    val dependencies: Artifacts = objects.newInstance(Artifacts::class)
 
     @get:Input
     abstract val repositoryData: ListProperty<RepositoryData>
@@ -54,22 +57,18 @@ abstract class CollectDependenciesTask : DefaultTask() {
         val url: String
     ) : java.io.Serializable
 
-    @Suppress("unused")
-    fun setFrom(configuration: Provider<Configuration>) {
-        artifacts.setFrom(configuration.map { it.incoming.artifacts })
-    }
-
     @TaskAction
     fun collect() {
         val dest = outputDir.get().asFile
         dest.mkdirs()
 
-        val lines = artifacts.artifacts().mapNotNull { artifact ->
-            val component = artifact.id.componentIdentifier as? ModuleComponentIdentifier ?: return@mapNotNull null
-            val groupPath = component.group.replace('.', '/')
-            val mavenPath = "$groupPath/${component.module}/${component.version}/${artifact.file.name}"
+        val lines = dependencies.artifacts().mapNotNull { artifact ->
+            val componentId = artifact.id.componentIdentifier as? ModuleComponentIdentifier ?: return@mapNotNull null
+            val version = (componentId as? MavenUniqueSnapshotComponentIdentifier)?.timestampedVersion ?: componentId.version
+            val groupPath = componentId.group.replace('.', '/')
+            val mavenPath = "$groupPath/${componentId.module}/$version/${artifact.file.name}"
             val sha256 = artifact.file.sha256()
-            "${component.group}:${component.module}:${component.version}\t$mavenPath\t$sha256"
+            "${componentId.group}:${componentId.module}:$version\t$mavenPath\t$sha256"
         }
 
         dest.resolve("artifacts.context").writeText(lines.joinToString("\n"))
@@ -92,7 +91,6 @@ abstract class CollectDependenciesTask : DefaultTask() {
     }
 
     abstract class Artifacts {
-
         data class Artifact(
             val id: ComponentArtifactIdentifier,
             val variant: ResolvedVariantResult,
@@ -122,6 +120,8 @@ abstract class CollectDependenciesTask : DefaultTask() {
             }
             return ids.mapIndexed { idx, id -> Artifact(id, variants[idx], files[idx]) }
         }
+
+        fun setFrom(configuration: NamedDomainObjectProvider<Configuration>) = setFrom(configuration.map { it.incoming.artifacts })
 
         fun setFrom(artifactCollection: Provider<ArtifactCollection>) {
             files.setFrom(artifactCollection.map { it.artifactFiles })
