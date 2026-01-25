@@ -159,7 +159,7 @@ and the `userdev` plugin allows it to achieve all that.
 
 Below is shown an example `build.gradle.kts` configuration structure, that compiles, to give you an idea on how to start developing!
 
-Keep in mind that the plugins' versions might be outdated and you should always search for and ensure you're running the latest versions available.
+Keep in mind that the versions provided below might be outdated and you should always search for and ensure you're specifying the latest versions available.
 
 ```kotlin
 plugins {
