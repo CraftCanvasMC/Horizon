@@ -63,7 +63,7 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
         PluginPackDetector pluginPackDetector = new PluginPackDetector(validator);
 
         // read from plugins, not folder, because technically we can include submodules in horizon jars // TODO - actually do this
-        for (HorizonPlugin plugin : HorizonLoader.INSTANCE.getPlugins().getAll()) {
+        for (HorizonPlugin plugin : HorizonLoader.getInstance().getPlugins().getAll()) {
             if (!plugin.pluginMetadata().loadDatapackEntry()) {
                 continue;
             }
@@ -73,10 +73,12 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
                 Pack.ResourcesSupplier resourcesSupplier = pluginPackDetector.detectPackResources(path, list);
                 if (!list.isEmpty()) {
                     LOGGER.warn("Ignoring potential pack entry: {}", ContentValidationException.getMessage(path, list));
-                } else if (resourcesSupplier != null) {
+                }
+                else if (resourcesSupplier != null) {
                     LOGGER.debug("Loading injected datapack entry: {}", path.getFileName());
                     output.accept(path, resourcesSupplier);
-                } else {
+                }
+                else {
                     LOGGER.debug("Found non-pack entry '{}', ignoring", path);
                 }
             } catch (IOException var10) {
@@ -96,7 +98,8 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
             if (fileSystem != FileSystems.getDefault() && !(fileSystem instanceof LinkFileSystem)) {
                 LOGGER.info("Can't open pack archive at {}", path);
                 return null;
-            } else {
+            }
+            else {
                 return new FilePackResources.FileResourcesSupplier(path);
             }
         }

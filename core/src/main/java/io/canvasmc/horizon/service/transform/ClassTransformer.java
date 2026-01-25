@@ -32,7 +32,7 @@ public final class ClassTransformer {
         this.services = new IdentityHashMap<>();
         this.exclusionFilter = path -> true;
 
-        for (HorizonPlugin horizonPlugin : HorizonLoader.INSTANCE.getPlugins().getAll()) {
+        for (HorizonPlugin horizonPlugin : HorizonLoader.getInstance().getPlugins().getAll()) {
             for (PluginServiceProvider.Service<String> service : horizonPlugin.pluginMetadata()
                 .serviceProvider()
                 .findServices(PluginServiceProvider.CLASS_TRANSFORMER)
@@ -43,7 +43,8 @@ public final class ClassTransformer {
                         TransformationService transformerObj = (TransformationService) serviceClazz.getDeclaredConstructor().newInstance();
                         services.put(transformerObj.getClass(), transformerObj);
                         LOGGER.info("Registered class transformer from {}, \"{}\"", horizonPlugin.identifier(), serviceClazz.getName());
-                    } else
+                    }
+                    else
                         throw new IllegalArgumentException("Declared service class '" + service.obj() + "' is not instanceof a TransformationService");
                 } catch (ClassNotFoundException exe) {
                     throw new IllegalArgumentException("The service '" + service.obj() + "' was not found or is invalid", exe);
@@ -82,7 +83,8 @@ public final class ClassTransformer {
         if (input.length > 0) {
             final ClassReader reader = new ClassReader(input);
             reader.accept(node, 0);
-        } else {
+        }
+        else {
             node.name = type.getInternalName();
             node.version = MixinEnvironment.getCompatibilityLevel().getClassVersion();
             node.superName = "java/lang/Object";

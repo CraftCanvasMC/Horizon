@@ -34,7 +34,8 @@ public class ConsoleOutputHandler implements OutputHandler {
 
         if (color == null) {
             stream.println(formattedMessage);
-        } else {
+        }
+        else {
             stream.println(color + formattedMessage + RESET);
         }
     }

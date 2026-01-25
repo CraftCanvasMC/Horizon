@@ -45,7 +45,8 @@ public final class ObjectTree {
         if (value instanceof Map) {
             //noinspection unchecked
             return new ObjectTree((Map<String, Object>) value, converters, remappingContext);
-        } else if (value instanceof List) {
+        }
+        else if (value instanceof List) {
             //noinspection unchecked
             List<Object> list = (List<Object>) value;
             List<Object> normalized = new ArrayList<>();
@@ -63,7 +64,8 @@ public final class ObjectTree {
     private static Object denormalizeValue(Object value) {
         if (value instanceof ObjectTree) {
             return ((ObjectTree) value).toRawMap();
-        } else if (value instanceof List) {
+        }
+        else if (value instanceof List) {
             //noinspection unchecked
             List<Object> list = (List<Object>) value;
             List<Object> denormalized = new ArrayList<>();
@@ -451,7 +453,8 @@ public final class ObjectTree {
                 if (value instanceof Map) {
                     //noinspection unchecked
                     value = applyAliases((Map<String, Object>) value);
-                } else if (value instanceof List) {
+                }
+                else if (value instanceof List) {
                     //noinspection ReassignedVariable,unchecked
                     value = applyAliasesToList((List<Object>) value);
                 }
@@ -468,10 +471,12 @@ public final class ObjectTree {
                 if (item instanceof Map) {
                     //noinspection unchecked
                     result.add(applyAliases((Map<String, Object>) item));
-                } else if (item instanceof List) {
+                }
+                else if (item instanceof List) {
                     //noinspection unchecked
                     result.add(applyAliasesToList((List<Object>) item));
-                } else {
+                }
+                else {
                     result.add(item);
                 }
             }
@@ -499,10 +504,12 @@ public final class ObjectTree {
                     } catch (Exception e) {
                         errors.add(new ParseError("Interpolation error for key '" + key + "'", e));
                     }
-                } else if (value instanceof Map) {
+                }
+                else if (value instanceof Map) {
                     //noinspection unchecked
                     value = remap((Map<String, Object>) value, context, errors);
-                } else if (value instanceof List) {
+                }
+                else if (value instanceof List) {
                     //noinspection ReassignedVariable,unchecked
                     value = interpolateList((List<Object>) value, context, errors);
                 }
@@ -523,13 +530,16 @@ public final class ObjectTree {
                         errors.add(new ParseError("Interpolation error in list", e));
                         result.add(item);
                     }
-                } else if (item instanceof Map) {
+                }
+                else if (item instanceof Map) {
                     //noinspection unchecked
                     result.add(remap((Map<String, Object>) item, context, errors));
-                } else if (item instanceof List) {
+                }
+                else if (item instanceof List) {
                     //noinspection unchecked
                     result.add(interpolateList((List<Object>) item, context, errors));
-                } else {
+                }
+                else {
                     result.add(item);
                 }
             }
@@ -606,9 +616,11 @@ public final class ObjectTree {
             try {
                 if (target instanceof OutputStream) {
                     writer.write(data, (OutputStream) target);
-                } else if (target instanceof Writer) {
+                }
+                else if (target instanceof Writer) {
                     writer.write(data, (Writer) target);
-                } else {
+                }
+                else {
                     throw new IllegalArgumentException("Unsupported target type");
                 }
             } catch (Exception e) {
@@ -641,7 +653,8 @@ public final class ObjectTree {
                 if (value instanceof Map) {
                     //noinspection unchecked
                     value = applyKeyMappings((Map<String, Object>) value);
-                } else if (value instanceof List) {
+                }
+                else if (value instanceof List) {
                     //noinspection unchecked
                     value = applyKeyMappingsToList((List<Object>) value);
                 }
@@ -658,10 +671,12 @@ public final class ObjectTree {
                 if (item instanceof Map) {
                     //noinspection unchecked
                     result.add(applyKeyMappings((Map<String, Object>) item));
-                } else if (item instanceof List) {
+                }
+                else if (item instanceof List) {
                     //noinspection unchecked
                     result.add(applyKeyMappingsToList((List<Object>) item));
-                } else {
+                }
+                else {
                     result.add(item);
                 }
             }

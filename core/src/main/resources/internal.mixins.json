@@ -1,5 +1,8 @@
 {
   "mixins": [
+    "MainMixin",
+    "branding.MinecraftServerGuiMixin",
+    "branding.MinecraftServerMixin",
     "commandinject.PaperPluginsCommandMixin",
     "commandinject.ReloadCommandMixin",
     "datapack.PackRepositoryAccessor",
@@ -11,8 +14,7 @@
     "initfix.paper.PaperServerPluginProviderMixin",
     "initfix.spigot.PluginClassLoaderMixin",
     "initfix.spigot.SpigotPluginProviderMixin",
-    "jij.PluginInitializerManagerMixin",
-    "name.MinecraftServerMixin"
+    "jij.PluginInitializerManagerMixin"
   ],
   "package": "io.canvasmc.horizon.inject.mixin",
   "mixinPriority": 1,

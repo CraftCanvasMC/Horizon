@@ -57,11 +57,13 @@ public class PatternFormatter {
             if (i < message.length() - 1 && message.charAt(i) == '{' && message.charAt(i + 1) == '}') {
                 if (argIndex < args.length) {
                     result.append(args[argIndex++]);
-                } else {
+                }
+                else {
                     result.append("{}");
                 }
                 i += 2;
-            } else {
+            }
+            else {
                 result.append(message.charAt(i));
                 i++;
             }

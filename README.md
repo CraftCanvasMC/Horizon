@@ -1,4 +1,4 @@
-# Horizon
+![logo](assets/horizon_logo.png)
 
 ---
 
@@ -677,7 +677,7 @@ Currently, Horizon exposes the Paperclip version info and pack info, which can b
 ```java
 // Here is an example of how to fetch the Horizon instance and read server version information
 // Note: there are *many* more methods, and it is best to look at the Javadocs for each class aswell
-Horizon horizon = Horizon.INSTANCE;
+HorizonLoader horizon = HorizonLoader.getInstance();
 FileJar paperclip = horizon.getPaperclipJar();
 
 getLogger().info("Paperclip JAR: " + paperclip.ioFile().getName());
@@ -738,7 +738,7 @@ to be modified.
 
 ```java
 // Get the Horizon instance
-Horizon horizon = Horizon.INSTANCE;
+HorizonLoader horizon = HorizonLoader.getInstance();
 // This includes *all* Horizon plugins, nested and unnested
 PluginTree plugins = horizon.getPlugins();
 for (HorizonPlugin plugin : plugins.getAll()) {

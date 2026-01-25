@@ -58,7 +58,8 @@ public final class PropertiesParser implements FormatParser {
 
             if (key.contains(".")) {
                 setNestedValue(result, key, value, errors);
-            } else {
+            }
+            else {
                 result.put(key, parseValue(value));
             }
         }

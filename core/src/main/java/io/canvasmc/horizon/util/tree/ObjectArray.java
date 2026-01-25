@@ -40,7 +40,8 @@ public final class ObjectArray {
         if (value instanceof Map) {
             //noinspection unchecked
             return new ObjectTree((Map<String, Object>) value, converters, remappingContext);
-        } else if (value instanceof List) {
+        }
+        else if (value instanceof List) {
             //noinspection unchecked
             return normalizeList((List<Object>) value, converters, remappingContext);
         }

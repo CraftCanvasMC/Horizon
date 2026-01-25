@@ -113,7 +113,8 @@ public class TransformerContainer {
                 Definition existing = best.get(key);
                 if (existing == null) {
                     best.put(key, def);
-                } else {
+                }
+                else {
                     // resolve conflict - choose the highest visibility
                     TransformOperation.Access oldA = existing.operation().access();
                     TransformOperation.Access newA = def.operation().access();
@@ -182,7 +183,8 @@ public class TransformerContainer {
                     Definition compiled = tryCompile(trimmed);
                     if (compiled != null) {
                         addDefinition(compiled.nodeTarget(), compiled);
-                    } else LOGGER.warn("Couldn't compile target definition on line ({}), \"{}\"", idx, line);
+                    }
+                    else LOGGER.warn("Couldn't compile target definition on line ({}), \"{}\"", idx, line);
                 }
             } catch (IOException ignored) {
             } catch (CompileError compileError) {

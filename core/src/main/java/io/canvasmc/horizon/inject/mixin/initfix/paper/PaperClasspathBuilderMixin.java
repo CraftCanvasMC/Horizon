@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.inject.mixin.initfix.paper;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import io.canvasmc.horizon.service.MixinLaunch;
+import io.canvasmc.horizon.HorizonLoader;
 import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
 import io.papermc.paper.plugin.loader.PaperClasspathBuilder;
 import org.jspecify.annotations.NonNull;
@@ -23,13 +23,13 @@ public class PaperClasspathBuilderMixin {
 
     @ModifyExpressionValue(method = "buildClassLoader", at = @At(value = "INVOKE", target = "Lio/papermc/paper/plugin/loader/PaperClasspathBuilder;buildLibraryPaths(Z)Ljava/util/List;"))
     public List<Path> horizon$loadPluginLibraries(@NonNull List<Path> original) {
-        if (!Arrays.stream(MixinLaunch.getContext().initialGameConnections()).toList().contains(context.getPluginSource().toAbsolutePath())) {
+        if (!Arrays.stream(HorizonLoader.getInstance().getLaunchService().getInitialConnections()).toList().contains(context.getPluginSource().toAbsolutePath())) {
             // plugin is not a horizon plugin
             return original;
         }
         // add all library jars to classpath
         for (Path path : original) {
-            MixinLaunch.getInstance().getClassLoader().tryAddToHorizonSystemLoader(path);
+            HorizonLoader.getInstance().getLaunchService().getClassLoader().tryAddToHorizonSystemLoader(path);
         }
         return original;
     }

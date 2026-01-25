@@ -46,17 +46,20 @@ public final class PropertiesWriter implements FormatWriter {
             if (value instanceof Map) {
                 //noinspection unchecked
                 flattenMap(key, (Map<String, Object>) value, props);
-            } else if (value instanceof List<?> list) {
+            }
+            else if (value instanceof List<?> list) {
                 for (int i = 0; i < list.size(); i++) {
                     Object item = list.get(i);
                     if (item instanceof Map) {
                         //noinspection unchecked
                         flattenMap(key + "[" + i + "]", (Map<String, Object>) item, props);
-                    } else {
+                    }
+                    else {
                         props.setProperty(key + "[" + i + "]", String.valueOf(item));
                     }
                 }
-            } else {
+            }
+            else {
                 props.setProperty(key, String.valueOf(value));
             }
         }

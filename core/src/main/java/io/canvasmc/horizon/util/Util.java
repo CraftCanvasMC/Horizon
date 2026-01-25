@@ -51,7 +51,8 @@ public class Util {
         final String p;
         if (path.startsWith("/")) {
             p = path;
-        } else {
+        }
+        else {
             p = "/" + path;
         }
         final InputStream stream = Util.class.getResourceAsStream(p);
@@ -121,7 +122,8 @@ public class Util {
     public static @NonNull InternalError kill(final String message, final @Nullable Throwable thrown) {
         if (thrown != null) {
             LOGGER.error(thrown, message);
-        } else LOGGER.error(message);
+        }
+        else LOGGER.error(message);
         System.exit(1);
         return new InternalError();
     }
@@ -162,7 +164,8 @@ public class Util {
                     if (!file.mkdirs() && !file.exists()) {
                         throw new IOException("Failed to create directory: " + file);
                     }
-                } else {
+                }
+                else {
                     if (!file.createNewFile()) {
                         throw new IOException("Failed to create file: " + file);
                     }

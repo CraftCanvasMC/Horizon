@@ -9,7 +9,7 @@ import org.jspecify.annotations.NonNull;
 import java.util.HashSet;
 import java.util.Set;
 
-import static io.canvasmc.horizon.plugin.EntrypointLoader.LOGGER;
+import static io.canvasmc.horizon.MixinPluginLoader.LOGGER;
 
 public class ValidationPhase implements Phase<Set<PluginCandidate>, Set<PluginCandidate>> {
 

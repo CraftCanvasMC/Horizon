@@ -70,7 +70,8 @@ public final class YamlParser implements FormatParser {
 
             if (value instanceof Map) {
                 value = normalizeMap((Map<?, ?>) value);
-            } else if (value instanceof List) {
+            }
+            else if (value instanceof List) {
                 value = normalizeList((List<?>) value);
             }
 
@@ -86,9 +87,11 @@ public final class YamlParser implements FormatParser {
         for (Object item : list) {
             if (item instanceof Map) {
                 result.add(normalizeMap((Map<?, ?>) item));
-            } else if (item instanceof List) {
+            }
+            else if (item instanceof List) {
                 result.add(normalizeList((List<?>) item));
-            } else {
+            }
+            else {
                 result.add(item);
             }
         }

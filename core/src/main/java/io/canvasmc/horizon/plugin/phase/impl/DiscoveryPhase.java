@@ -31,7 +31,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
-import static io.canvasmc.horizon.plugin.EntrypointLoader.LOGGER;
+import static io.canvasmc.horizon.MixinPluginLoader.LOGGER;
 
 public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
     public static final String JIJ_PATH_HORIZON = "META-INF/jars/horizon/";
@@ -48,7 +48,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
             path -> Files.isRegularFile(path) && path.toString().endsWith(".jar"))) {
 
             // also try and parse extra plugins
-            Set<Path> files = HorizonLoader.INSTANCE.getProperties().extraPlugins().stream().map(File::toPath).collect(Collectors.toSet());
+            Set<Path> files = HorizonLoader.getInstance().getProperties().extraPlugins().stream().map(File::toPath).collect(Collectors.toSet());
             stream.forEach(files::add);
 
             for (Path path : files) {
@@ -141,17 +141,20 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                 if (entry.getName().startsWith(JIJ_PATH_HORIZON)) {
                     type = NestedEntry.Type.HORIZON;
                     n = JIJ_PATH_HORIZON;
-                } else if (entry.getName().startsWith(JIJ_PATH_PAPER)) {
+                }
+                else if (entry.getName().startsWith(JIJ_PATH_PAPER)) {
                     type = NestedEntry.Type.PLUGIN;
                     n = JIJ_PATH_PAPER;
-                } else if (entry.getName().startsWith(JIJ_PATH_LIB)) {
+                }
+                else if (entry.getName().startsWith(JIJ_PATH_LIB)) {
                     type = NestedEntry.Type.LIBRARY;
                     n = JIJ_PATH_LIB;
-                } else {
+                }
+                else {
                     return;
                 }
 
-                File cacheDir = HorizonLoader.INSTANCE.getProperties().cacheLocation();
+                File cacheDir = HorizonLoader.getInstance().getProperties().cacheLocation();
                 String fileName = entry.getName().substring(n.length());
                 File extractedFile = new File(cacheDir, fileName);
 
@@ -163,8 +166,8 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                         LOGGER.error("Path traversal attempt detected: {}", entry.getName());
                         return;
                     }
-                } catch (IOException e) {
-                    LOGGER.error("Failed to validate path for: {}", entry.getName(), e);
+                } catch (IOException ioexe) {
+                    LOGGER.error(ioexe, "Failed to validate path for: {}", entry.getName());
                     return;
                 }
 

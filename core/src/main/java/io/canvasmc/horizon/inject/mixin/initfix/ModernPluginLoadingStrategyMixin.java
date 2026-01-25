@@ -2,7 +2,7 @@ package io.canvasmc.horizon.inject.mixin.initfix;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import io.canvasmc.horizon.plugin.EntrypointLoader;
+import io.canvasmc.horizon.MixinPluginLoader;
 import io.papermc.paper.plugin.entrypoint.strategy.ProviderConfiguration;
 import io.papermc.paper.plugin.entrypoint.strategy.modern.ModernPluginLoadingStrategy;
 import io.papermc.paper.plugin.provider.PluginProvider;
@@ -21,9 +21,10 @@ public class ModernPluginLoadingStrategyMixin<T> {
         original.call(instance, tPluginProvider, dependencyContext);
         // Note: bootstrapper works fine, doesn't need specific patch
         if (tPluginProvider instanceof PaperPluginParent.PaperServerPluginProvider paperPluginProvider) {
-            EntrypointLoader.ACTIVE_PLUGIN_PROVIDER_REF.set(paperPluginProvider);
-        } else if (tPluginProvider instanceof SpigotPluginProvider spigotPluginProvider) {
-            EntrypointLoader.ACTIVE_PLUGIN_PROVIDER_REF.set(spigotPluginProvider);
+            MixinPluginLoader.ACTIVE_PLUGIN_PROVIDER_REF.set(paperPluginProvider);
+        }
+        else if (tPluginProvider instanceof SpigotPluginProvider spigotPluginProvider) {
+            MixinPluginLoader.ACTIVE_PLUGIN_PROVIDER_REF.set(spigotPluginProvider);
         }
     }
 }

@@ -1,8 +1,9 @@
 package io.canvasmc.horizon.ember;
 
+import io.canvasmc.horizon.HorizonLoader;
+import io.canvasmc.horizon.MixinLaunch;
 import io.canvasmc.horizon.service.HorizonMixinLogger;
 import io.canvasmc.horizon.service.MixinContainerHandle;
-import io.canvasmc.horizon.service.MixinLaunch;
 import io.canvasmc.horizon.service.transform.ClassTransformer;
 import io.canvasmc.horizon.service.transform.TransformPhase;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
@@ -66,7 +67,7 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
     @Override
     public void offer(final IMixinInternal internal) {
         if (internal instanceof IMixinTransformerFactory) {
-            final MixinTransformationImpl transformer = MixinLaunch.getInstance().getTransformer().getService(MixinTransformationImpl.class);
+            final MixinTransformationImpl transformer = HorizonLoader.getInstance().getLaunchService().getTransformer().getService(MixinTransformationImpl.class);
             if (transformer == null) return;
 
             transformer.offer((IMixinTransformerFactory) internal);
@@ -142,7 +143,7 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
 
     @Override
     public InputStream getResourceAsStream(final @NonNull String name) {
-        final EmberClassLoader loader = MixinLaunch.getInstance().getClassLoader();
+        final EmberClassLoader loader = HorizonLoader.getInstance().getLaunchService().getClassLoader();
         return loader.getResourceAsStream(name);
     }
 
@@ -163,12 +164,12 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
 
     @Override
     public @NonNull Class<?> findClass(final @NonNull String name) throws ClassNotFoundException {
-        return Class.forName(name, true, MixinLaunch.getInstance().getClassLoader());
+        return Class.forName(name, true, HorizonLoader.getInstance().getLaunchService().getClassLoader());
     }
 
     @Override
     public @NonNull Class<?> findClass(final @NonNull String name, final boolean initialize) throws ClassNotFoundException {
-        return Class.forName(name, initialize, MixinLaunch.getInstance().getClassLoader());
+        return Class.forName(name, initialize, HorizonLoader.getInstance().getLaunchService().getClassLoader());
     }
 
     @Override
@@ -190,7 +191,7 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
     public @NonNull ClassNode getClassNode(final @NonNull String name, final boolean runTransformers, final int readerFlags) throws ClassNotFoundException, IOException {
         if (!runTransformers) throw new IllegalStateException("ClassNodes must always be provided transformed!");
 
-        final MixinLaunch launch = MixinLaunch.getInstance();
+        final MixinLaunch launch = HorizonLoader.getInstance().getLaunchService();
         final EmberClassLoader loader = launch.getClassLoader();
         final ClassTransformer transformer = launch.getTransformer();
 
@@ -226,7 +227,7 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
 
     @Override
     public boolean isClassLoaded(final @NonNull String name) {
-        final EmberClassLoader loader = MixinLaunch.getInstance().getClassLoader();
+        final EmberClassLoader loader = HorizonLoader.getInstance().getLaunchService().getClassLoader();
         return loader.hasClass(name);
     }
 

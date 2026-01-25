@@ -122,7 +122,7 @@ record PatchEntry(
 
     private byte @NonNull [] readPatchBytes() throws IOException {
         String fullPatchPath = "META-INF/" + Util.endingSlash(location) + patchPath;
-        JarFile jar = HorizonLoader.INSTANCE.getPaperclipJar().jarFile();
+        JarFile jar = HorizonLoader.getInstance().getPaperclipJar().jarFile();
 
         InputStream in = jar.getInputStream(jar.getEntry(fullPatchPath));
         if (in == null) {

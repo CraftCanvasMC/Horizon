@@ -134,7 +134,8 @@ public final class EmberClassLoader extends ClassLoader {
                     LOGGER.trace("Loading parent class: {}", canonicalName);
                     target = this.parent.loadClass(canonicalName);
                     LOGGER.trace("Loaded parent class: {}", canonicalName);
-                } else {
+                }
+                else {
                     LOGGER.trace("Attempting to load class: {}", canonicalName);
                     target = this.findClass(canonicalName, TransformPhase.INITIALIZE);
                     if (target == null) {
@@ -148,7 +149,8 @@ public final class EmberClassLoader extends ClassLoader {
                             LOGGER.trace("Unable to locate parent class: {}", canonicalName);
                             throw exception;
                         }
-                    } else {
+                    }
+                    else {
                         LOGGER.trace("Loaded transformed class: {}", canonicalName);
                     }
                 }

@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.inject.mixin.initfix.paper;
 
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.inject.access.PluginClassloaderHolder;
-import io.canvasmc.horizon.service.MixinLaunch;
 import io.papermc.paper.plugin.entrypoint.classloader.PaperPluginClassLoader;
 import io.papermc.paper.plugin.provider.type.paper.PaperPluginParent;
 import org.jspecify.annotations.NonNull;
@@ -24,7 +24,7 @@ public class PaperPluginParentMixin {
     @Inject(method = "createPluginProvider", at = @At("RETURN"))
     public void horizon$storeClassloader(PaperPluginParent.PaperBootstrapProvider provider, @NonNull CallbackInfoReturnable<PaperPluginParent.PaperServerPluginProvider> cir) {
         PaperPluginParent.PaperServerPluginProvider pluginProvider = cir.getReturnValue();
-        if (!Arrays.stream(MixinLaunch.getContext().initialGameConnections()).toList().contains(pluginProvider.getSource().toAbsolutePath())) {
+        if (!Arrays.stream(HorizonLoader.getInstance().getLaunchService().getInitialConnections()).toList().contains(pluginProvider.getSource().toAbsolutePath())) {
             // plugin is not a horizon plugin
             return;
         }

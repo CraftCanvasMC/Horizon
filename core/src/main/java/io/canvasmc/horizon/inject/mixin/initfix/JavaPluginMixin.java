@@ -3,8 +3,8 @@ package io.canvasmc.horizon.inject.mixin.initfix;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import io.canvasmc.horizon.MixinPluginLoader;
 import io.canvasmc.horizon.inject.access.PluginClassloaderHolder;
-import io.canvasmc.horizon.plugin.EntrypointLoader;
 import io.papermc.paper.plugin.provider.PluginProvider;
 import io.papermc.paper.plugin.provider.classloader.ConfiguredPluginClassLoader;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,7 +35,7 @@ public abstract class JavaPluginMixin implements PluginClassloaderHolder {
     private static ClassLoader horizon$returnCorrectClassloader(ClassLoader original,
                                                                 @Share("fetchingPlugin") @NonNull LocalRef<String> fetchingPlugin) {
         if (original instanceof ConfiguredPluginClassLoader) return original;
-        return ((PluginClassloaderHolder) EntrypointLoader.MAIN2JAVA_PLUGIN.get(fetchingPlugin.get())).horizon$getPluginClassLoader();
+        return ((PluginClassloaderHolder) MixinPluginLoader.MAIN2JAVA_PLUGIN.get(fetchingPlugin.get())).horizon$getPluginClassLoader();
     }
 
     @Inject(method = "getProvidingPlugin", at = @At("HEAD"))
@@ -49,7 +49,7 @@ public abstract class JavaPluginMixin implements PluginClassloaderHolder {
     private static ClassLoader horizon$returnCorrectProvidingClassloader(ClassLoader original,
                                                                          @Share("fetchingProvidedPlugin") @NonNull LocalRef<String> fetchingPlugin) {
         if (original instanceof ConfiguredPluginClassLoader) return original;
-        return ((PluginClassloaderHolder) EntrypointLoader.MAIN2JAVA_PLUGIN.get(fetchingPlugin.get())).horizon$getPluginClassLoader();
+        return ((PluginClassloaderHolder) MixinPluginLoader.MAIN2JAVA_PLUGIN.get(fetchingPlugin.get())).horizon$getPluginClassLoader();
     }
 
     @ModifyExpressionValue(method = "<init>()V", at = @At(value = "INVOKE", target = "Ljava/lang/Class;getClassLoader()Ljava/lang/ClassLoader;"))
@@ -58,9 +58,10 @@ public abstract class JavaPluginMixin implements PluginClassloaderHolder {
         // it here so we init the plugin safely, since it *is* safe
         if (original instanceof ConfiguredPluginClassLoader) {
             return original;
-        } else {
+        }
+        else {
             // Note: we use getAndSet so we avoid a leak
-            PluginProvider runningProvider = (PluginProvider) EntrypointLoader.ACTIVE_PLUGIN_PROVIDER_REF.getAndSet(null);
+            PluginProvider runningProvider = (PluginProvider) MixinPluginLoader.ACTIVE_PLUGIN_PROVIDER_REF.getAndSet(null);
             if (runningProvider instanceof PluginClassloaderHolder holder) {
                 return horizon$setPluginClassLoader(holder.horizon$getPluginClassLoader());
             }
@@ -80,7 +81,7 @@ public abstract class JavaPluginMixin implements PluginClassloaderHolder {
         String clazzName = ((Object) this).getClass().getName();
         LOGGER.info("Set stored horizon ClassLoader for '{}'", clazzName);
         // put the main class name, this, as a mapping to the object
-        EntrypointLoader.MAIN2JAVA_PLUGIN.put(clazzName, this);
+        MixinPluginLoader.MAIN2JAVA_PLUGIN.put(clazzName, this);
         return this.horizon$pluginClassLoader = loader;
     }
 }

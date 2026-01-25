@@ -5,16 +5,19 @@ import io.canvasmc.horizon.instrument.patch.ServerPatcherEntrypoint;
 import io.canvasmc.horizon.logger.Level;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.logger.stream.OutStream;
-import io.canvasmc.horizon.plugin.EntrypointLoader;
 import io.canvasmc.horizon.plugin.PluginTree;
 import io.canvasmc.horizon.plugin.data.HorizonMetadata;
 import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
-import io.canvasmc.horizon.service.MixinLaunch;
 import io.canvasmc.horizon.transformer.AccessTransformationImpl;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
 import io.canvasmc.horizon.util.FileJar;
 import io.canvasmc.horizon.util.PaperclipVersion;
+import io.canvasmc.horizon.util.ServerProperties;
+import io.canvasmc.horizon.util.Util;
+import io.canvasmc.horizon.util.resolver.Artifact;
+import io.canvasmc.horizon.util.resolver.DependencyResolver;
+import io.canvasmc.horizon.util.resolver.Repository;
 import io.canvasmc.horizon.util.tree.Format;
 import io.canvasmc.horizon.util.tree.ObjectTree;
 import org.jspecify.annotations.NonNull;
@@ -24,11 +27,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.Attributes;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * The main class for Horizon that acts as a base
@@ -44,29 +51,37 @@ public class HorizonLoader {
         .pattern("[{date: HH:mm:ss}] [{level}" + (DEBUG ? "/{class}" : "") + "]: {message}")
         .level(DEBUG ? Level.DEBUG : Level.INFO)
         .build();
-    public static HorizonPlugin INTERNAL_PLUGIN;
-    public static HorizonLoader INSTANCE;
+    static HorizonPlugin INTERNAL_PLUGIN;
+    private static HorizonLoader INSTANCE;
 
+    // final, all non-null
+    protected @NonNull
+    final MixinPluginLoader pluginLoader;
     private @NonNull
     final ServerProperties properties;
     private @NonNull
     final String version;
     private @NonNull
     final Instrumentation instrumentation;
-    private
+    private @NonNull
     final List<Path> initialClasspath;
     private @NonNull
     final FileJar paperclipJar;
+
+    // nullable, gets created post-init
     private PluginTree plugins;
     private PaperclipVersion paperclipVersion;
+    private MixinLaunch launchService;
 
     public HorizonLoader(@NonNull ServerProperties properties, @NonNull String version, @NonNull Instrumentation instrumentation, List<Path> initialClasspath, String @NonNull [] providedArgs) {
         this.properties = properties;
         this.version = version;
         this.instrumentation = instrumentation;
         this.initialClasspath = initialClasspath;
+        this.pluginLoader = new MixinPluginLoader();
 
         INSTANCE = this;
+
         try {
             File paperclipIOFile = properties.serverJar();
             this.paperclipJar = new FileJar(paperclipIOFile, new JarFile(paperclipIOFile));
@@ -103,13 +118,68 @@ public class HorizonLoader {
         }
     }
 
+    public static HorizonLoader getInstance() {
+        return INSTANCE;
+    }
+
+    public static void main(String[] args) {
+        // TODO - can we support this..?
+        if (Boolean.getBoolean("paper.useLegacyPluginLoading")) {
+            throw new IllegalStateException("Legacy plugin loading is unsupported with Horizon");
+        }
+        String version;
+        JarFile sourceJar;
+        try {
+            //noinspection resource
+            sourceJar = new JarFile(HorizonLoader.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+            Manifest manifest = sourceJar.getManifest();
+            version = manifest.getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+        } catch (IOException e) {
+            throw new RuntimeException("Couldn't fetch source jar", e);
+        }
+
+        List<Path> initialClasspath = new ArrayList<>();
+
+        // first, boot dependency resolver so we can actually run things without dying
+        new DependencyResolver(new File("libraries"), () -> {
+            return Util.parseFrom(sourceJar, "META-INF/artifacts.context", (line) -> {
+                String[] split = line.split("\t");
+                String id = split[0];
+                String path = split[1];
+                String sha256 = split[2];
+                return new Artifact(id, path, sha256);
+            }, Artifact.class);
+        }, () -> {
+            return Util.parseFrom(sourceJar, "META-INF/repositories.context", (line) -> {
+                String[] split = line.split("\t");
+                String name = split[0];
+                URL url = URI.create(split[1]).toURL();
+                return new Repository(name, url);
+            }, Repository.class);
+        }).resolve().forEach((jar) -> {
+            initialClasspath.add(jar.ioFile().toPath());
+            JvmAgent.addJar(jar.jarFile());
+        });
+
+        // load properties and start horizon init
+        ServerProperties properties = ServerProperties.load(args);
+
+        // cleanup directory for plugins
+        File cacheDirectory = properties.cacheLocation();
+        Util.clearDirectory(cacheDirectory);
+
+        new HorizonLoader(properties, version, JvmAgent.INSTRUMENTATION, initialClasspath, args);
+    }
+
     /**
      * The launch service for Horizon
      *
      * @return the Mixin launch service
      */
     public @NonNull MixinLaunch getLaunchService() {
-        return MixinLaunch.getInstance();
+        if (this.launchService == null)
+            throw new UnsupportedOperationException("Launch service hasn't been created yet");
+        return this.launchService;
     }
 
     /**
@@ -177,7 +247,7 @@ public class HorizonLoader {
      */
     private void start(String[] providedArgs) {
         LOGGER.info("Preparing Minecraft server");
-        this.plugins = EntrypointLoader.INSTANCE.init();
+        this.plugins = this.pluginLoader.init();
 
         final URL[] unpacked = prepareHorizonServer();
 
@@ -211,7 +281,7 @@ public class HorizonLoader {
         try {
             initialClasspath.add(Path.of(HorizonLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI()));
 
-            MixinLaunch.launch(
+            this.launchService = new MixinLaunch(
                 new MixinLaunch.LaunchContext(
                     providedArgs,
                     initialClasspath.stream()
@@ -220,6 +290,7 @@ public class HorizonLoader {
                     Path.of(unpacked[0].toURI())
                 )
             );
+            this.launchService.run();
         } catch (URISyntaxException e) {
             throw new RuntimeException("Couldn't locate self for setting up inital classpath", e);
         }
@@ -257,7 +328,7 @@ public class HorizonLoader {
                 this.paperclipVersion = versionTree.as(PaperclipVersion.class);
 
                 try {
-                    JvmAgent.addJar(HorizonLoader.INSTANCE.getPaperclipJar().ioFile().toPath());
+                    JvmAgent.addJar(this.paperclipJar.ioFile().toPath());
                 } catch (final IOException exception) {
                     throw new IllegalStateException("Unable to add paperclip jar to classpath!", exception);
                 }

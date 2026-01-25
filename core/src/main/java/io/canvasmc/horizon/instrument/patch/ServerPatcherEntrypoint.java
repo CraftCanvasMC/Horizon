@@ -224,7 +224,7 @@ public final class ServerPatcherEntrypoint {
             filePath = filePath.substring(1);
         }
 
-        JarFile patcherJar = HorizonLoader.INSTANCE.getPaperclipJar().jarFile();
+        JarFile patcherJar = HorizonLoader.getInstance().getPaperclipJar().jarFile();
 
         JarEntry entry = patcherJar.getJarEntry(filePath);
         if (entry != null) {

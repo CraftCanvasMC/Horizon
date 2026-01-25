@@ -55,7 +55,7 @@ public abstract class PaperPluginsCommandMixin {
         final TreeMap<String, PluginProvider<JavaPlugin>> paperPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         final TreeMap<String, PluginProvider<JavaPlugin>> spigotPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        final List<String> horizonPluginJars = HorizonLoader.INSTANCE.getPlugins().getAll().stream()
+        final List<String> horizonPluginJars = HorizonLoader.getInstance().getPlugins().getAll().stream()
             .map(HorizonPlugin::pluginMetadata)
             .map(HorizonMetadata::name)
             .map(String::toLowerCase)
@@ -65,9 +65,11 @@ public abstract class PaperPluginsCommandMixin {
             PluginMeta configuration = provider.getMeta();
             if (horizonPluginJars.contains(configuration.getName().toLowerCase())) {
                 horizonPlugins.put(configuration.getDisplayName(), provider);
-            } else if (provider instanceof SpigotPluginProvider) {
+            }
+            else if (provider instanceof SpigotPluginProvider) {
                 spigotPlugins.put(configuration.getDisplayName(), provider);
-            } else if (provider instanceof PaperPluginParent.PaperServerPluginProvider) {
+            }
+            else if (provider instanceof PaperPluginParent.PaperServerPluginProvider) {
                 paperPlugins.put(configuration.getDisplayName(), provider);
             }
         }
