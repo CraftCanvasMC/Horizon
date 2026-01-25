@@ -158,7 +158,8 @@ JAR your plugin is going to be developed against, allowing you to compile agains
 and the `userdev` plugin allows it to achieve all that.
 
 Below is shown an example `build.gradle.kts` configuration structure, that compiles, to give you an idea on how to start developing!
-Keep in mind that the plugins' versions might be outdated and you should always search for and ensure you're running the latest version available.
+
+Keep in mind that the plugins' versions might be outdated and you should always search for and ensure you're running the latest versions available.
 
 ```kotlin
 plugins {
@@ -180,7 +181,8 @@ horizon {
 }
 ```
 
-The `run-paper` plugin is automatically configured to download a jar for the version specified in the dev bundle, however it can still be overriden.
+The `run-paper` plugin is automatically configured to download a jar for the version specified in the dev bundle, however it can be overriden.
+
 In addition, using the `shadow` gradle plugin is *unsupported* and you should instead opt-in to JiJ'ing your
 dependencies by using the appropriate configurations, just like this:
 
