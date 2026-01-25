@@ -180,7 +180,7 @@ horizon {
 }
 ```
 
-The `run-paper` plugin is automatically configured to download a jar for the version specified in the dev bundle, however it might still be overriden.
+The `run-paper` plugin is automatically configured to download a jar for the version specified in the dev bundle, however it can still be overriden.
 In addition, using the `shadow` gradle plugin is *unsupported* and you should instead opt-in to JiJ'ing your
 dependencies by using the appropriate configurations, just like this:
 
