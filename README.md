@@ -157,16 +157,18 @@ scripts together with the `weaver-userdev` plugin. The `horizon` plugin automati
 JAR your plugin is going to be developed against, allowing you to compile against it and access the server's internals,
 and the `userdev` plugin allows it to achieve all that.
 
-Below is shown an example `build.gradle.kts` configuration structure to give you an idea on how to start developing!
+Below is shown an example `build.gradle.kts` configuration structure, that compiles, to give you an idea on how to start developing!
+Keep in mind that the plugins' versions might be outdated and you should always search for and ensure you're running the latest version available.
 
 ```kotlin
 plugins {
-    id("io.canvasmc.weaver.userdev") version "xxx"
-    id("io.canvasmc.horizon") version "xxx"
+    id("io.canvasmc.weaver.userdev") version "2.3.12"
+    id("xyz.jpenilla.run-paper") version "3.0.2"
+    id("io.canvasmc.horizon") version "1.0.0"
 }
 
 dependencies {
-    horizon.horizonApi("1.0.0") // <- required for accesing the Horizon API in dev.
+    horizon.horizonApi("1.0.0-build.1") // <- required for accesing the Horizon API, and also provides MIXIN deps.
     paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 
@@ -178,6 +180,7 @@ horizon {
 }
 ```
 
+The `run-paper` plugin is automatically configured to download a jar for the version specified in the dev bundle, however it might still be overriden.
 In addition, using the `shadow` gradle plugin is *unsupported* and you should instead opt-in to JiJ'ing your
 dependencies by using the appropriate configurations, just like this:
 
