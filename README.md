@@ -711,7 +711,7 @@ use and are more recommended for some operations, like appending a jar file to t
 ```java
 // Gets the MixinLaunch instance, which contains the classloader,
 // and other more advanced API like class transformers
-MixinLaunch launcher = MixinLaunch.getInstance();
+MixinLaunch launcher = HorizonLoader.getInstance().getLaunchService();
 
 // This contains data like the String[] args that will be passed to the server
 // along with inital game connections, and the actual game jar
@@ -721,7 +721,7 @@ MixinLaunch.LaunchContext launchContext = launcher.getLaunchContext();
 // although, it is recommended to use any API provided by Horizon that functions
 // similarly or as a replacement to the API that the Instrumentation provides, as it will
 // function safer and better for the Horizon environment
-java.lang.instrument.Instrumentation instrumentation = JvmAgent.INSTRUMENTATION;
+JavaInstrumentation instrumentation = HorizonLoader.getInstance().getInstrumentation();
 
 // This is the Ember ClassLoader, which is the primary bytecode modification
 // loader for the Horizon environment. Here you can append new jars to the classpath too!
@@ -806,3 +806,5 @@ public class TransformerExample implements TransformationService {
 That is an example of how a transformation service should be made. They are extremely powerful and can transform the entire
 class on any class on load. This is used internally for inital patches by Horizon, and for service implementations for plugins
 like Mixins and ATs. It is generally recommended to just use Mixins, but if seriously needed, this API is exposed to plugins.
+
+### Entrypoint API

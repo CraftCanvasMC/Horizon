@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.ember;
 
-import io.canvasmc.horizon.instrument.JvmAgent;
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.service.transform.ClassTransformer;
 import io.canvasmc.horizon.service.transform.TransformPhase;
 import org.jspecify.annotations.NonNull;
@@ -89,10 +89,10 @@ public final class EmberClassLoader extends ClassLoader {
         try {
             // Note: the instrumentation is designed in java to handle multiple
             //     invocations, so this is safe to be called multiple times
-            JvmAgent.addJar(path);
+            HorizonLoader.getInstance().getInstrumentation().addJar(path);
             addTransformationPath(path);
-        } catch (IOException e) {
-            throw new RuntimeException("Couldn't append to classpath", e);
+        } catch (Throwable thrown) {
+            throw new RuntimeException("Couldn't append to classpath", thrown);
         }
     }
 

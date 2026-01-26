@@ -1,6 +1,7 @@
 package io.canvasmc.horizon;
 
-import io.canvasmc.horizon.instrument.JvmAgent;
+import io.canvasmc.horizon.instrument.JavaInstrumentation;
+import io.canvasmc.horizon.instrument.JavaInstrumentationImpl;
 import io.canvasmc.horizon.instrument.patch.ServerPatcherEntrypoint;
 import io.canvasmc.horizon.logger.Level;
 import io.canvasmc.horizon.logger.Logger;
@@ -62,7 +63,7 @@ public class HorizonLoader {
     private @NonNull
     final String version;
     private @NonNull
-    final Instrumentation instrumentation;
+    final JavaInstrumentation instrumentation;
     private @NonNull
     final List<Path> initialClasspath;
     private @NonNull
@@ -73,7 +74,7 @@ public class HorizonLoader {
     private PaperclipVersion paperclipVersion;
     private MixinLaunch launchService;
 
-    public HorizonLoader(@NonNull ServerProperties properties, @NonNull String version, @NonNull Instrumentation instrumentation, List<Path> initialClasspath, String @NonNull [] providedArgs) {
+    public HorizonLoader(@NonNull ServerProperties properties, @NonNull String version, @NonNull JavaInstrumentation instrumentation, @NonNull List<Path> initialClasspath, String @NonNull [] providedArgs) {
         this.properties = properties;
         this.version = version;
         this.instrumentation = instrumentation;
@@ -119,6 +120,9 @@ public class HorizonLoader {
     }
 
     public static HorizonLoader getInstance() {
+        if (INSTANCE == null) {
+            throw new IllegalStateException("Horizon loader hasn't been instantiated yet");
+        }
         return INSTANCE;
     }
 
@@ -139,6 +143,8 @@ public class HorizonLoader {
         }
 
         List<Path> initialClasspath = new ArrayList<>();
+        // init instrumentation interface early, we need this before we can access Horizon API
+        JavaInstrumentation javaInstrumentation = new JavaInstrumentationImpl();
 
         // first, boot dependency resolver so we can actually run things without dying
         new DependencyResolver(new File("libraries"), () -> {
@@ -158,7 +164,7 @@ public class HorizonLoader {
             }, Repository.class);
         }).resolve().forEach((jar) -> {
             initialClasspath.add(jar.ioFile().toPath());
-            JvmAgent.addJar(jar.jarFile());
+            javaInstrumentation.addJar(jar.jarFile());
         });
 
         // load properties and start horizon init
@@ -168,7 +174,7 @@ public class HorizonLoader {
         File cacheDirectory = properties.cacheLocation();
         Util.clearDirectory(cacheDirectory);
 
-        new HorizonLoader(properties, version, JvmAgent.INSTRUMENTATION, initialClasspath, args);
+        new HorizonLoader(properties, version, javaInstrumentation, initialClasspath, args);
     }
 
     /**
@@ -215,8 +221,9 @@ public class HorizonLoader {
      *
      * @return the instrumentation
      * @see Instrumentation
+     * @see JavaInstrumentation
      */
-    public @NonNull Instrumentation getInstrumentation() {
+    public @NonNull JavaInstrumentation getInstrumentation() {
         return instrumentation;
     }
 
@@ -254,10 +261,10 @@ public class HorizonLoader {
         for (URL url : unpacked) {
             try {
                 Path asPath = Path.of(url.toURI());
-                JvmAgent.addJar(asPath);
+                getInstrumentation().addJar(asPath);
                 initialClasspath.add(asPath);
-            } catch (URISyntaxException | IOException e) {
-                throw new RuntimeException("Couldn't unpack and attach jar: " + url, e);
+            } catch (final Throwable thrown) {
+                throw new RuntimeException("Couldn't unpack and attach jar: " + url, thrown);
             }
         }
 
@@ -270,10 +277,10 @@ public class HorizonLoader {
                 try {
                     LOGGER.info("Adding nested library jar '{}'", nestedLibrary.ioFile().getName());
                     Path asPath = Path.of(nestedLibrary.ioFile().toURI());
-                    JvmAgent.addJar(asPath);
+                    getInstrumentation().addJar(asPath);
                     initialClasspath.add(asPath);
-                } catch (IOException e) {
-                    throw new RuntimeException("Couldn't attach jar: " + nestedLibrary.jarFile().getName(), e);
+                } catch (final Throwable thrown) {
+                    throw new RuntimeException("Couldn't attach jar: " + nestedLibrary.jarFile().getName(), thrown);
                 }
             }
         }
@@ -328,9 +335,9 @@ public class HorizonLoader {
                 this.paperclipVersion = versionTree.as(PaperclipVersion.class);
 
                 try {
-                    JvmAgent.addJar(this.paperclipJar.ioFile().toPath());
-                } catch (final IOException exception) {
-                    throw new IllegalStateException("Unable to add paperclip jar to classpath!", exception);
+                    getInstrumentation().addJar(this.paperclipJar.jarFile());
+                } catch (final Throwable thrown) {
+                    throw new IllegalStateException("Unable to add paperclip jar to classpath!", thrown);
                 }
 
                 // unpack libraries and patch
