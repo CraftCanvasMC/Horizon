@@ -1,7 +1,7 @@
 package io.canvasmc.horizon;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
-import io.canvasmc.horizon.ember.EmberClassLoader;
+import io.canvasmc.horizon.service.EmberClassLoader;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.transform.ClassTransformer;
 import io.canvasmc.horizon.service.transform.TransformationService;

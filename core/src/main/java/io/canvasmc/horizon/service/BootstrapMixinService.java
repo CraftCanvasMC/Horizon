@@ -1,10 +1,8 @@
-package io.canvasmc.horizon.ember;
+package io.canvasmc.horizon.service;
 
 import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.MixinLaunch;
-import io.canvasmc.horizon.service.HorizonMixinLogger;
-import io.canvasmc.horizon.service.MixinContainerHandle;
-import io.canvasmc.horizon.service.transform.ClassTransformer;
+import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.service.transform.TransformPhase;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
 import org.jspecify.annotations.NonNull;
@@ -24,29 +22,32 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 
-/**
- * Provides the mixin service for Ember.
- *
- * @author vectrix
- * @since 1.0.0
- */
-// TODO - rewrite
-public final class EmberMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider, IClassTracker {
+public class BootstrapMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider, IClassTracker, IMixinServiceBootstrap {
+    public static final String SIDE = Constants.SIDE_SERVER;
+    private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "mixin_service");
     private final ReEntranceLock lock;
     private final MixinContainerHandle container;
+    private final MixinTransformationImpl mixinTransformer;
 
-    /**
-     * Creates a new mixin service.
-     *
-     * @since 1.0.0
-     */
-    public EmberMixinService() {
+    public BootstrapMixinService() {
         this.lock = new ReEntranceLock(1);
-        this.container = new MixinContainerHandle("Horizon");
+        this.container = new MixinContainerHandle(getName());
+        this.mixinTransformer = HorizonLoader.getInstance().getLaunchService().getTransformer().getService(MixinTransformationImpl.class);
+        if (mixinTransformer == null) {
+            throw new IllegalStateException("Mixin transformation service not available?");
+        }
+    }
+
+    private static @NonNull String getInternalName(@NonNull String name) {
+        return name.replace('.', '/');
+    }
+
+    private static @NonNull String getCanonicalName(@NonNull String name) {
+        return name.replace('/', '.');
     }
 
     @Override
-    public @NonNull String getName() {
+    public String getName() {
         return "Horizon";
     }
 
@@ -57,6 +58,20 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
 
     @Override
     public void prepare() {
+        LOGGER.debug("Running prepare for mixin service");
+        // we don't do anything for preparing
+    }
+
+    @Override
+    public void init() {
+        LOGGER.debug("Running init for mixin service");
+        // we don't do anything for init
+    }
+
+    @Override
+    public void bootstrap() {
+        LOGGER.debug("Running bootstrap for bootstrap mixin service");
+        // we don't do anything for bootstrap
     }
 
     @Override
@@ -67,15 +82,8 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
     @Override
     public void offer(final IMixinInternal internal) {
         if (internal instanceof IMixinTransformerFactory) {
-            final MixinTransformationImpl transformer = HorizonLoader.getInstance().getLaunchService().getTransformer().getService(MixinTransformationImpl.class);
-            if (transformer == null) return;
-
-            transformer.offer((IMixinTransformerFactory) internal);
+            mixinTransformer.offer((IMixinTransformerFactory) internal);
         }
-    }
-
-    @Override
-    public void init() {
     }
 
     @Override
@@ -88,7 +96,7 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
 
     @Override
     public String getSideName() {
-        return Constants.SIDE_SERVER;
+        return SIDE;
     }
 
     @Override
@@ -191,15 +199,11 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
     public @NonNull ClassNode getClassNode(final @NonNull String name, final boolean runTransformers, final int readerFlags) throws ClassNotFoundException, IOException {
         if (!runTransformers) throw new IllegalStateException("ClassNodes must always be provided transformed!");
 
-        final MixinLaunch launch = HorizonLoader.getInstance().getLaunchService();
-        final EmberClassLoader loader = launch.getClassLoader();
-        final ClassTransformer transformer = launch.getTransformer();
+        final MixinLaunch launchService = HorizonLoader.getInstance().getLaunchService();
+        final EmberClassLoader loader = launchService.getClassLoader();
 
-        final MixinTransformationImpl mixinTransformer = transformer.getService(MixinTransformationImpl.class);
-        if (mixinTransformer == null) throw new ClassNotFoundException("Mixin transformer is not available!");
-
-        final String canonicalName = name.replace('/', '.');
-        final String internalName = name.replace('.', '/');
+        final String canonicalName = getCanonicalName(name);
+        final String internalName = getInternalName(name);
 
         final EmberClassLoader.@Nullable ClassData entry = loader.classData(canonicalName, TransformPhase.MIXIN);
         if (entry == null) throw new ClassNotFoundException(canonicalName);
@@ -233,6 +237,12 @@ public final class EmberMixinService implements IMixinService, IClassProvider, I
 
     @Override
     public String getClassRestrictions(final @NonNull String name) {
+        // no restrictions
         return "";
+    }
+
+    @Override
+    public String getServiceClassName() {
+        return "io.canvasmc.horizon.service.BootstrapMixinService";
     }
 }

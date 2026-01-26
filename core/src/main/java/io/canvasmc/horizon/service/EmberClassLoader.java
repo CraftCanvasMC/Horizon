@@ -1,8 +1,9 @@
-package io.canvasmc.horizon.ember;
+package io.canvasmc.horizon.service;
 
 import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.service.transform.ClassTransformer;
 import io.canvasmc.horizon.service.transform.TransformPhase;
+import io.canvasmc.horizon.util.DummyClassLoader;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 

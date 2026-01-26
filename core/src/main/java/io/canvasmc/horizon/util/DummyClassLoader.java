@@ -1,16 +1,14 @@
-package io.canvasmc.horizon.ember;
+package io.canvasmc.horizon.util;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
-// TODO - rewrite
-final class DummyClassLoader extends ClassLoader {
-    private static final Enumeration<URL> NULL_ENUMERATION = new Enumeration<URL>() {
+public class DummyClassLoader extends ClassLoader {
+    private static final Enumeration<URL> DUMMY_ENUMERATION = new Enumeration<>() {
         @Override
         public boolean hasMoreElements() {
             return false;
@@ -37,7 +35,7 @@ final class DummyClassLoader extends ClassLoader {
     }
 
     @Override
-    public @NonNull Enumeration<URL> getResources(final @NonNull String name) throws IOException {
-        return DummyClassLoader.NULL_ENUMERATION;
+    public @NonNull Enumeration<URL> getResources(final @NonNull String name) {
+        return DummyClassLoader.DUMMY_ENUMERATION;
     }
 }

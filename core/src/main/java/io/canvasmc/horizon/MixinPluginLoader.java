@@ -1,6 +1,5 @@
 package io.canvasmc.horizon;
 
-import io.canvasmc.horizon.ember.EmberMixinService;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.plugin.LoadContext;
 import io.canvasmc.horizon.plugin.PluginTree;
@@ -10,6 +9,7 @@ import io.canvasmc.horizon.plugin.phase.impl.BuilderPhase;
 import io.canvasmc.horizon.plugin.phase.impl.DiscoveryPhase;
 import io.canvasmc.horizon.plugin.phase.impl.ValidationPhase;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
+import io.canvasmc.horizon.service.BootstrapMixinService;
 import io.canvasmc.horizon.service.MixinContainerHandle;
 import io.canvasmc.horizon.service.transform.ClassTransformer;
 import io.canvasmc.horizon.transformer.AccessTransformationImpl;
@@ -127,7 +127,7 @@ public class MixinPluginLoader {
             }
         }
 
-        final EmberMixinService service = (EmberMixinService) MixinService.getService();
+        final BootstrapMixinService service = (BootstrapMixinService) MixinService.getService();
         final MixinContainerHandle handle = (MixinContainerHandle) service.getPrimaryContainer();
 
         for (HorizonPlugin plugin : HorizonLoader.getInstance().getPlugins().getAll()) {

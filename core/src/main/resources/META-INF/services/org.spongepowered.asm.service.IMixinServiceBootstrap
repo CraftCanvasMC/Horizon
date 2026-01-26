@@ -1,1 +1,1 @@
-io.canvasmc.horizon.service.MixinBootstrapService
+io.canvasmc.horizon.service.BootstrapMixinService

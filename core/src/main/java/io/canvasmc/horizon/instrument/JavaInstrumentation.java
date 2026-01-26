@@ -1,5 +1,6 @@
 package io.canvasmc.horizon.instrument;
 
+import io.canvasmc.horizon.service.EmberClassLoader;
 import org.jspecify.annotations.NonNull;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -15,7 +16,7 @@ import java.util.jar.JarFile;
 public interface JavaInstrumentation {
 
     /**
-     * Adds a jar to the system classloader. It is however recommended to use {@link io.canvasmc.horizon.ember.EmberClassLoader#tryAddToHorizonSystemLoader(Path)}
+     * Adds a jar to the system classloader. It is however recommended to use {@link EmberClassLoader#tryAddToHorizonSystemLoader(Path)}
      *
      * @param jar the jar file
      * @throws IllegalStateException if the instrumentation failed to boot or was unable to add
@@ -23,7 +24,7 @@ public interface JavaInstrumentation {
     void addJar(final @NonNull JarFile jar);
 
     /**
-     * Adds a jar to the system classloader. It is however recommended to use {@link io.canvasmc.horizon.ember.EmberClassLoader#tryAddToHorizonSystemLoader(Path)}
+     * Adds a jar to the system classloader. It is however recommended to use {@link EmberClassLoader#tryAddToHorizonSystemLoader(Path)}
      *
      * @param path the jar path
      * @throws IllegalStateException if the instrumentation failed to boot or was unable to add
