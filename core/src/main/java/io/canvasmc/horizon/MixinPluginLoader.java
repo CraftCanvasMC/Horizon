@@ -26,9 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 public class MixinPluginLoader {
 
@@ -38,14 +36,10 @@ public class MixinPluginLoader {
         new BuilderPhase()
     );
 
-    public static final Supplier<Throwable> PLUGIN_NOT_FOUND_FROM_NAME = () -> new IllegalArgumentException("Unable to find plugin from string 'name'");
-    public static final Map<String, Object> MAIN2JAVA_PLUGIN = new ConcurrentHashMap<>();
     public static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "plugin_loader");
 
     // used for 'mixin.initfix' to store the current plugin provider
     public static AtomicReference<Object> ACTIVE_PLUGIN_PROVIDER_REF = new AtomicReference<>();
-
-    private final Map<String, HorizonPlugin> containersByConfig = new HashMap<>();
 
     private static @NonNull LoadContext getLoadContext() {
         File pluginsDirectory = HorizonLoader.getInstance().getProperties().pluginsDirectory();
@@ -70,12 +64,6 @@ public class MixinPluginLoader {
     }
 
     MixinPluginLoader() {
-    }
-
-    public static HorizonPlugin getPluginFromName(String name) throws Throwable {
-        return HorizonLoader.getInstance().getPlugins().getAll().stream()
-            .filter(pl -> pl.pluginMetadata().name().equalsIgnoreCase(name))
-            .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_NAME);
     }
 
     public @NonNull PluginTree init() {
@@ -131,6 +119,8 @@ public class MixinPluginLoader {
         final BootstrapMixinService service = (BootstrapMixinService) MixinService.getService();
         final MixinContainerHandle handle = (MixinContainerHandle) service.getPrimaryContainer();
 
+        final Map<String, HorizonPlugin> containersByConfig = new HashMap<>();
+
         for (HorizonPlugin plugin : HorizonLoader.getInstance().getPlugins().getAll()) {
             Path pluginPath = plugin.file().ioFile().toPath();
             handle.addResource(pluginPath.getFileName().toString(), pluginPath);
@@ -138,7 +128,7 @@ public class MixinPluginLoader {
             final List<String> mixins = plugin.pluginMetadata().mixins();
             if (mixins != null && !mixins.isEmpty()) {
                 for (final String config : mixins) {
-                    final HorizonPlugin previous = this.containersByConfig.putIfAbsent(config, plugin);
+                    final HorizonPlugin previous = containersByConfig.putIfAbsent(config, plugin);
                     if (previous != null) {
                         LOGGER.warn("Skipping duplicate mixin configuration: {} (in {} and {})", config, previous.identifier(), plugin.identifier());
                         continue;
@@ -152,7 +142,7 @@ public class MixinPluginLoader {
         }
 
         for (final Config config : Mixins.getConfigs()) {
-            final HorizonPlugin container = this.containersByConfig.get(config.getName());
+            final HorizonPlugin container = containersByConfig.get(config.getName());
             if (container == null) continue;
 
             final IMixinConfig mixinConfig = config.getConfig();

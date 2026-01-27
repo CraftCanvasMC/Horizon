@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.inject.mixin.initfix.paper;
 
-import io.canvasmc.horizon.inject.access.PluginClassloaderHolder;
+import io.canvasmc.horizon.inject.access.IPluginProvider;
 import io.papermc.paper.plugin.provider.type.paper.PaperPluginParent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Unique;
 import java.util.jar.JarFile;
 
 @Mixin(PaperPluginParent.PaperServerPluginProvider.class)
-public abstract class PaperServerPluginProviderMixin implements PluginClassloaderHolder {
+public abstract class PaperServerPluginProviderMixin implements IPluginProvider {
 
     @Unique
     private ClassLoader horizon$paperPluginClassLoader;
@@ -23,7 +23,7 @@ public abstract class PaperServerPluginProviderMixin implements PluginClassloade
     }
 
     @Override
-    public ClassLoader horizon$setPluginClassLoader(ClassLoader loader) {
-        return this.horizon$paperPluginClassLoader = loader;
+    public void horizon$setPluginClassLoader(ClassLoader loader) {
+        this.horizon$paperPluginClassLoader = loader;
     }
 }

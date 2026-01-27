@@ -7,7 +7,7 @@ public class HorizonTestPlugin extends JavaPlugin {
     @Override
     public void onLoad() {
         getLogger().info("Test1: " + JavaPlugin.getPlugin(HorizonTestPlugin.class).getName());
-        getLogger().info("Test2: " + JavaPlugin.getProvidingPlugin(HorizonTestPlugin.class).getName());
+        getLogger().info("Test2: " + JavaPlugin.getProvidingPlugin(TransformerTest.class).getName());
     }
 
     @Override

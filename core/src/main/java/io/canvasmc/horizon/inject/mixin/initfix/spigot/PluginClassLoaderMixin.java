@@ -3,7 +3,7 @@ package io.canvasmc.horizon.inject.mixin.initfix.spigot;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.MixinPluginLoader;
-import io.canvasmc.horizon.inject.access.PluginClassloaderHolder;
+import io.canvasmc.horizon.inject.access.IPluginProvider;
 import io.papermc.paper.plugin.provider.entrypoint.DependencyContext;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.PluginClassLoader;
@@ -26,7 +26,7 @@ public class PluginClassLoaderMixin {
             // plugin is not a horizon plugin
             return;
         }
-        ((PluginClassloaderHolder) MixinPluginLoader.ACTIVE_PLUGIN_PROVIDER_REF.get()).horizon$setPluginClassLoader((ClassLoader) (Object) this);
+        ((IPluginProvider) MixinPluginLoader.ACTIVE_PLUGIN_PROVIDER_REF.get()).horizon$setPluginClassLoader((ClassLoader) (Object) this);
     }
 
     @ModifyExpressionValue(method = "initialize", at = @At(value = "INVOKE", target = "Ljava/lang/Class;getClassLoader()Ljava/lang/ClassLoader;"))

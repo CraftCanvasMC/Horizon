@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.inject.mixin.initfix.paper;
 
 import io.canvasmc.horizon.HorizonLoader;
-import io.canvasmc.horizon.inject.access.PluginClassloaderHolder;
+import io.canvasmc.horizon.inject.access.IPluginProvider;
 import io.papermc.paper.plugin.entrypoint.classloader.PaperPluginClassLoader;
 import io.papermc.paper.plugin.provider.type.paper.PaperPluginParent;
 import org.jspecify.annotations.NonNull;
@@ -28,7 +28,7 @@ public class PaperPluginParentMixin {
             // plugin is not a horizon plugin
             return;
         }
-        if (pluginProvider instanceof PluginClassloaderHolder holder) {
+        if (pluginProvider instanceof IPluginProvider holder) {
             holder.horizon$setPluginClassLoader(this.classLoader);
         }
     }

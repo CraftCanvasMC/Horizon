@@ -43,6 +43,10 @@ java {
     }
 }
 
+tasks.withType<Javadoc> {
+    exclude("io/canvasmc/horizon/inject/mixin/**")
+}
+
 fun fetchBuild(): Provider<String> {
     return providers.gradleProperty("buildNumber")
         .orElse(providers.environmentVariable("BUILD_NUMBER"))

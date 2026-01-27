@@ -1,7 +1,6 @@
 package io.canvasmc.horizon.plugin.data;
 
 import com.google.common.collect.ImmutableList;
-import io.canvasmc.horizon.HorizonLoader;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,9 +37,5 @@ public record HorizonMetadata(
         // setup option args so they are non-null
         mixins = ImmutableList.copyOf(mixins == null ? Collections.emptyList() : mixins);
         accessWideners = ImmutableList.copyOf(accessWideners == null ? Collections.emptyList() : accessWideners);
-
-        // validate api version
-        String minecraftVersion = HorizonLoader.getInstance().getVersionMeta().id();
-        // TODO - actually finish this
     }
 }

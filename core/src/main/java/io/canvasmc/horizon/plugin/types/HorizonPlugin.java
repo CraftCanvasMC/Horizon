@@ -8,6 +8,7 @@ import org.jspecify.annotations.NonNull;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -68,6 +69,10 @@ public final class HorizonPlugin {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (HorizonPlugin) obj;
         return Objects.equals(this.identifier, that.identifier);
+    }
+
+    public @NonNull Path getPath() {
+        return file().ioFile().toPath().toAbsolutePath();
     }
 
     /**
