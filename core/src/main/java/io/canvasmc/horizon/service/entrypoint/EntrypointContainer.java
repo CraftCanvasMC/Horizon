@@ -17,7 +17,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 public class EntrypointContainer {
-
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "entrypoint_api");
 
     @Contract("_, _, _ -> new")

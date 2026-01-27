@@ -9,7 +9,6 @@ import java.util.Map;
 
 // Note: always pretty-prints
 public final class JsonWriter implements FormatWriter {
-
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override

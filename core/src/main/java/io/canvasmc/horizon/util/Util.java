@@ -25,7 +25,6 @@ import java.util.jar.JarFile;
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 public class Util {
-
     public static final String JAR_SUFFIX = ".jar";
     public static MessageDigest SHA_256_DIGEST;
 

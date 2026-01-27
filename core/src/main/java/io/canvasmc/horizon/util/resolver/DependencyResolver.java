@@ -17,7 +17,6 @@ import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 public class DependencyResolver {
-
     private final File out;
     private final Supplier<Artifact[]> artifactSupplier;
     private final Supplier<Repository[]> repositorySupplier;

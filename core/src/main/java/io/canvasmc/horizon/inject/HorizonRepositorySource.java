@@ -40,7 +40,6 @@ import java.util.function.Consumer;
  * @author dueris
  */
 public record HorizonRepositorySource(DirectoryValidator validator) implements RepositorySource {
-
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "datapack-injection");
     private static final PackSelectionConfig DISCOVERED_PACK_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.TOP, false);
 

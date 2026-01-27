@@ -5,7 +5,6 @@ import java.io.Writer;
 import java.util.Map;
 
 public interface FormatWriter {
-
     void write(Map<String, Object> data, OutputStream output) throws Exception;
 
     void write(Map<String, Object> data, Writer writer) throws Exception;

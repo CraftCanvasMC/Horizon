@@ -23,7 +23,6 @@ public record ServerProperties(
     File cacheLocation,
     List<File> extraPlugins
 ) {
-
     private static final Pattern ADD_PLUGIN_PATTERN =
         Pattern.compile("^--?add-(plugin|extra-plugin-jar)=(.+)$");
 

@@ -32,7 +32,6 @@ public record HorizonMetadata(
     boolean loadDatapackEntry,
     PluginServiceProvider serviceProvider
 ) { // TODO - dependencies?
-
     public HorizonMetadata {
         // we don't need to validate arguments here, as pre construction they already are
         name = name.toLowerCase();

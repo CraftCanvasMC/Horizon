@@ -12,7 +12,6 @@ import java.util.Optional;
  * Wrapper for a value in the ObjectTree type conversion methods.
  */
 public final class ObjectValue implements Value<Object> {
-
     private final @Nullable Object value;
     private final TypeConverterRegistry converters;
 

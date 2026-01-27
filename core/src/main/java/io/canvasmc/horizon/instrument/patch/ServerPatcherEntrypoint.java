@@ -31,7 +31,6 @@ import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 
 public final class ServerPatcherEntrypoint {
-
     private static final String META_INF = "/META-INF/";
     private static final String LIBRARIES_LIST = "libraries.list";
     private static final String VERSIONS_LIST = "versions.list";

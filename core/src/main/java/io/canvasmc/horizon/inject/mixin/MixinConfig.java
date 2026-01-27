@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class MixinConfig implements IMixinConfigPlugin {
-
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "horizon-mixin");
 
     private static final String MIXIN_ROOT = "io.canvasmc.horizon.inject.mixin.";

@@ -17,7 +17,6 @@ import java.util.*;
  * @author dueris
  */
 public final class ObjectTree {
-
     private final Map<String, Object> data;
     private final TypeConverterRegistry converters;
     private final RemappingContext remappingContext;

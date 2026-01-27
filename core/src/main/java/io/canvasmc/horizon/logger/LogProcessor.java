@@ -9,9 +9,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LogProcessor {
-
     private static final Object lock = new Object();
     private static volatile LogProcessor instance;
+
     private final BlockingQueue<ProcessTask> queue;
     private final ExecutorService executor;
     private final AtomicBoolean running;

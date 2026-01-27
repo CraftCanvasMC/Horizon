@@ -16,7 +16,6 @@ import java.util.stream.Stream;
  * @author dueris
  */
 public final class ObjectArray {
-
     private final List<Object> items;
     private final TypeConverterRegistry converters;
     private final RemappingContext remappingContext;

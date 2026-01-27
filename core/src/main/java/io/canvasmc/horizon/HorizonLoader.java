@@ -44,7 +44,6 @@ import java.util.jar.Manifest;
  * @author dueris
  */
 public class HorizonLoader {
-
     public static final boolean DEBUG = Boolean.getBoolean("Horizon.debug");
     public static final Logger LOGGER = Logger.create()
         .name("main")
@@ -52,6 +51,7 @@ public class HorizonLoader {
         .pattern("[{date: HH:mm:ss}] [{level}" + (DEBUG ? "/{class}" : "") + "]: {message}")
         .level(DEBUG ? Level.DEBUG : Level.INFO)
         .build();
+
     static HorizonPlugin INTERNAL_PLUGIN;
     private static HorizonLoader INSTANCE;
 

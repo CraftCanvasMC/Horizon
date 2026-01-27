@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HorizonMixinLogger extends LoggerAdapterAbstract {
-
     private static final Map<String, ILogger> LOGGERS = new ConcurrentHashMap<>();
 
     private final Logger logger;

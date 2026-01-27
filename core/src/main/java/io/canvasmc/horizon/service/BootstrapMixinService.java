@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class BootstrapMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider, IClassTracker, IMixinServiceBootstrap {
-
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "mixin_service");
 
     public static final String SIDE = Constants.SIDE_SERVER;

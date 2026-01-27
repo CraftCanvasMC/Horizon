@@ -20,7 +20,6 @@ import java.util.Objects;
  * </p>
  */
 public final class HorizonPlugin {
-
     private final String identifier;
     private final FileJar file;
     private final HorizonMetadata pluginMetadata;

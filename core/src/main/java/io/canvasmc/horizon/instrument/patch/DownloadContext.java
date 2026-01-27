@@ -20,7 +20,6 @@ import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 
 record DownloadContext(byte[] hash, URL url, String fileName) {
-
     private static final int BUFFER_SIZE = 32 * 1024; // 32 KiB
 
     public static DownloadContext parseLine(final String line) {

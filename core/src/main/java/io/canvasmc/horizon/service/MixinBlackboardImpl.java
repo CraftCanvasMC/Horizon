@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class MixinBlackboardImpl implements IGlobalPropertyService {
-
     private final Map<String, IPropertyKey> keys = new HashMap<>();
     private final PropertyStore store = new PropertyStore();
 

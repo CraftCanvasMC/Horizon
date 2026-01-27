@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import static io.canvasmc.horizon.MixinPluginLoader.LOGGER;
 
 public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
-
     public static final String JIJ_PATH_HORIZON = "META-INF/jars/horizon/";
     public static final String JIJ_PATH_PAPER = "META-INF/jars/plugin/";
     public static final String JIJ_PATH_LIB = "META-INF/jars/libs/";

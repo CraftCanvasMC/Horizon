@@ -38,10 +38,10 @@ import java.util.regex.Pattern;
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 public final class MixinLaunch {
-
     private static final String JAVA_HOME = System.getProperty("java.home");
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static final Optional<Manifest> DEFAULT_MANIFEST = Optional.of(new Manifest());
+
     public static final Pattern TRANSFORMATION_EXCLUDED_PATTERN = Pattern.compile(
         "^(?:" +
             "io\\.canvasmc\\.horizon\\.(?!inject\\.)" + "|" +
@@ -55,6 +55,7 @@ public final class MixinLaunch {
     public static final String[] TRANSFORMATION_EXCLUDED_RESOURCES = {
         "org/spongepowered/asm/"
     };
+
     private final ConcurrentMap<String, Optional<Manifest>> manifests = new ConcurrentHashMap<>();
     private final MixinLaunch.@NonNull LaunchContext context;
     private ClassTransformer transformer;

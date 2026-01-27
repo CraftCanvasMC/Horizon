@@ -27,7 +27,6 @@ import java.util.function.Predicate;
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 public final class ClassTransformer {
-
     private final Map<Class<? extends TransformationService>, TransformationService> services;
     private final Map<TransformPhase, List<TransformationService>> orderedCache;
 

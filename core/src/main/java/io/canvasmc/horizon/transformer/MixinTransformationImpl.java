@@ -15,7 +15,6 @@ import org.spongepowered.asm.service.ISyntheticClassRegistry;
 import org.spongepowered.asm.transformers.MixinClassReader;
 
 public final class MixinTransformationImpl implements TransformationService {
-
     public static final int ASM_VERSION = Opcodes.ASM9;
 
     private IMixinTransformerFactory transformerFactory;

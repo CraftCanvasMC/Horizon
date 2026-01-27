@@ -12,7 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PatternFormatter {
-
     protected final String pattern;
     private final Pattern tokenPattern = Pattern.compile("\\{([^}]*)}");
     private final ThreadLocal<Map<String, SimpleDateFormat>> dateFormatters =

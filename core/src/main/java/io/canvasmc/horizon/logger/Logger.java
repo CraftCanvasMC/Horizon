@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Logger {
-
     private final String name;
     private final Level minLevel;
     private final PatternFormatter formatter;

@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PluginServiceProvider {
-
     public static final Class<? extends ServiceType<String>> CLASS_TRANSFORMER = ClassTransformer.class;
     public static final Class<? extends ServiceType<Entrypoints.Entrypoint>> CUSTOM = Entrypoints.class;
 

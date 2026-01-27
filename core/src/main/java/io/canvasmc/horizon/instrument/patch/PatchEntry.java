@@ -35,7 +35,6 @@ record PatchEntry(
     String patchPath,
     String outputPath
 ) {
-
     private static boolean bannerPrinted = false;
 
     private static @Nullable PatchEntry parseLine(@NonNull String line) {

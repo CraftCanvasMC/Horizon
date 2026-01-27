@@ -18,7 +18,6 @@ import java.util.function.Function;
  * Registry for type converters
  */
 public final class TypeConverterRegistry {
-
     private final Map<Class<?>, TypeConverter<?>> converters = new HashMap<>();
     private final Map<Class<?>, ObjectDeserializer<?>> deserializers = new HashMap<>();
 

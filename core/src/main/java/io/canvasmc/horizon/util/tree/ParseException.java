@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 public final class ParseException extends Exception {
-
     private final List<ParseError> errors;
 
     private static @NonNull String buildMessage(@NonNull List<ParseError> errors) {

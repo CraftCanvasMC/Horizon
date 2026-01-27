@@ -31,9 +31,10 @@ import java.util.List;
  * }
  * }</pre>
  * <p>
- * This was primarily documented based on <a href="https://minecraft.wiki/w/Version.json#JSON_format">minecraft.wiki</a>,
- * and the wiki was also updated from these docs, it is recommended that you take a look at the wiki link along with these
- * docs for a full in-depth look on what this is and represents.
+ * This was primarily documented based on <a
+ * href="https://minecraft.wiki/w/Version.json#JSON_format">minecraft.wiki</a>, and the wiki was also updated from these
+ * docs, it is recommended that you take a look at the wiki link along with these docs for a full in-depth look on what
+ * this is and represents.
  *
  * @param id
  *     The version's unique identifier. May sometimes display the build has as well

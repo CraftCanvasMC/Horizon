@@ -6,7 +6,6 @@ import io.canvasmc.horizon.logger.OutputHandler;
 import java.io.PrintStream;
 
 public class ConsoleOutputHandler implements OutputHandler {
-
     private static final String RESET = "\u001B[0m";
     private static final String YELLOW = "\u001B[33m";
     private static final String RED = "\u001B[91m";
