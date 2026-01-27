@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ReloadCommand.class)
 public class ReloadCommandMixin {
+
     @Inject(method = "execute", at = @At("HEAD"), cancellable = true)
     public void horizon$removeReloadCommand(CommandSender sender, String currentAlias, String[] args, @NonNull CallbackInfoReturnable<Boolean> cir) {
         cir.cancel();

@@ -11,12 +11,14 @@ import java.util.ArrayList;
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 /**
- * Taken from <a href="https://github.com/cpw/grossjava9hacks/blob/1.3/src/main/java/cpw/mods/gross/Java9ClassLoaderUtil.java">grossjava9hacks</a>.
+ * Taken from <a
+ * href="https://github.com/cpw/grossjava9hacks/blob/1.3/src/main/java/cpw/mods/gross/Java9ClassLoaderUtil.java">grossjava9hacks</a>.
  *
  * @author cpw
  * @since 1.0.0
  */
 public final class ClassLoaders {
+
     private ClassLoaders() {
     }
 

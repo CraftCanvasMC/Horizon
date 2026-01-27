@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BuilderPhase implements Phase<Set<PluginCandidate>, List<HorizonPlugin>> {
+
     @Override
     public List<HorizonPlugin> execute(@NonNull Set<PluginCandidate> input, LoadContext context) throws PhaseException {
         List<HorizonPlugin> completed = new ArrayList<>();

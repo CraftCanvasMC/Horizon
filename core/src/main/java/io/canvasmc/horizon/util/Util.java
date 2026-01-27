@@ -3,7 +3,13 @@ package io.canvasmc.horizon.util;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -19,6 +25,7 @@ import java.util.jar.JarFile;
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 public class Util {
+
     public static final String JAR_SUFFIX = ".jar";
     public static MessageDigest SHA_256_DIGEST;
 
@@ -30,21 +37,18 @@ public class Util {
         }
     }
 
-    public static byte @NonNull [] readFromInStream(final @NonNull InputStream in) {
-        try (in) {
-            byte[] buf = new byte[1024 * 24];
-            int off = 0;
-            int read;
-            while ((read = in.read(buf, off, buf.length - off)) != -1) {
-                off += read;
-                if (off == buf.length) {
-                    buf = Arrays.copyOf(buf, buf.length * 2);
-                }
-            }
-            return Arrays.copyOfRange(buf, 0, off);
-        } catch (IOException e) {
-            throw kill("Failed to read data from input stream", e);
+    private static int getHexValue(final char c) {
+        final int i = Character.digit(c, 16);
+        if (i < 0) {
+            throw new IllegalArgumentException("Invalid hex char: " + c);
         }
+        return i;
+    }
+
+    private static boolean hasFileExtension(String path) {
+        String name = new File(path).getName();
+        int lastDot = name.lastIndexOf('.');
+        return lastDot > 0 && lastDot < name.length() - 1;
     }
 
     public static @Nullable String readResourceText(final @NonNull String path) throws IOException {
@@ -69,10 +73,6 @@ public class Util {
         return writer.toString();
     }
 
-    public static boolean isDataValid(final byte[] data, final byte[] hash) {
-        return Arrays.equals(hash, SHA_256_DIGEST.digest(data));
-    }
-
     public static boolean isFileValid(final Path file, final byte[] hash) {
         if (Files.exists(file)) {
             final byte[] fileBytes;
@@ -84,6 +84,36 @@ public class Util {
             return isDataValid(fileBytes, hash);
         }
         return false;
+    }
+
+    public static byte @NonNull [] readFromInStream(final @NonNull InputStream in) {
+        try (in) {
+            byte[] buf = new byte[1024 * 24];
+            int off = 0;
+            int read;
+            while ((read = in.read(buf, off, buf.length - off)) != -1) {
+                off += read;
+                if (off == buf.length) {
+                    buf = Arrays.copyOf(buf, buf.length * 2);
+                }
+            }
+            return Arrays.copyOfRange(buf, 0, off);
+        } catch (IOException e) {
+            throw kill("Failed to read data from input stream", e);
+        }
+    }
+
+    public static boolean isDataValid(final byte[] data, final byte[] hash) {
+        return Arrays.equals(hash, SHA_256_DIGEST.digest(data));
+    }
+
+    public static @NonNull InternalError kill(final String message, final @Nullable Throwable thrown) {
+        if (thrown != null) {
+            LOGGER.error(thrown, message);
+        }
+        else LOGGER.error(message);
+        System.exit(1);
+        return new InternalError();
     }
 
     public static byte @NonNull [] fromHex(final @NonNull String s) {
@@ -104,28 +134,11 @@ public class Util {
         }
     }
 
-    private static int getHexValue(final char c) {
-        final int i = Character.digit(c, 16);
-        if (i < 0) {
-            throw new IllegalArgumentException("Invalid hex char: " + c);
-        }
-        return i;
-    }
-
     public static @NonNull String endingSlash(final @NonNull String dir) {
         if (dir.endsWith("/")) {
             return dir;
         }
         return dir + "/";
-    }
-
-    public static @NonNull InternalError kill(final String message, final @Nullable Throwable thrown) {
-        if (thrown != null) {
-            LOGGER.error(thrown, message);
-        }
-        else LOGGER.error(message);
-        System.exit(1);
-        return new InternalError();
     }
 
     public static void clearDirectory(@NonNull File directory) {
@@ -139,12 +152,6 @@ public class Util {
                 file.delete();
             });
         }
-    }
-
-    private static boolean hasFileExtension(String path) {
-        String name = new File(path).getName();
-        int lastDot = name.lastIndexOf('.');
-        return lastDot > 0 && lastDot < name.length() - 1;
     }
 
     public static @NonNull File getOrCreateFile(String path) {

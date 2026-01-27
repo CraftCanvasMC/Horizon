@@ -31,6 +31,11 @@ public class ValidationPhase implements Phase<Set<PluginCandidate>, Set<PluginCa
         return validated;
     }
 
+    @Override
+    public String getName() {
+        return "Validation";
+    }
+
     private void rebuildNested(@NonNull PluginCandidate candidate, LoadContext context) throws PhaseException {
         Set<PluginCandidate> nested = candidate.nestedData().horizonEntries();
         if (nested.isEmpty()) {
@@ -41,7 +46,6 @@ public class ValidationPhase implements Phase<Set<PluginCandidate>, Set<PluginCa
         nested.clear();
         nested.addAll(validatedNested);
     }
-
 
     private boolean validateCandidate(@NonNull PluginCandidate candidate) {
         if (candidate.metadata().name() == null || candidate.metadata().name().trim().isEmpty()) {
@@ -60,10 +64,5 @@ public class ValidationPhase implements Phase<Set<PluginCandidate>, Set<PluginCa
         }
 
         return true;
-    }
-
-    @Override
-    public String getName() {
-        return "Validation";
     }
 }

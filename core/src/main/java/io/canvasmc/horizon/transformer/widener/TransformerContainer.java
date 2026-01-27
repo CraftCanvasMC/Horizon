@@ -23,8 +23,6 @@ import java.util.regex.Pattern;
 
 public class TransformerContainer {
 
-    public static final Supplier<Throwable> COULDNT_LOCATE_FIELD = () -> new IllegalArgumentException("Couldn't locate target field when attempting to transform");
-    public static final Supplier<Throwable> COULDNT_LOCATE_METHOD = () -> new IllegalArgumentException("Couldn't locate target method when attempting to transform");
     /**
      * Patterns for identifying the definition of a transformer
      * <p>
@@ -50,6 +48,9 @@ public class TransformerContainer {
     private static final int VIS_PUBLIC = 3;
     private static final int VIS_PROTECTED = 2;
     private static final int VIS_PRIVATE = 1;
+
+    public static final Supplier<Throwable> COULDNT_LOCATE_FIELD = () -> new IllegalArgumentException("Couldn't locate target field when attempting to transform");
+    public static final Supplier<Throwable> COULDNT_LOCATE_METHOD = () -> new IllegalArgumentException("Couldn't locate target method when attempting to transform");
 
     private final Object2ObjectOpenHashMap<String, ObjectOpenHashSet<Definition>> definitionRegistry =
         new Object2ObjectOpenHashMap<>(8, 0.75F);
@@ -194,6 +195,65 @@ public class TransformerContainer {
         }
     }
 
+    // Note: we already know the string isn't blank
+    private @Nullable Definition tryCompile(@NonNull String trimmed) throws CompileError {
+        if (!MODIFIER_PREFIX.matcher(trimmed).find()) {
+            throw new CompileError("definition has invalid modifier '" + trimmed + "'");
+        }
+
+        Matcher m;
+
+        m = CLASS_REGEX.matcher(trimmed);
+        if (m.matches()) {
+            String op = m.group(1);
+            String f = m.group(2); // may be null
+            String clazzTarget = m.group(3);
+
+            TransformOperation operation = tryParseOperation(op + (f == null ? "" : f));
+
+            return new Definition(
+                operation,
+                new Definition.ClassData(clazzTarget),
+                clazzTarget.replace(".", "/")
+            );
+        }
+
+        m = FIELD_REGEX.matcher(trimmed);
+        if (m.matches()) {
+            String op = m.group(1);
+            String f = m.group(2);
+            String clazzTarget = m.group(3);
+            String fieldName = m.group(4);
+
+            TransformOperation operation = tryParseOperation(op + (f == null ? "" : f));
+
+            return new Definition(
+                operation,
+                new Definition.FieldData(fieldName),
+                clazzTarget.replace(".", "/")
+            );
+        }
+
+        m = METHOD_REGEX.matcher(trimmed);
+        if (m.matches()) {
+            String op = m.group(1);
+            String f = m.group(2);
+            String clazzTarget = m.group(3);
+            String methodName = m.group(4);
+            String params = m.group(5);
+            String returnType = m.group(6);
+
+            TransformOperation operation = tryParseOperation(op + (f == null ? "" : f));
+
+            return new Definition(
+                operation,
+                new Definition.MethodData(methodName + "(" + params + ")" + returnType),
+                clazzTarget.replace(".", "/")
+            );
+        }
+        return null;
+    }
+
     public void addDefinition(String className, Definition def) {
         if (locked) {
             throw new IllegalStateException("TransformerContainer is locked and cannot be modified.");
@@ -252,64 +312,5 @@ public class TransformerContainer {
                 }
             }
         }
-    }
-
-    // Note: we already know the string isn't blank
-    private @Nullable Definition tryCompile(@NonNull String trimmed) throws CompileError {
-        if (!MODIFIER_PREFIX.matcher(trimmed).find()) {
-            throw new CompileError("definition has invalid modifier '" + trimmed + "'");
-        }
-
-        Matcher m;
-
-        m = CLASS_REGEX.matcher(trimmed);
-        if (m.matches()) {
-            String op = m.group(1);
-            String f = m.group(2); // may be null
-            String clazzTarget = m.group(3);
-
-            TransformOperation operation = tryParseOperation(op + (f == null ? "" : f));
-
-            return new Definition(
-                operation,
-                new Definition.ClassData(clazzTarget),
-                clazzTarget.replace(".", "/")
-            );
-        }
-
-        m = FIELD_REGEX.matcher(trimmed);
-        if (m.matches()) {
-            String op = m.group(1);
-            String f = m.group(2);
-            String clazzTarget = m.group(3);
-            String fieldName = m.group(4);
-
-            TransformOperation operation = tryParseOperation(op + (f == null ? "" : f));
-
-            return new Definition(
-                operation,
-                new Definition.FieldData(fieldName),
-                clazzTarget.replace(".", "/")
-            );
-        }
-
-        m = METHOD_REGEX.matcher(trimmed);
-        if (m.matches()) {
-            String op = m.group(1);
-            String f = m.group(2);
-            String clazzTarget = m.group(3);
-            String methodName = m.group(4);
-            String params = m.group(5);
-            String returnType = m.group(6);
-
-            TransformOperation operation = tryParseOperation(op + (f == null ? "" : f));
-
-            return new Definition(
-                operation,
-                new Definition.MethodData(methodName + "(" + params + ")" + returnType),
-                clazzTarget.replace(".", "/")
-            );
-        }
-        return null;
     }
 }

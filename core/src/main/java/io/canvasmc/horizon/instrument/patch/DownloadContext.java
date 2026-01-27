@@ -15,9 +15,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
-import static java.nio.file.StandardOpenOption.*;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 record DownloadContext(byte[] hash, URL url, String fileName) {
+
     private static final int BUFFER_SIZE = 32 * 1024; // 32 KiB
 
     public static DownloadContext parseLine(final String line) {
@@ -39,10 +42,6 @@ record DownloadContext(byte[] hash, URL url, String fileName) {
         } catch (MalformedURLException malformedURLException) {
             throw Util.kill("Invalid URL in download-context: " + parts[1], malformedURLException);
         }
-    }
-
-    public @NonNull Path getOutputFile(@NonNull Path outDir) {
-        return outDir.resolve("cache").resolve(fileName);
     }
 
     public void download(Path outputDir) {
@@ -101,6 +100,10 @@ record DownloadContext(byte[] hash, URL url, String fileName) {
         }
 
         LOGGER.info("{} downloaded successfully.", fileName);
+    }
+
+    public @NonNull Path getOutputFile(@NonNull Path outDir) {
+        return outDir.resolve("cache").resolve(fileName);
     }
 
     private void printProgress(long current, long total) {

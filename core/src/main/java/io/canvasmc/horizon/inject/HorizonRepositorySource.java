@@ -4,7 +4,11 @@ import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.*;
+import net.minecraft.server.packs.FilePackResources;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackSelectionConfig;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.linkfs.LinkFileSystem;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackDetector;
@@ -17,7 +21,12 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +35,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * Acts as a repository source for horizon plugins marked as embedding
- * datapack entries
+ * Acts as a repository source for horizon plugins marked as embedding datapack entries
  *
  * @author dueris
  */
 public record HorizonRepositorySource(DirectoryValidator validator) implements RepositorySource {
+
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "datapack-injection");
     private static final PackSelectionConfig DISCOVERED_PACK_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.TOP, false);
 
@@ -52,11 +61,6 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
         } catch (IOException var3) {
             LOGGER.warn("Failed to list horizon injected packs", var3);
         }
-    }
-
-    private @NonNull PackLocationInfo createDiscoveredFilePackInfo(Path path) {
-        String string = nameFromPath(path);
-        return new PackLocationInfo("injected/" + string, Component.literal(string), PackSource.WORLD, Optional.empty());
     }
 
     public void discoverPacks(DirectoryValidator validator, BiConsumer<Path, Pack.ResourcesSupplier> output) throws IOException {
@@ -87,26 +91,15 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
         }
     }
 
+    private @NonNull PackLocationInfo createDiscoveredFilePackInfo(Path path) {
+        String string = nameFromPath(path);
+        return new PackLocationInfo("injected/" + string, Component.literal(string), PackSource.WORLD, Optional.empty());
+    }
+
     public class PluginPackDetector extends PackDetector<Pack.@NonNull ResourcesSupplier> {
+
         public PluginPackDetector(DirectoryValidator validator) {
             super(validator);
-        }
-
-        @Override
-        protected Pack.@Nullable ResourcesSupplier createZipPack(@NonNull Path path) {
-            FileSystem fileSystem = path.getFileSystem();
-            if (fileSystem != FileSystems.getDefault() && !(fileSystem instanceof LinkFileSystem)) {
-                LOGGER.info("Can't open pack archive at {}", path);
-                return null;
-            }
-            else {
-                return new FilePackResources.FileResourcesSupplier(path);
-            }
-        }
-
-        @Override
-        protected Pack.ResourcesSupplier createDirectoryPack(@NonNull Path path) {
-            return new PathPackResources.PathResourcesSupplier(path);
         }
 
         @Override
@@ -130,6 +123,23 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
             }
 
             return fileAttributes.isRegularFile() && !fileAttributes.isDirectory() && path.getFileName().toString().endsWith(".jar") ? this.createZipPack(path) : null;
+        }
+
+        @Override
+        protected Pack.@Nullable ResourcesSupplier createZipPack(@NonNull Path path) {
+            FileSystem fileSystem = path.getFileSystem();
+            if (fileSystem != FileSystems.getDefault() && !(fileSystem instanceof LinkFileSystem)) {
+                LOGGER.info("Can't open pack archive at {}", path);
+                return null;
+            }
+            else {
+                return new FilePackResources.FileResourcesSupplier(path);
+            }
+        }
+
+        @Override
+        protected Pack.ResourcesSupplier createDirectoryPack(@NonNull Path path) {
+            return new PathPackResources.PathResourcesSupplier(path);
         }
     }
 }

@@ -6,8 +6,9 @@ import java.util.jar.JarFile;
 /**
  * Represents a pair of an IO file and a jar file
  *
- * @param ioFile  the io file
- * @param jarFile the jar file
+ * @param ioFile
+ *     the io file
+ * @param jarFile
+ *     the jar file
  */
-public record FileJar(File ioFile, JarFile jarFile) {
-}
+public record FileJar(File ioFile, JarFile jarFile) {}

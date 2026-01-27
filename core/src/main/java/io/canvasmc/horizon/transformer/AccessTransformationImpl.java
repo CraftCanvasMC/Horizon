@@ -8,6 +8,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 
 public final class AccessTransformationImpl implements TransformationService {
+
     private final TransformerContainer container = new TransformerContainer();
     private volatile boolean initialized = false;
 

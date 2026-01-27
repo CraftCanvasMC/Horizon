@@ -12,6 +12,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public record Artifact(String artifactId, String path, String sha256) {
+
     private static byte @NonNull [] readAllBytes(@NonNull InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[8192];

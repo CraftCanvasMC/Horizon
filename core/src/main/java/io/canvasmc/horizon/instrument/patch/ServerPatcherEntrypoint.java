@@ -17,48 +17,24 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
-import static java.nio.file.StandardOpenOption.*;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 public final class ServerPatcherEntrypoint {
 
     private static final String META_INF = "/META-INF/";
     private static final String LIBRARIES_LIST = "libraries.list";
     private static final String VERSIONS_LIST = "versions.list";
-
-    public static URL @NonNull [] setupClasspath() {
-        final Path repoDir = Path.of(System.getProperty("bundlerRepoDir", ""));
-        final PatchEntry[] patches = findPatches();
-        final DownloadContext downloadContext = findDownloadContext();
-
-        if (patches.length > 0 && downloadContext == null) {
-            throw new IllegalArgumentException(
-                "patches.list file found without a corresponding original-url file"
-            );
-        }
-
-        final Path baseFile = (downloadContext != null)
-            ? downloadOriginalJar(downloadContext, repoDir)
-            : null;
-
-        final Map<String, Map<String, URL>> classpathUrls =
-            extractAndApplyPatches(baseFile, patches, repoDir);
-
-        Collection<URL> versions = classpathUrls.getOrDefault("versions", Map.of()).values();
-        Collection<URL> libraries = classpathUrls.getOrDefault("libraries", Map.of()).values();
-
-        URL[] urls = new URL[versions.size() + libraries.size()];
-        int i = 0;
-
-        for (URL u : versions) urls[i++] = u;
-        for (URL u : libraries) urls[i++] = u;
-
-        return urls;
-    }
 
     private static PatchEntry @NonNull [] findPatches() {
         try (InputStream stream = resource(META_INF + "patches.list")) {
@@ -77,22 +53,6 @@ public final class ServerPatcherEntrypoint {
             throw Util.kill("Failed to read download-context file", e);
         }
         return DownloadContext.parseLine(line);
-    }
-
-    private static Entry @Nullable [] findEntries(String file) {
-        try (InputStream stream = resource(META_INF + file)) {
-            return (stream != null) ? Entry.parse(reader(stream)) : null;
-        } catch (IOException e) {
-            throw Util.kill("Failed to read " + file + " file", e);
-        }
-    }
-
-    private static @NonNull BufferedReader reader(InputStream stream) {
-        return new BufferedReader(new InputStreamReader(stream));
-    }
-
-    private static InputStream resource(String name) {
-        return ServerPatcherEntrypoint.class.getResourceAsStream(name);
     }
 
     private static @NonNull Path downloadOriginalJar(DownloadContext ctx, Path repoDir) {
@@ -148,6 +108,14 @@ public final class ServerPatcherEntrypoint {
         return urls;
     }
 
+    private static InputStream resource(String name) {
+        return ServerPatcherEntrypoint.class.getResourceAsStream(name);
+    }
+
+    private static @NonNull BufferedReader reader(InputStream stream) {
+        return new BufferedReader(new InputStreamReader(stream));
+    }
+
     private static void extractEntries(
         Map<String, URL> urls,
         PatchEntry[] patches,
@@ -165,6 +133,14 @@ public final class ServerPatcherEntrypoint {
             if (!isPatchedFile(e, patches, category)) {
                 extractFile(e, urls, originalRoot, outDir, baseDir);
             }
+        }
+    }
+
+    private static Entry @Nullable [] findEntries(String file) {
+        try (InputStream stream = resource(META_INF + file)) {
+            return (stream != null) ? Entry.parse(reader(stream)) : null;
+        } catch (IOException e) {
+            throw Util.kill("Failed to read " + file + " file", e);
         }
     }
 
@@ -247,7 +223,45 @@ public final class ServerPatcherEntrypoint {
         return Files.newInputStream(orig);
     }
 
+    public static URL @NonNull [] setupClasspath() {
+        final Path repoDir = Path.of(System.getProperty("bundlerRepoDir", ""));
+        final PatchEntry[] patches = findPatches();
+        final DownloadContext downloadContext = findDownloadContext();
+
+        if (patches.length > 0 && downloadContext == null) {
+            throw new IllegalArgumentException(
+                "patches.list file found without a corresponding original-url file"
+            );
+        }
+
+        final Path baseFile = (downloadContext != null)
+            ? downloadOriginalJar(downloadContext, repoDir)
+            : null;
+
+        final Map<String, Map<String, URL>> classpathUrls =
+            extractAndApplyPatches(baseFile, patches, repoDir);
+
+        Collection<URL> versions = classpathUrls.getOrDefault("versions", Map.of()).values();
+        Collection<URL> libraries = classpathUrls.getOrDefault("libraries", Map.of()).values();
+
+        URL[] urls = new URL[versions.size() + libraries.size()];
+        int i = 0;
+
+        for (URL u : versions) urls[i++] = u;
+        for (URL u : libraries) urls[i++] = u;
+
+        return urls;
+    }
+
     record Entry(byte[] hash, String id, String path) {
+
+        private static @NonNull Entry parseLine(@NonNull String line) {
+            String[] parts = line.split("\t");
+            if (parts.length != 3) {
+                throw new IllegalStateException("Malformed library entry: " + line);
+            }
+            return new Entry(Util.fromHex(parts[0]), parts[1], parts[2]);
+        }
 
         static Entry @NonNull [] parse(@NonNull BufferedReader reader) throws IOException {
             List<Entry> list = new ArrayList<>(8);
@@ -256,14 +270,6 @@ public final class ServerPatcherEntrypoint {
                 list.add(parseLine(line));
             }
             return list.toArray(new Entry[0]);
-        }
-
-        private static @NonNull Entry parseLine(@NonNull String line) {
-            String[] parts = line.split("\t");
-            if (parts.length != 3) {
-                throw new IllegalStateException("Malformed library entry: " + line);
-            }
-            return new Entry(Util.fromHex(parts[0]), parts[1], parts[2]);
         }
     }
 }

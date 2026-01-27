@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
 public class DummyClassLoader extends ClassLoader {
+
     private static final Enumeration<URL> DUMMY_ENUMERATION = new Enumeration<>() {
         @Override
         public boolean hasMoreElements() {

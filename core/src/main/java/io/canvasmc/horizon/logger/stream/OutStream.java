@@ -7,11 +7,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public class OutStream {
+
     public static ConsoleBuilder CONSOLE = new ConsoleBuilder();
     public static FileBuilder FILE = new FileBuilder();
     public static StreamBuilder STREAM = new StreamBuilder();
 
     public static class ConsoleBuilder {
+
         private boolean colored = false;
 
         public OutputHandler build() {
@@ -25,6 +27,7 @@ public class OutStream {
     }
 
     public static class FileBuilder {
+
         private File file;
         private boolean append = true;
 
@@ -51,6 +54,7 @@ public class OutStream {
     }
 
     public static class StreamBuilder {
+
         private OutputStream stream;
         private boolean autoFlush = true;
 

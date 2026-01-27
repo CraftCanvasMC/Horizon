@@ -1,6 +1,7 @@
 package io.canvasmc.horizon.plugin.phase;
 
 public class PhaseException extends Exception {
+
     public PhaseException(String message) {
         super(message);
     }

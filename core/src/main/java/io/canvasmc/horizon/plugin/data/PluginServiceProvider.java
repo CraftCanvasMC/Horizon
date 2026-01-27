@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PluginServiceProvider {
+
     public static final Class<? extends ServiceType<String>> CLASS_TRANSFORMER = ClassTransformer.class;
     public static final Class<? extends ServiceType<Entrypoints.Entrypoint>> CUSTOM = Entrypoints.class;
 
@@ -52,12 +53,14 @@ public class PluginServiceProvider {
     }
 
     public interface ServiceType<E> {
+
         String getYamlEntryName();
 
         Service<E>[] parse(ObjectArray array);
     }
 
     public static class ClassTransformer implements ServiceType<String> {
+
         public static final ClassTransformer INST = new ClassTransformer();
 
         @Override
@@ -79,6 +82,7 @@ public class PluginServiceProvider {
     }
 
     public static class Entrypoints implements ServiceType<Entrypoints.Entrypoint> {
+
         public static final Entrypoints INST = new Entrypoints();
 
         @Override
@@ -102,6 +106,7 @@ public class PluginServiceProvider {
         }
 
         public record Entrypoint(String entrypointer, String target) {
+
             @Override
             public @NonNull String toString() {
                 return "Entrypoint{" +
@@ -113,6 +118,7 @@ public class PluginServiceProvider {
     }
 
     public record Service<E>(ServiceType<E> service, E obj) {
+
         @Override
         public @NonNull String toString() {
             return "service:" + service.getYamlEntryName() + "/" + obj.toString();

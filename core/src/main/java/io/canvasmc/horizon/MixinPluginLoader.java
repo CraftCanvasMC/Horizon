@@ -32,34 +32,20 @@ import java.util.function.Supplier;
 
 public class MixinPluginLoader {
 
-    public static final Supplier<Throwable> PLUGIN_NOT_FOUND_FROM_NAME = () -> new IllegalArgumentException("Unable to find plugin from string 'name'");
-
-    public static final Map<String, Object> MAIN2JAVA_PLUGIN = new ConcurrentHashMap<>();
-    public static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "plugin_loader");
-
     private static final List<Phase<?, ?>> PHASES = List.of(
         new DiscoveryPhase(),
         new ValidationPhase(),
         new BuilderPhase()
     );
+
+    public static final Supplier<Throwable> PLUGIN_NOT_FOUND_FROM_NAME = () -> new IllegalArgumentException("Unable to find plugin from string 'name'");
+    public static final Map<String, Object> MAIN2JAVA_PLUGIN = new ConcurrentHashMap<>();
+    public static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "plugin_loader");
+
     // used for 'mixin.initfix' to store the current plugin provider
     public static AtomicReference<Object> ACTIVE_PLUGIN_PROVIDER_REF = new AtomicReference<>();
+
     private final Map<String, HorizonPlugin> containersByConfig = new HashMap<>();
-
-    MixinPluginLoader() {
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <I, O> O executePhase(@NonNull Phase<I, O> phase, Object input, LoadContext context)
-        throws PhaseException {
-        return phase.execute((I) input, context);
-    }
-
-    public static HorizonPlugin getPluginFromName(String name) throws Throwable {
-        return HorizonLoader.getInstance().getPlugins().getAll().stream()
-            .filter(pl -> pl.pluginMetadata().name().equalsIgnoreCase(name))
-            .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_NAME);
-    }
 
     private static @NonNull LoadContext getLoadContext() {
         File pluginsDirectory = HorizonLoader.getInstance().getProperties().pluginsDirectory();
@@ -75,6 +61,21 @@ public class MixinPluginLoader {
             );
         }
         return new LoadContext(pluginsDirectory, cacheDirectory);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <I, O> O executePhase(@NonNull Phase<I, O> phase, Object input, LoadContext context)
+        throws PhaseException {
+        return phase.execute((I) input, context);
+    }
+
+    MixinPluginLoader() {
+    }
+
+    public static HorizonPlugin getPluginFromName(String name) throws Throwable {
+        return HorizonLoader.getInstance().getPlugins().getAll().stream()
+            .filter(pl -> pl.pluginMetadata().name().equalsIgnoreCase(name))
+            .findFirst().orElseThrow(PLUGIN_NOT_FOUND_FROM_NAME);
     }
 
     public @NonNull PluginTree init() {

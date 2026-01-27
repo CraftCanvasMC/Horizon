@@ -4,6 +4,7 @@ import org.jspecify.annotations.NonNull;
 import org.objectweb.asm.Opcodes;
 
 public interface TransformOperation {
+
     static @NonNull Builder builder() {
         return new Builder();
     }
@@ -78,6 +79,7 @@ public interface TransformOperation {
     }
 
     final class Builder {
+
         private Access access = Access.DEFAULT;
         private Finality finality = Finality.NONE;
 

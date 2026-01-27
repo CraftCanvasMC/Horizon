@@ -21,7 +21,8 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
     /**
      * Converts to String
      *
-     * @throws TypeConversionException if conversion fails
+     * @throws TypeConversionException
+     *     if conversion fails
      */
     @Nullable String asString();
 
@@ -35,7 +36,8 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
     /**
      * Converts to integer
      *
-     * @throws TypeConversionException if conversion fails
+     * @throws TypeConversionException
+     *     if conversion fails
      */
     int asInt();
 
@@ -121,7 +123,8 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
     /**
      * Converts to ObjectTree if the value is a tree structure
      *
-     * @throws TypeConversionException if the value is not an ObjectTree
+     * @throws TypeConversionException
+     *     if the value is not an ObjectTree
      */
     ObjectTree asTree();
 

@@ -3,7 +3,11 @@ package io.canvasmc.horizon.util.tree;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NonNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -12,15 +16,10 @@ import java.util.stream.Stream;
  * @author dueris
  */
 public final class ObjectArray {
+
     private final List<Object> items;
     private final TypeConverterRegistry converters;
     private final RemappingContext remappingContext;
-
-    ObjectArray(List<Object> items, TypeConverterRegistry converters, RemappingContext remappingContext) {
-        this.items = Collections.unmodifiableList(normalizeList(new ArrayList<>(items), converters, remappingContext));
-        this.converters = converters;
-        this.remappingContext = remappingContext;
-    }
 
     /**
      * Normalizes a list by converting all Map instances to ObjectTree instances
@@ -48,11 +47,10 @@ public final class ObjectArray {
         return value;
     }
 
-    /**
-     * Gets the value at the specified index in the array
-     */
-    public @NonNull ObjectValue get(int index) {
-        return new ObjectValue(items.get(index), converters);
+    ObjectArray(List<Object> items, TypeConverterRegistry converters, RemappingContext remappingContext) {
+        this.items = Collections.unmodifiableList(normalizeList(new ArrayList<>(items), converters, remappingContext));
+        this.converters = converters;
+        this.remappingContext = remappingContext;
     }
 
     /**
@@ -63,6 +61,13 @@ public final class ObjectArray {
             return Optional.empty();
         }
         return Optional.of(get(index));
+    }
+
+    /**
+     * Gets the value at the specified index in the array
+     */
+    public @NonNull ObjectValue get(int index) {
+        return new ObjectValue(items.get(index), converters);
     }
 
     /**

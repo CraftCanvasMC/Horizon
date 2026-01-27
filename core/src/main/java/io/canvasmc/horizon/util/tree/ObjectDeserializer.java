@@ -5,5 +5,6 @@ package io.canvasmc.horizon.util.tree;
  */
 @FunctionalInterface
 public interface ObjectDeserializer<T> {
+
     T deserialize(ObjectTree tree) throws Exception;
 }

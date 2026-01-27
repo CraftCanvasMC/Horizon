@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 
 public class StreamOutputHandler implements OutputHandler {
+
     private final PrintWriter writer;
 
     StreamOutputHandler(OutputStream stream, boolean autoFlush) {

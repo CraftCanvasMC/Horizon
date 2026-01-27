@@ -17,6 +17,7 @@ public class MixinContainerHandle extends ContainerHandleVirtual {
     }
 
     public static class Resource extends ContainerHandleURI {
+
         private final String name;
         private final Path path;
 

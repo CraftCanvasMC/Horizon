@@ -5,5 +5,6 @@ package io.canvasmc.horizon.util.tree;
  */
 @FunctionalInterface
 public interface TypeConverter<T> {
+
     T convert(Object value) throws Exception;
 }

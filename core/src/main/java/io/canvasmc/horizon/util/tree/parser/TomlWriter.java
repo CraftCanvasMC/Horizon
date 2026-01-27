@@ -8,6 +8,7 @@ import java.io.Writer;
 import java.util.Map;
 
 public final class TomlWriter implements FormatWriter {
+
     private final TomlMapper mapper = new TomlMapper();
 
     @Override

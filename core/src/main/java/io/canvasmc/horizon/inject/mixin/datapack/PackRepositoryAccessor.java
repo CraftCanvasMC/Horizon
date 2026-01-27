@@ -10,6 +10,7 @@ import java.util.Set;
 
 @Mixin(PackRepository.class)
 public interface PackRepositoryAccessor {
+
     @Accessor("sources")
     Set<RepositorySource> getSources();
 

@@ -6,12 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 public final class ParseException extends Exception {
-    private final List<ParseError> errors;
 
-    public ParseException(List<ParseError> errors) {
-        super(buildMessage(errors));
-        this.errors = Collections.unmodifiableList(errors);
-    }
+    private final List<ParseError> errors;
 
     private static @NonNull String buildMessage(@NonNull List<ParseError> errors) {
         StringBuilder sb = new StringBuilder("Failed to parse configuration (")
@@ -23,6 +19,11 @@ public final class ParseException extends Exception {
         }
 
         return sb.toString();
+    }
+
+    public ParseException(List<ParseError> errors) {
+        super(buildMessage(errors));
+        this.errors = Collections.unmodifiableList(errors);
     }
 
     public List<ParseError> getErrors() {

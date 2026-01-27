@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.util.Map;
 
 public final class YamlWriter implements FormatWriter {
+
     private final Yaml yaml = new Yaml();
 
     @Override

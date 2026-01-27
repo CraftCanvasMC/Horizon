@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public record RemappingContext(Map<String, String> variables) {
+
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$\\{([^}]+)}");
 
     public RemappingContext(Map<String, String> variables) {

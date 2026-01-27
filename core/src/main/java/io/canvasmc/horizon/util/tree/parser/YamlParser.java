@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class YamlParser implements FormatParser {
+
     private final Yaml yaml = new Yaml();
 
     @Override

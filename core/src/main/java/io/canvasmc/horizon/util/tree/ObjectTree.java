@@ -11,21 +11,16 @@ import java.io.Writer;
 import java.util.*;
 
 /**
- * Immutable tree structure representing hierarchical configuration data.
- * Supports reading from YAML, JSON, TOML, and Properties formats.
+ * Immutable tree structure representing hierarchical configuration data. Supports reading from YAML, JSON, TOML, and
+ * Properties formats.
  *
  * @author dueris
  */
 public final class ObjectTree {
+
     private final Map<String, Object> data;
     private final TypeConverterRegistry converters;
     private final RemappingContext remappingContext;
-
-    ObjectTree(Map<String, Object> data, TypeConverterRegistry converters, RemappingContext remappingContext) {
-        this.data = Collections.unmodifiableMap(normalizeData(data, converters, remappingContext));
-        this.converters = converters;
-        this.remappingContext = remappingContext;
-    }
 
     /**
      * Normalizes the data map by converting all Map instances to ObjectTree instances
@@ -77,6 +72,12 @@ public final class ObjectTree {
         return value;
     }
 
+    ObjectTree(Map<String, Object> data, TypeConverterRegistry converters, RemappingContext remappingContext) {
+        this.data = Collections.unmodifiableMap(normalizeData(data, converters, remappingContext));
+        this.converters = converters;
+        this.remappingContext = remappingContext;
+    }
+
     /**
      * Creates a new read builder for parsing data
      */
@@ -112,10 +113,15 @@ public final class ObjectTree {
     /**
      * Gets a value from the tree
      *
-     * @param key the key to retrieve
+     * @param key
+     *     the key to retrieve
+     *
      * @return the value wrapper
-     * @throws NoSuchElementException if the key does not exist
-     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedthing"} to find a nested value
+     *
+     * @throws NoSuchElementException
+     *     if the key does not exist
+     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedthing"} to find a
+     *     nested value
      */
     public @NonNull Value<?> getValueOrThrow(String key) {
         if (!data.containsKey(key)) {
@@ -125,26 +131,18 @@ public final class ObjectTree {
     }
 
     /**
-     * Gets an optional value from this tree. Will return {@link Optional#empty()} if the key does not exist
-     *
-     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedthing"} to find a nested value
-     */
-    public Optional<Value<?>> getValueOptional(String key) {
-        return Optional.ofNullable(data.get(key))
-            .map(v -> new ObjectValue(v, converters));
-    }
-
-    /**
      * Gets a value from the tree safely.
      * <p>
-     * What quantifies "safely" is that this doesn't throw a {@link NoSuchElementException} if not found,
-     * and instead it returns an {@link EmptyValue}, which essentially is a wrapper of "null".
-     * This is generally recommended for when trying to access keys that may not exist. It is always recommended
-     * to use {@link Value#asOptional(Class)} after parsing this to avoid potential parse issues, since
-     * this can potentially be an empty value.
+     * What quantifies "safely" is that this doesn't throw a {@link NoSuchElementException} if not found, and instead it
+     * returns an {@link EmptyValue}, which essentially is a wrapper of "null". This is generally recommended for when
+     * trying to access keys that may not exist. It is always recommended to use {@link Value#asOptional(Class)} after
+     * parsing this to avoid potential parse issues, since this can potentially be an empty value.
      *
-     * @param key the key to retrieve
+     * @param key
+     *     the key to retrieve
+     *
      * @return the value wrapper
+     *
      * @see EmptyValue
      */
     public @NonNull Value<?> getValueSafe(String key) {
@@ -152,11 +150,25 @@ public final class ObjectTree {
     }
 
     /**
+     * Gets an optional value from this tree. Will return {@link Optional#empty()} if the key does not exist
+     *
+     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedthing"} to find a
+     *     nested value
+     */
+    public Optional<Value<?>> getValueOptional(String key) {
+        return Optional.ofNullable(data.get(key))
+            .map(v -> new ObjectValue(v, converters));
+    }
+
+    /**
      * Gets a nested tree from this tree
      *
-     * @throws ClassCastException     if the value is not a Map
-     * @throws NoSuchElementException if the key does not exist
-     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedtree"} to find a nested tree within a nested tree
+     * @throws ClassCastException
+     *     if the value is not a Map
+     * @throws NoSuchElementException
+     *     if the key does not exist
+     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedtree"} to find a
+     *     nested tree within a nested tree
      */
     public @NonNull ObjectTree getTree(String key) {
         if (!data.containsKey(key)) {
@@ -172,7 +184,8 @@ public final class ObjectTree {
     /**
      * Gets an optional nested tree from this tree
      *
-     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedtree"} to find a nested tree within a nested tree
+     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedtree"} to find a
+     *     nested tree within a nested tree
      */
     public Optional<ObjectTree> getTreeOptional(String key) {
         return Optional.ofNullable(data.get(key))
@@ -183,9 +196,12 @@ public final class ObjectTree {
     /**
      * Gets an array from this tree
      *
-     * @throws ClassCastException     if the value is not a List
-     * @throws NoSuchElementException if the key does not exist
-     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedarray"} to find a nested array
+     * @throws ClassCastException
+     *     if the value is not a List
+     * @throws NoSuchElementException
+     *     if the key does not exist
+     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedarray"} to find a
+     *     nested array
      */
     public @NonNull ObjectArray getArray(String key) {
         if (!data.containsKey(key)) {
@@ -202,7 +218,8 @@ public final class ObjectTree {
     /**
      * Gets an optional array from this tree
      *
-     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedarray"} to find a nested array
+     * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedarray"} to find a
+     *     nested array
      */
     public Optional<ObjectArray> getArrayOptional(String key) {
         //noinspection unchecked
@@ -249,15 +266,8 @@ public final class ObjectTree {
     }
 
     /**
-     * Deserializes this tree into a custom object using a registered deserializer
-     */
-    public <T> T as(Class<T> type) throws Exception {
-        ObjectDeserializer<T> deserializer = converters.getDeserializer(type);
-        return deserializer.deserialize(this);
-    }
-
-    /**
-     * Attempts to deserialize this tree into a custom object using a registered deserializer and returns as an {@link Optional}
+     * Attempts to deserialize this tree into a custom object using a registered deserializer and returns as an
+     * {@link Optional}
      */
     public <T> Optional<T> asOptional(Class<T> type) {
         try {
@@ -265,6 +275,14 @@ public final class ObjectTree {
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Deserializes this tree into a custom object using a registered deserializer
+     */
+    public <T> T as(Class<T> type) throws Exception {
+        ObjectDeserializer<T> deserializer = converters.getDeserializer(type);
+        return deserializer.deserialize(this);
     }
 
     public TypeConverterRegistry getConverters() {
@@ -276,8 +294,8 @@ public final class ObjectTree {
     }
 
     @Override
-    public String toString() {
-        return "ObjectTree" + data;
+    public int hashCode() {
+        return data.hashCode();
     }
 
     @Override
@@ -288,14 +306,15 @@ public final class ObjectTree {
     }
 
     @Override
-    public int hashCode() {
-        return data.hashCode();
+    public String toString() {
+        return "ObjectTree" + data;
     }
 
     /**
      * Builder for reading and parsing data
      */
     public static final class ReadBuilder {
+
         private final TypeConverterRegistry converters = new TypeConverterRegistry();
         private final Map<String, Set<String>> aliases = new HashMap<>();
         private final Map<String, String> remapVars = new HashMap<>();
@@ -331,7 +350,8 @@ public final class ObjectTree {
         }
 
         /**
-         * Registers a custom object deserializer. Should be used when parsing a full {@link ObjectTree} using {@link ObjectTree#as(Class)}
+         * Registers a custom object deserializer. Should be used when parsing a full {@link ObjectTree} using
+         * {@link ObjectTree#as(Class)}
          */
         public <T> ReadBuilder registerDeserializer(Class<T> type, ObjectDeserializer<T> deserializer) {
             converters.registerDeserializer(type, deserializer);
@@ -339,8 +359,8 @@ public final class ObjectTree {
         }
 
         /**
-         * Adds an alias that maps to a primary key.
-         * When parsing, if any alias is found, it will be remapped to the primary key.
+         * Adds an alias that maps to a primary key. When parsing, if any alias is found, it will be remapped to the
+         * primary key.
          */
         public ReadBuilder alias(String primaryKey, String... aliasKeys) {
             aliases.computeIfAbsent(primaryKey, k -> new HashSet<>())
@@ -386,11 +406,13 @@ public final class ObjectTree {
         }
 
         /**
-         * Registers an override for a key-value pair using a JVM system property.
-         * If the system property exists, its value will replace the parsed value.
+         * Registers an override for a key-value pair using a JVM system property. If the system property exists, its
+         * value will replace the parsed value.
          *
-         * @param property   the config key to override
-         * @param systemProp the JVM system property name
+         * @param property
+         *     the config key to override
+         * @param systemProp
+         *     the JVM system property name
          */
         public @NonNull ReadBuilder registerOverrideKey(String property, String systemProp) {
             overrideKeys.put(property, systemProp);
@@ -551,6 +573,7 @@ public final class ObjectTree {
      * Builder for writing/serializing data
      */
     public static final class WriteBuilder {
+
         private final ObjectTree tree;
         private final Map<String, String> keyMappings = new HashMap<>();
         private Format format;
@@ -688,6 +711,7 @@ public final class ObjectTree {
      * Builder for constructing an {@link ObjectTree} programmatically
      */
     public static final class Builder {
+
         private final Map<String, Object> data = new LinkedHashMap<>();
         private final TypeConverterRegistry converters = new TypeConverterRegistry();
         private final Map<String, String> interpolationVariables = new HashMap<>();

@@ -8,7 +8,11 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +22,9 @@ import java.util.Map;
 import java.util.jar.JarFile;
 
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
-import static java.nio.file.StandardOpenOption.*;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 record PatchEntry(
     String location,
@@ -29,19 +35,8 @@ record PatchEntry(
     String patchPath,
     String outputPath
 ) {
+
     private static boolean bannerPrinted = false;
-
-    public static PatchEntry @NonNull [] parse(@NonNull BufferedReader reader) throws IOException {
-        List<PatchEntry> list = new ArrayList<>(4);
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            PatchEntry p = parseLine(line);
-            if (p != null) list.add(p);
-        }
-
-        return list.toArray(new PatchEntry[0]);
-    }
 
     private static @Nullable PatchEntry parseLine(@NonNull String line) {
         if (line.isBlank() || line.startsWith("#")) return null;
@@ -60,6 +55,18 @@ record PatchEntry(
             parts[5],
             parts[6]
         );
+    }
+
+    public static PatchEntry @NonNull [] parse(@NonNull BufferedReader reader) throws IOException {
+        List<PatchEntry> list = new ArrayList<>(4);
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            PatchEntry p = parseLine(line);
+            if (p != null) list.add(p);
+        }
+
+        return list.toArray(new PatchEntry[0]);
     }
 
     public void applyPatch(

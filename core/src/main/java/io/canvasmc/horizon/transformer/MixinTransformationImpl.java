@@ -15,6 +15,7 @@ import org.spongepowered.asm.service.ISyntheticClassRegistry;
 import org.spongepowered.asm.transformers.MixinClassReader;
 
 public final class MixinTransformationImpl implements TransformationService {
+
     public static final int ASM_VERSION = Opcodes.ASM9;
 
     private IMixinTransformerFactory transformerFactory;
@@ -54,6 +55,14 @@ public final class MixinTransformationImpl implements TransformationService {
         return this.transformer.transformClass(MixinEnvironment.getCurrentEnvironment(), type.getClassName(), node) ? node : null;
     }
 
+    boolean shouldGenerateClass(final @NonNull Type type) {
+        return this.registry.findSyntheticClass(type.getClassName()) != null;
+    }
+
+    boolean generateClass(final @NonNull Type type, final @NonNull ClassNode node) {
+        return this.transformer.generateClass(MixinEnvironment.getCurrentEnvironment(), type.getClassName(), node);
+    }
+
     public @NonNull ClassNode classNode(final @NonNull String canonicalName, final @NonNull String internalName, final byte @NonNull [] input, final int readerFlags) throws ClassNotFoundException {
         if (input.length != 0) {
             final ClassNode node = new ClassNode(ASM_VERSION);
@@ -69,13 +78,5 @@ public final class MixinTransformationImpl implements TransformationService {
         }
 
         throw new ClassNotFoundException(canonicalName);
-    }
-
-    boolean shouldGenerateClass(final @NonNull Type type) {
-        return this.registry.findSyntheticClass(type.getClassName()) != null;
-    }
-
-    boolean generateClass(final @NonNull Type type, final @NonNull ClassNode node) {
-        return this.transformer.generateClass(MixinEnvironment.getCurrentEnvironment(), type.getClassName(), node);
     }
 }

@@ -12,6 +12,7 @@ import java.util.Optional;
  * Wrapper for a value in the ObjectTree type conversion methods.
  */
 public final class ObjectValue implements Value<Object> {
+
     private final @Nullable Object value;
     private final TypeConverterRegistry converters;
 
@@ -139,6 +140,14 @@ public final class ObjectValue implements Value<Object> {
         return convertOptional(type);
     }
 
+    private <T> Optional<T> convertOptional(Class<T> type) {
+        try {
+            return Optional.of(convert(type));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
     private <T> T convert(Class<T> type) {
         if (value == null) {
             throw new TypeConversionException("Cannot convert null to " + type.getSimpleName());
@@ -167,17 +176,9 @@ public final class ObjectValue implements Value<Object> {
         }
     }
 
-    private <T> Optional<T> convertOptional(Class<T> type) {
-        try {
-            return Optional.of(convert(type));
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
-
     @Override
-    public String toString() {
-        return String.valueOf(value);
+    public int hashCode() {
+        return Objects.hashCode(value);
     }
 
     @Override
@@ -188,7 +189,7 @@ public final class ObjectValue implements Value<Object> {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(value);
+    public String toString() {
+        return String.valueOf(value);
     }
 }

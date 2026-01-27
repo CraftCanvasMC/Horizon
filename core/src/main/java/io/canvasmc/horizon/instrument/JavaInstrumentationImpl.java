@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.jar.JarFile;
 
 public class JavaInstrumentationImpl implements JavaInstrumentation {
+
     // Note: non-null guaranteed when accessed outside this class
     private static Instrumentation INSTRUMENTATION;
 

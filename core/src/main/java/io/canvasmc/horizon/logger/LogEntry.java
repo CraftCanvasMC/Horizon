@@ -1,6 +1,7 @@
 package io.canvasmc.horizon.logger;
 
 public class LogEntry {
+
     private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
     final Level level;
     final String message;

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Logger {
+
     private final String name;
     private final Level minLevel;
     private final PatternFormatter formatter;
@@ -43,6 +44,13 @@ public class Logger {
 
     public void trace(String message, Object... args) {
         log(Level.TRACE, message, null, args);
+    }
+
+    private void log(@NonNull Level level, String message, Throwable throwable, Object[] args) {
+        if (level.isEnabled(minLevel)) {
+            LogEntry entry = new LogEntry(level, message, name, throwable);
+            processor.submit(entry, formatter, handlers, args);
+        }
     }
 
     public void trace(Throwable throwable, Object... args) {
@@ -121,13 +129,6 @@ public class Logger {
         return Level.ERROR.isEnabled(minLevel);
     }
 
-    private void log(@NonNull Level level, String message, Throwable throwable, Object[] args) {
-        if (level.isEnabled(minLevel)) {
-            LogEntry entry = new LogEntry(level, message, name, throwable);
-            processor.submit(entry, formatter, handlers, args);
-        }
-    }
-
     public String getName() {
         return name;
     }
@@ -141,6 +142,7 @@ public class Logger {
     }
 
     public static class Builder {
+
         private final List<OutputHandler> handlers = new ArrayList<>();
         private String name;
         private Level level = Level.INFO;

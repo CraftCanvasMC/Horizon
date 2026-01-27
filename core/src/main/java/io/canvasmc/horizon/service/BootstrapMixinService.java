@@ -12,7 +12,15 @@ import org.spongepowered.asm.launch.platform.container.IContainerHandle;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformerFactory;
-import org.spongepowered.asm.service.*;
+import org.spongepowered.asm.service.IClassBytecodeProvider;
+import org.spongepowered.asm.service.IClassProvider;
+import org.spongepowered.asm.service.IClassTracker;
+import org.spongepowered.asm.service.IMixinAuditTrail;
+import org.spongepowered.asm.service.IMixinInternal;
+import org.spongepowered.asm.service.IMixinService;
+import org.spongepowered.asm.service.IMixinServiceBootstrap;
+import org.spongepowered.asm.service.ITransformer;
+import org.spongepowered.asm.service.ITransformerProvider;
 import org.spongepowered.asm.util.Constants;
 import org.spongepowered.asm.util.ReEntranceLock;
 
@@ -23,11 +31,22 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class BootstrapMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider, IClassTracker, IMixinServiceBootstrap {
-    public static final String SIDE = Constants.SIDE_SERVER;
+
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "mixin_service");
+
+    public static final String SIDE = Constants.SIDE_SERVER;
+
     private final ReEntranceLock lock;
     private final MixinContainerHandle container;
     private final MixinTransformationImpl mixinTransformer;
+
+    private static @NonNull String getCanonicalName(@NonNull String name) {
+        return name.replace('/', '.');
+    }
+
+    private static @NonNull String getInternalName(@NonNull String name) {
+        return name.replace('.', '/');
+    }
 
     public BootstrapMixinService() {
         this.lock = new ReEntranceLock(1);
@@ -36,14 +55,6 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
         if (mixinTransformer == null) {
             throw new IllegalStateException("Mixin transformation service not available?");
         }
-    }
-
-    private static @NonNull String getInternalName(@NonNull String name) {
-        return name.replace('.', '/');
-    }
-
-    private static @NonNull String getCanonicalName(@NonNull String name) {
-        return name.replace('/', '.');
     }
 
     @Override
@@ -63,18 +74,6 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
     }
 
     @Override
-    public void init() {
-        LOGGER.debug("Running init for mixin service");
-        // we don't do anything for init
-    }
-
-    @Override
-    public void bootstrap() {
-        LOGGER.debug("Running bootstrap for bootstrap mixin service");
-        // we don't do anything for bootstrap
-    }
-
-    @Override
     public MixinEnvironment.Phase getInitialPhase() {
         return MixinEnvironment.Phase.PREINIT;
     }
@@ -87,21 +86,17 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
     }
 
     @Override
+    public void init() {
+        LOGGER.debug("Running init for mixin service");
+        // we don't do anything for init
+    }
+
+    @Override
     public void beginPhase() {
     }
 
     @Override
     public void checkEnv(final @NonNull Object bootSource) {
-    }
-
-    @Override
-    public String getSideName() {
-        return SIDE;
-    }
-
-    @Override
-    public @NonNull ILogger getLogger(final @NonNull String name) {
-        return HorizonMixinLogger.get(name);
     }
 
     @Override
@@ -156,6 +151,11 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
     }
 
     @Override
+    public String getSideName() {
+        return SIDE;
+    }
+
+    @Override
     public MixinEnvironment.CompatibilityLevel getMinCompatibilityLevel() {
         return MixinEnvironment.CompatibilityLevel.JAVA_8;
     }
@@ -163,6 +163,11 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
     @Override
     public MixinEnvironment.CompatibilityLevel getMaxCompatibilityLevel() {
         return MixinEnvironment.CompatibilityLevel.JAVA_22;
+    }
+
+    @Override
+    public @NonNull ILogger getLogger(final @NonNull String name) {
+        return HorizonMixinLogger.get(name);
     }
 
     @Override
@@ -244,5 +249,11 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
     @Override
     public String getServiceClassName() {
         return "io.canvasmc.horizon.service.BootstrapMixinService";
+    }
+
+    @Override
+    public void bootstrap() {
+        LOGGER.debug("Running bootstrap for bootstrap mixin service");
+        // we don't do anything for bootstrap
     }
 }

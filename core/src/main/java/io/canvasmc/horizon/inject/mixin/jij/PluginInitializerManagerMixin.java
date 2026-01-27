@@ -18,6 +18,7 @@ import java.util.List;
 
 @Mixin(PluginInitializerManager.class)
 public class PluginInitializerManagerMixin {
+
     @Inject(method = "load", at = @At(value = "INVOKE", target = "Lio/papermc/paper/plugin/util/EntrypointUtil;registerProvidersFromSource(Lio/papermc/paper/plugin/provider/source/ProviderSource;Ljava/lang/Object;)V", ordinal = 0))
     private static void horizon$jijInject(@NonNull OptionSet optionSet, CallbackInfo ci) {
         List<File> jijCache = HorizonLoader.getInstance().getPlugins().getAll().stream()

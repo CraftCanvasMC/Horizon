@@ -1,7 +1,11 @@
 package io.canvasmc.horizon.util;
 
 import io.canvasmc.horizon.HorizonLoader;
-import io.canvasmc.horizon.util.tree.*;
+import io.canvasmc.horizon.util.tree.Format;
+import io.canvasmc.horizon.util.tree.ObjectArray;
+import io.canvasmc.horizon.util.tree.ObjectTree;
+import io.canvasmc.horizon.util.tree.ParseError;
+import io.canvasmc.horizon.util.tree.ParseException;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;
@@ -19,8 +23,41 @@ public record ServerProperties(
     File cacheLocation,
     List<File> extraPlugins
 ) {
+
     private static final Pattern ADD_PLUGIN_PATTERN =
         Pattern.compile("^--?add-(plugin|extra-plugin-jar)=(.+)$");
+
+    private static @NonNull List<File> extractExtraPlugins(@NonNull ObjectTree tree, String @NonNull [] args) {
+        List<File> initial = new ArrayList<>();
+
+        ObjectArray extraPluginsArray = tree.getArray("extraPlugins");
+        for (int i = 0; i < extraPluginsArray.size(); i++) {
+            String path = extraPluginsArray.get(i).asString();
+            if (path == null) throw new IllegalArgumentException("Extra plugins array had a null entry at index " + i);
+            initial.add(new File(path));
+        }
+
+        List<File> addedFromArgs = new ArrayList<>();
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+
+            Matcher matcher = ADD_PLUGIN_PATTERN.matcher(arg);
+            if (matcher.matches()) {
+                addedFromArgs.add(new File(matcher.group(2)));
+                continue;
+            }
+
+            if (arg.equals("--add-plugin") || arg.equals("--add-extra-plugin-jar")) {
+                if (i + 1 >= args.length) {
+                    throw new IllegalArgumentException(arg + " requires a path argument");
+                }
+                addedFromArgs.add(new File(args[++i]));
+            }
+        }
+
+        initial.addAll(addedFromArgs);
+        return initial;
+    }
 
     public static @NonNull ServerProperties load(String[] args) {
         File file = new File("horizon.yml");
@@ -74,37 +111,5 @@ public record ServerProperties(
         } catch (Throwable thrown) {
             throw Util.kill("Couldn't parse horizon properties, exiting", thrown);
         }
-    }
-
-    private static @NonNull List<File> extractExtraPlugins(@NonNull ObjectTree tree, String @NonNull [] args) {
-        List<File> initial = new ArrayList<>();
-
-        ObjectArray extraPluginsArray = tree.getArray("extraPlugins");
-        for (int i = 0; i < extraPluginsArray.size(); i++) {
-            String path = extraPluginsArray.get(i).asString();
-            if (path == null) throw new IllegalArgumentException("Extra plugins array had a null entry at index " + i);
-            initial.add(new File(path));
-        }
-
-        List<File> addedFromArgs = new ArrayList<>();
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
-
-            Matcher matcher = ADD_PLUGIN_PATTERN.matcher(arg);
-            if (matcher.matches()) {
-                addedFromArgs.add(new File(matcher.group(2)));
-                continue;
-            }
-
-            if (arg.equals("--add-plugin") || arg.equals("--add-extra-plugin-jar")) {
-                if (i + 1 >= args.length) {
-                    throw new IllegalArgumentException(arg + " requires a path argument");
-                }
-                addedFromArgs.add(new File(args[++i]));
-            }
-        }
-
-        initial.addAll(addedFromArgs);
-        return initial;
     }
 }

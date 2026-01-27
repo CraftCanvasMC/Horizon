@@ -18,7 +18,11 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 import java.util.List;
 import java.util.TreeMap;
@@ -34,13 +38,13 @@ public abstract class PaperPluginsCommandMixin {
     private static Component INFO_ICON_SERVER_PLUGIN;
 
     @Shadow
-    private static <T> List<Component> formatProviders(TreeMap<String, PluginProvider<T>> plugins) {
-        return List.of();
+    private static Component header(String header, int color, int count, boolean showSize) {
+        return Component.empty();
     }
 
     @Shadow
-    private static Component header(String header, int color, int count, boolean showSize) {
-        return Component.empty();
+    private static <T> List<Component> formatProviders(TreeMap<String, PluginProvider<T>> plugins) {
+        return List.of();
     }
 
     /**

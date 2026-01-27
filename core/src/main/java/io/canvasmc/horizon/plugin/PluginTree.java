@@ -99,8 +99,9 @@ public record PluginTree(List<PluginNode> roots) {
         LIBRARY
     }
 
-    public record PluginNode(String name, String version, NodeType type, List<PluginNode> children,
-                             @Nullable HorizonPlugin plugin) {
+    public record PluginNode(
+        String name, String version, NodeType type, List<PluginNode> children,
+        @Nullable HorizonPlugin plugin) {
 
         @Contract("_ -> new")
         public static @NonNull PluginNode from(@NonNull HorizonPlugin plugin) {

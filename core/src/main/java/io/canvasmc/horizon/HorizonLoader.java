@@ -39,12 +39,12 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
- * The main class for Horizon that acts as a base
- * that runs the full startup and bootstrap process
+ * The main class for Horizon that acts as a base that runs the full startup and bootstrap process
  *
  * @author dueris
  */
 public class HorizonLoader {
+
     public static final boolean DEBUG = Boolean.getBoolean("Horizon.debug");
     public static final Logger LOGGER = Logger.create()
         .name("main")
@@ -178,79 +178,10 @@ public class HorizonLoader {
     }
 
     /**
-     * The launch service for Horizon
-     *
-     * @return the Mixin launch service
-     */
-    public @NonNull MixinLaunch getLaunchService() {
-        if (this.launchService == null)
-            throw new UnsupportedOperationException("Launch service hasn't been created yet");
-        return this.launchService;
-    }
-
-    /**
-     * The optionset parsed for Horizon
-     *
-     * @return the Horizon optionset
-     * @see ServerProperties
-     */
-    public @NonNull ServerProperties getProperties() {
-        return this.properties;
-    }
-
-    /**
-     * The Paperclip version info from the {@code version.json}
-     *
-     * @return the Paperclip {@code version.json}
-     */
-    public PaperclipVersion getVersionMeta() {
-        return paperclipVersion;
-    }
-
-    /**
-     * The server jar file of the Paperclip instance
-     *
-     * @return the server jar
-     */
-    public @NonNull FileJar getPaperclipJar() {
-        return paperclipJar;
-    }
-
-    /**
-     * Gets the JVM instrumentation
-     *
-     * @return the instrumentation
-     * @see Instrumentation
-     * @see JavaInstrumentation
-     */
-    public @NonNull JavaInstrumentation getInstrumentation() {
-        return instrumentation;
-    }
-
-    /**
-     * Gets the version of Horizon this is
-     *
-     * @return the version
-     */
-    public @NonNull String getVersion() {
-        return version;
-    }
-
-    /**
-     * Returns the {@link PluginTree} for the Horizon environment
-     *
-     * @return all plugins
-     * @throws IllegalStateException if the server hasn't loaded Horizon plugins yet
-     */
-    public PluginTree getPlugins() {
-        if (this.plugins == null) throw new IllegalStateException("Server hasn't loaded plugins yet");
-        return this.plugins;
-    }
-
-    /**
      * Starts the Horizon server
      *
-     * @param providedArgs the arguments provided to the server to be passed to the Minecraft main method
+     * @param providedArgs
+     *     the arguments provided to the server to be passed to the Minecraft main method
      */
     private void start(String[] providedArgs) {
         LOGGER.info("Preparing Minecraft server");
@@ -346,5 +277,79 @@ public class HorizonLoader {
         } catch (Throwable thrown) {
             throw new RuntimeException("Couldn't prepare server", thrown);
         }
+    }
+
+    /**
+     * Gets the JVM instrumentation
+     *
+     * @return the instrumentation
+     *
+     * @see Instrumentation
+     * @see JavaInstrumentation
+     */
+    public @NonNull JavaInstrumentation getInstrumentation() {
+        return instrumentation;
+    }
+
+    /**
+     * The server jar file of the Paperclip instance
+     *
+     * @return the server jar
+     */
+    public @NonNull FileJar getPaperclipJar() {
+        return paperclipJar;
+    }
+
+    /**
+     * The launch service for Horizon
+     *
+     * @return the Mixin launch service
+     */
+    public @NonNull MixinLaunch getLaunchService() {
+        if (this.launchService == null)
+            throw new UnsupportedOperationException("Launch service hasn't been created yet");
+        return this.launchService;
+    }
+
+    /**
+     * The optionset parsed for Horizon
+     *
+     * @return the Horizon optionset
+     *
+     * @see ServerProperties
+     */
+    public @NonNull ServerProperties getProperties() {
+        return this.properties;
+    }
+
+    /**
+     * The Paperclip version info from the {@code version.json}
+     *
+     * @return the Paperclip {@code version.json}
+     */
+    public PaperclipVersion getVersionMeta() {
+        return paperclipVersion;
+    }
+
+    /**
+     * Gets the version of Horizon this is
+     *
+     * @return the version
+     */
+    public @NonNull String getVersion() {
+        return version;
+    }
+
+    /**
+     * Returns the {@link PluginTree} for the Horizon environment
+     *
+     * @return all plugins
+     *
+     * @throws IllegalStateException
+     *     if the server hasn't loaded Horizon plugins yet
+     */
+    public PluginTree getPlugins() {
+        if (this.plugins == null) throw new IllegalStateException("Server hasn't loaded plugins yet");
+        return this.plugins;
     }
 }

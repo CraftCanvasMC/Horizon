@@ -4,6 +4,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 public record ParseError(String message, @Nullable Throwable cause) {
+
     public ParseError(String message) {
         this(message, null);
     }

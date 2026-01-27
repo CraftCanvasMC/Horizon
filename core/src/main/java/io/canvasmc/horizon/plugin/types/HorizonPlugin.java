@@ -20,6 +20,7 @@ import java.util.Objects;
  * </p>
  */
 public final class HorizonPlugin {
+
     private final String identifier;
     private final FileJar file;
     private final HorizonMetadata pluginMetadata;
@@ -73,12 +74,17 @@ public final class HorizonPlugin {
     /**
      * A bundle of nested horizon plugins, server plugins, and libraries
      *
-     * @param horizonEntries      horizon plugins
-     * @param serverPluginEntries server plugins
-     * @param libraryEntries      library plugins
+     * @param horizonEntries
+     *     horizon plugins
+     * @param serverPluginEntries
+     *     server plugins
+     * @param libraryEntries
+     *     library plugins
      */
-    public record NestedData(List<HorizonPlugin> horizonEntries, List<FileJar> serverPluginEntries,
-                             List<FileJar> libraryEntries) {
+    public record NestedData(
+        List<HorizonPlugin> horizonEntries, List<FileJar> serverPluginEntries,
+        List<FileJar> libraryEntries) {
+
         public NestedData(List<HorizonPlugin> horizonEntries, List<FileJar> serverPluginEntries, List<FileJar> libraryEntries) {
             this.horizonEntries = ImmutableList.copyOf(horizonEntries);
             this.serverPluginEntries = ImmutableList.copyOf(serverPluginEntries);

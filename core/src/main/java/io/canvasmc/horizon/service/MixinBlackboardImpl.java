@@ -31,19 +31,20 @@ public final class MixinBlackboardImpl implements IGlobalPropertyService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public <T> @Nullable T getProperty(final @NonNull IPropertyKey key, final @Nullable T defaultValue) {
+        return this.store.get((Property<T>) key, defaultValue);
+    }
+
+    @Override
     @Nullable
     @SuppressWarnings("unchecked")
     public String getPropertyString(final @NonNull IPropertyKey key, final @Nullable String defaultValue) {
         return this.store.get((Property<String>) key, defaultValue);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> @Nullable T getProperty(final @NonNull IPropertyKey key, final @Nullable T defaultValue) {
-        return this.store.get((Property<T>) key, defaultValue);
-    }
-
     private static final class PropertyStore {
+
         private final ConcurrentHashMap<Property<?>, Object> values = new ConcurrentHashMap<>();
 
         <T> void set(Property<T> property, T value) {

@@ -51,6 +51,16 @@ public class HorizonMixinLogger extends LoggerAdapterAbstract {
         return throwable;
     }
 
+    private void logWithThrowable(@NonNull Level level, Throwable throwable, String message) {
+        switch (level) {
+            case TRACE -> this.logger.trace(throwable, message);
+            case DEBUG -> this.logger.debug(throwable, message);
+            case INFO -> this.logger.info(throwable, message);
+            case WARN -> this.logger.warn(throwable, message);
+            default -> this.logger.error(throwable, message);
+        }
+    }
+
     private void logMessage(@NonNull Level level, String message, Object... args) {
         switch (level) {
             case TRACE -> this.logger.trace(message, args);
@@ -68,16 +78,6 @@ public class HorizonMixinLogger extends LoggerAdapterAbstract {
             case INFO -> this.logger.info(throwable);
             case WARN -> this.logger.warn(throwable);
             default -> this.logger.error(throwable);
-        }
-    }
-
-    private void logWithThrowable(@NonNull Level level, Throwable throwable, String message) {
-        switch (level) {
-            case TRACE -> this.logger.trace(throwable, message);
-            case DEBUG -> this.logger.debug(throwable, message);
-            case INFO -> this.logger.info(throwable, message);
-            case WARN -> this.logger.warn(throwable, message);
-            default -> this.logger.error(throwable, message);
         }
     }
 }

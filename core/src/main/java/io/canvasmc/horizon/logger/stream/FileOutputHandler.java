@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class FileOutputHandler implements OutputHandler {
+
     private final BufferedWriter writer;
     private final String filePath;
 

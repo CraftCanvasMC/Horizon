@@ -1,10 +1,15 @@
 package io.canvasmc.horizon.logger;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LogProcessor {
+
     private static final Object lock = new Object();
     private static volatile LogProcessor instance;
     private final BlockingQueue<ProcessTask> queue;
@@ -34,12 +39,6 @@ public class LogProcessor {
             }
         }
         return instance;
-    }
-
-    public void submit(LogEntry entry, PatternFormatter formatter, List<OutputHandler> handlers, Object[] args) {
-        if (!queue.offer(new ProcessTask(entry, formatter, handlers, args))) {
-            System.err.println("Log queue full - dropping message: " + entry.message);
-        }
     }
 
     private void processLogs() {
@@ -81,7 +80,13 @@ public class LogProcessor {
         }
     }
 
-    private record ProcessTask(LogEntry entry, PatternFormatter formatter, List<OutputHandler> handlers,
-                               Object[] args) {
+    public void submit(LogEntry entry, PatternFormatter formatter, List<OutputHandler> handlers, Object[] args) {
+        if (!queue.offer(new ProcessTask(entry, formatter, handlers, args))) {
+            System.err.println("Log queue full - dropping message: " + entry.message);
+        }
     }
+
+    private record ProcessTask(
+        LogEntry entry, PatternFormatter formatter, List<OutputHandler> handlers,
+        Object[] args) {}
 }

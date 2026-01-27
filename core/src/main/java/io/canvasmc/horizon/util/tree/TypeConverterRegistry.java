@@ -18,6 +18,7 @@ import java.util.function.Function;
  * Registry for type converters
  */
 public final class TypeConverterRegistry {
+
     private final Map<Class<?>, TypeConverter<?>> converters = new HashMap<>();
     private final Map<Class<?>, ObjectDeserializer<?>> deserializers = new HashMap<>();
 
@@ -81,8 +82,13 @@ public final class TypeConverterRegistry {
         });
     }
 
-    public <T> void registerDeserializer(Class<T> type, ObjectDeserializer<T> deserializer) {
-        deserializers.put(type, deserializer);
+    public <T> @NonNull TypeConverter<T> get(Class<T> type) {
+        //noinspection unchecked
+        TypeConverter<T> converter = (TypeConverter<T>) converters.get(type);
+        if (converter == null) {
+            throw new TypeConversionException("No converter registered for type: " + type.getName());
+        }
+        return converter;
     }
 
     public <T, B> void registerDeserializerMapped(Class<T> newType, Class<B> baseType, Function<B, T> mapper) {
@@ -93,15 +99,6 @@ public final class TypeConverterRegistry {
         });
     }
 
-    public <T> @NonNull TypeConverter<T> get(Class<T> type) {
-        //noinspection unchecked
-        TypeConverter<T> converter = (TypeConverter<T>) converters.get(type);
-        if (converter == null) {
-            throw new TypeConversionException("No converter registered for type: " + type.getName());
-        }
-        return converter;
-    }
-
     public <T> @NonNull ObjectDeserializer<T> getDeserializer(Class<T> type) {
         //noinspection unchecked
         ObjectDeserializer<T> deserializer = (ObjectDeserializer<T>) deserializers.get(type);
@@ -109,5 +106,9 @@ public final class TypeConverterRegistry {
             throw new TypeConversionException("No deserializer registered for type: " + type.getName());
         }
         return deserializer;
+    }
+
+    public <T> void registerDeserializer(Class<T> type, ObjectDeserializer<T> deserializer) {
+        deserializers.put(type, deserializer);
     }
 }

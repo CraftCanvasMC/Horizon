@@ -5,5 +5,6 @@ package io.canvasmc.horizon.util.tree;
  */
 @FunctionalInterface
 public interface ObjectSerializer<T> {
+
     ObjectTree serialize(T object) throws Exception;
 }

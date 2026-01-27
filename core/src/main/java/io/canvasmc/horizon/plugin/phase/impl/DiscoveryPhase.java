@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import static io.canvasmc.horizon.MixinPluginLoader.LOGGER;
 
 public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
+
     public static final String JIJ_PATH_HORIZON = "META-INF/jars/horizon/";
     public static final String JIJ_PATH_PAPER = "META-INF/jars/plugin/";
     public static final String JIJ_PATH_LIB = "META-INF/jars/libs/";
@@ -67,6 +68,11 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
         return candidates;
     }
 
+    @Override
+    public String getName() {
+        return "Discovery";
+    }
+
     private Optional<PluginCandidate> scanJarFile(File jarFile) {
         try {
             JarFile jar = new JarFile(jarFile);
@@ -93,7 +99,6 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                 }
 
                 CandidateMetadata metadata = parseMetadata(yamlTree);
-                // TODO - build plugin tree structure?
 
                 PluginCandidate.NestedData nestedData = new PluginCandidate.NestedData(
                     Sets.newHashSet(),
@@ -130,6 +135,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void locateAndExtractJIJ(@NonNull JarFile jar, Consumer<NestedEntry> processor) {
         jar.stream()
             .filter(e -> e.getName().endsWith(Util.JAR_SUFFIX))
@@ -172,7 +178,6 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                 }
 
                 try {
-                    //noinspection ResultOfMethodCallIgnored
                     extractedFile.getParentFile().mkdirs();
                     extractedFile.createNewFile();
 
@@ -203,12 +208,8 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
         return new CandidateMetadata(name, version, data);
     }
 
-    @Override
-    public String getName() {
-        return "Discovery";
-    }
-
     private record NestedEntry(Type type, FileJar obj) {
+
         public enum Type {
             HORIZON,
             PLUGIN,

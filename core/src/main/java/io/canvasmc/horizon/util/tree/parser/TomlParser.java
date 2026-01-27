@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class TomlParser implements FormatParser {
+
     private final TomlMapper mapper = new TomlMapper();
 
     @Override

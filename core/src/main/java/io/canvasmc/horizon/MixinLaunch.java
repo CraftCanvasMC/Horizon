@@ -1,8 +1,8 @@
 package io.canvasmc.horizon;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
-import io.canvasmc.horizon.service.EmberClassLoader;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
+import io.canvasmc.horizon.service.EmberClassLoader;
 import io.canvasmc.horizon.service.transform.ClassTransformer;
 import io.canvasmc.horizon.service.transform.TransformationService;
 import io.canvasmc.horizon.util.ClassLoaders;
@@ -16,7 +16,11 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
-import java.net.*;
+import java.net.JarURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,6 +38,10 @@ import java.util.regex.Pattern;
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
 public final class MixinLaunch {
+
+    private static final String JAVA_HOME = System.getProperty("java.home");
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static final Optional<Manifest> DEFAULT_MANIFEST = Optional.of(new Manifest());
     public static final Pattern TRANSFORMATION_EXCLUDED_PATTERN = Pattern.compile(
         "^(?:" +
             "io\\.canvasmc\\.horizon\\.(?!inject\\.)" + "|" +
@@ -47,10 +55,6 @@ public final class MixinLaunch {
     public static final String[] TRANSFORMATION_EXCLUDED_RESOURCES = {
         "org/spongepowered/asm/"
     };
-
-    private static final String JAVA_HOME = System.getProperty("java.home");
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static final Optional<Manifest> DEFAULT_MANIFEST = Optional.of(new Manifest());
     private final ConcurrentMap<String, Optional<Manifest>> manifests = new ConcurrentHashMap<>();
     private final MixinLaunch.@NonNull LaunchContext context;
     private ClassTransformer transformer;
@@ -117,52 +121,36 @@ public final class MixinLaunch {
         }
     }
 
-    private void prepareMixin(@NonNull MixinPluginLoader pluginLoader) {
-        MixinBootstrap.init();
+    private boolean transformable(final @NonNull URI uri) throws URISyntaxException, IOException {
+        final File target = new File(uri);
 
-        // finish plugin load, resolve mixin and wideners
-        pluginLoader.finishPluginLoad(this.transformer);
-
-        try {
-            final Method method = MixinEnvironment.class.getDeclaredMethod("gotoPhase", MixinEnvironment.Phase.class);
-            method.setAccessible(true);
-            method.invoke(null, MixinEnvironment.Phase.INIT);
-            method.invoke(null, MixinEnvironment.Phase.DEFAULT);
-        } catch (final Exception exception) {
-            LOGGER.error(exception, "Failed to complete mixin bootstrap!");
+        if (target.getAbsolutePath().startsWith(JAVA_HOME)) {
+            return false;
         }
 
-        for (final TransformationService transformer : this.transformer.services()) {
-            transformer.preboot();
+        if (target.isDirectory()) {
+            for (final String test : TRANSFORMATION_EXCLUDED_RESOURCES) {
+                if (new File(target, test).exists()) {
+                    return false;
+                }
+            }
+        }
+        else if (target.isFile()) {
+            try (final JarFile jarFile = new JarFile(new File(uri))) {
+                for (final String test : TRANSFORMATION_EXCLUDED_RESOURCES) {
+                    if (jarFile.getEntry(test) != null) {
+                        return false;
+                    }
+                }
+            }
         }
 
-        // init mixin extras
-        MixinExtrasBootstrap.init();
-    }
-
-    public EmberClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    public ClassTransformer getTransformer() {
-        return transformer;
+        return true;
     }
 
     private @NonNull Predicate<String> packageFilter() {
         return name -> {
             return !name.matches(TRANSFORMATION_EXCLUDED_PATTERN.pattern());
-        };
-    }
-
-    private @NonNull Predicate<String> resourceFilter() {
-        return path -> {
-            for (final String test : TRANSFORMATION_EXCLUDED_RESOURCES) {
-                if (path.startsWith(test)) {
-                    return false;
-                }
-            }
-
-            return true;
         };
     }
 
@@ -200,31 +188,47 @@ public final class MixinLaunch {
         };
     }
 
-    private boolean transformable(final @NonNull URI uri) throws URISyntaxException, IOException {
-        final File target = new File(uri);
-
-        if (target.getAbsolutePath().startsWith(JAVA_HOME)) {
-            return false;
-        }
-
-        if (target.isDirectory()) {
+    private @NonNull Predicate<String> resourceFilter() {
+        return path -> {
             for (final String test : TRANSFORMATION_EXCLUDED_RESOURCES) {
-                if (new File(target, test).exists()) {
+                if (path.startsWith(test)) {
                     return false;
                 }
             }
-        }
-        else if (target.isFile()) {
-            try (final JarFile jarFile = new JarFile(new File(uri))) {
-                for (final String test : TRANSFORMATION_EXCLUDED_RESOURCES) {
-                    if (jarFile.getEntry(test) != null) {
-                        return false;
-                    }
-                }
-            }
+
+            return true;
+        };
+    }
+
+    private void prepareMixin(@NonNull MixinPluginLoader pluginLoader) {
+        MixinBootstrap.init();
+
+        // finish plugin load, resolve mixin and wideners
+        pluginLoader.finishPluginLoad(this.transformer);
+
+        try {
+            final Method method = MixinEnvironment.class.getDeclaredMethod("gotoPhase", MixinEnvironment.Phase.class);
+            method.setAccessible(true);
+            method.invoke(null, MixinEnvironment.Phase.INIT);
+            method.invoke(null, MixinEnvironment.Phase.DEFAULT);
+        } catch (final Exception exception) {
+            LOGGER.error(exception, "Failed to complete mixin bootstrap!");
         }
 
-        return true;
+        for (final TransformationService transformer : this.transformer.services()) {
+            transformer.preboot();
+        }
+
+        // init mixin extras
+        MixinExtrasBootstrap.init();
+    }
+
+    public EmberClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    public ClassTransformer getTransformer() {
+        return transformer;
     }
 
     public Path[] getInitialConnections() {
@@ -242,7 +246,5 @@ public final class MixinLaunch {
     record LaunchContext(
         String[] args,
         Path[] initialGameConnections,
-        Path gameJar
-    ) {
-    }
+        Path gameJar) {}
 }
