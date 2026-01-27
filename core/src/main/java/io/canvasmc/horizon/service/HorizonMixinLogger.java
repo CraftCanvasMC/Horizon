@@ -27,7 +27,7 @@ public class HorizonMixinLogger extends LoggerAdapterAbstract {
 
     @Override
     public String getType() {
-        return "TinyLogger";
+        return "HorizonLogger";
     }
 
     @Override
