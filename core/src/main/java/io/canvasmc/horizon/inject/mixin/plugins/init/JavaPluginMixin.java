@@ -1,4 +1,4 @@
-package io.canvasmc.horizon.inject.mixin.initfix;
+package io.canvasmc.horizon.inject.mixin.plugins.init;
 
 import com.google.common.base.Preconditions;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;

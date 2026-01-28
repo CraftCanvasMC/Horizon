@@ -47,7 +47,7 @@ public final class ClassTransformer {
                     if (TransformationService.class.isAssignableFrom(serviceClazz)) {
                         TransformationService transformerObj = (TransformationService) serviceClazz.getDeclaredConstructor().newInstance();
                         services.put(transformerObj.getClass(), transformerObj);
-                        LOGGER.info("Registered class transformer from {}, \"{}\"", horizonPlugin.identifier(), serviceClazz.getName());
+                        LOGGER.debug("Registered class transformer from {}, \"{}\"", horizonPlugin.identifier(), serviceClazz.getName());
                     }
                     else
                         throw new IllegalArgumentException("Declared service class '" + service.obj() + "' is not instanceof a TransformationService");

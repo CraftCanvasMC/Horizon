@@ -1,4 +1,4 @@
-package io.canvasmc.horizon.inject.mixin.initfix.paper;
+package io.canvasmc.horizon.inject.mixin.plugins.init.paper;
 
 import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.inject.access.IPluginProvider;

@@ -10,6 +10,7 @@ import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
 import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.plugin.types.PluginCandidate;
+import io.canvasmc.horizon.service.BootstrapMixinService;
 import io.canvasmc.horizon.util.FileJar;
 import io.canvasmc.horizon.util.Util;
 import io.canvasmc.horizon.util.tree.Format;
@@ -94,6 +95,8 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                     .format(Format.YAML).from(in);
 
                 if (!yamlTree.containsKey("horizon")) {
+                    // inject plugin into setup classloader as backup for allowing Paper/Spigot plugin injects
+                    BootstrapMixinService.loadToInit(jarFile.toURI().toURL());
                     return Optional.empty();
                 }
 

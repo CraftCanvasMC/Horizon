@@ -21,7 +21,7 @@ public class JavaInstrumentationImpl implements JavaInstrumentation {
     }
 
     public static void agentmain(String agentArgs, java.lang.instrument.Instrumentation inst) {
-        HorizonLoader.LOGGER.info("Booted from agent main");
+        HorizonLoader.LOGGER.debug("Booted from agent main");
         INSTRUMENTATION = inst;
     }
 

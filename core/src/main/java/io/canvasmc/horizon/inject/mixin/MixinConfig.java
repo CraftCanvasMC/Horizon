@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+// TODO - should we really allow disabling internal mixins?
 public final class MixinConfig implements IMixinConfigPlugin {
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "horizon-mixin");
 
@@ -34,7 +35,7 @@ public final class MixinConfig implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
-        LOGGER.info("Loading Horizon mixins: {}", mixinPackage);
+        LOGGER.debug("Loading Horizon mixins: {}", mixinPackage);
 
         if (!logged) {
             logged = true;

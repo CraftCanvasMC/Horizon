@@ -2,6 +2,7 @@ package io.canvasmc.horizon;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
+import io.canvasmc.horizon.service.BootstrapMixinService;
 import io.canvasmc.horizon.service.EmberClassLoader;
 import io.canvasmc.horizon.service.transform.ClassTransformer;
 import io.canvasmc.horizon.service.transform.TransformationService;
@@ -9,6 +10,7 @@ import io.canvasmc.horizon.util.ClassLoaders;
 import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.service.MixinService;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,7 +102,19 @@ public final class MixinLaunch {
                     LOGGER.info("Launching {}", target);
                     Thread runThread = new Thread(() -> {
                         try {
+                            // when we load this class, all plugin mixin jsons are loaded, and as a result
+                            // all mixins into spigot or paper plugins are also validated. the mixin service
+                            // for horizon has an "init" phase where it loads the target classes from ember
+                            // and during that phase, spigot and paper plugins are not accessible.
+                            // during this init phase, we temporarily read spigot/paper plugins so that the
+                            // target ClassNodes are validated successfully, so when we transform later
+                            // it will be transformed correctly because the target definition will actually exist
+
+                            // while a kinda hacky way around this, it does work for allowing horizon plugins
+                            // to target injections at non-horizon plugins
                             final Class<?> mainClass = Class.forName(target, true, classLoader);
+                            // exit init phase, we have done what we needed to do now
+                            ((BootstrapMixinService) MixinService.getService()).markOutOfInit();
                             final MethodHandle mainHandle = MethodHandles.lookup()
                                 .findStatic(mainClass, "main", MethodType.methodType(void.class, String[].class))
                                 .asFixedArity();
@@ -112,6 +126,8 @@ public final class MixinLaunch {
                     }, "launch");
                     runThread.setContextClassLoader(this.classLoader);
                     runThread.start();
+                    // boot process is finished, this is the last thing executed before the thread goes to bed
+                    LOGGER.debug("Horizon boot process finished, exiting boot thread");
                 }
             }
             else {

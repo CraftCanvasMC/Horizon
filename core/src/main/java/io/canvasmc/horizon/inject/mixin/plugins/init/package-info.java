@@ -9,23 +9,23 @@
  * </p>
  *
  * <ul>
- *   <li>{@link io.canvasmc.horizon.inject.mixin.initfix.JavaPluginMixin}</li>
- *   <li>{@link io.canvasmc.horizon.inject.mixin.initfix.ModernPluginLoadingStrategyMixin}</li>
+ *   <li>{@link io.canvasmc.horizon.inject.mixin.plugins.init.JavaPluginMixin}</li>
+ *   <li>{@link io.canvasmc.horizon.inject.mixin.plugins.init.ModernPluginLoadingStrategyMixin}</li>
  * </ul>
  *
  * <p>Paper plugins (paper-plugin.yml)</p>
  * <ul>
- *   <li>{@link io.canvasmc.horizon.inject.mixin.initfix.paper.PaperPluginParentMixin}</li>
- *   <li>{@link io.canvasmc.horizon.inject.mixin.initfix.paper.PaperServerPluginProviderMixin}</li>
- *   <li>{@link io.canvasmc.horizon.inject.mixin.initfix.paper.PaperClasspathBuilderMixin}</li>
+ *   <li>{@link io.canvasmc.horizon.inject.mixin.plugins.init.paper.PaperPluginParentMixin}</li>
+ *   <li>{@link io.canvasmc.horizon.inject.mixin.plugins.init.paper.PaperServerPluginProviderMixin}</li>
+ *   <li>{@link io.canvasmc.horizon.inject.mixin.plugins.init.paper.PaperClasspathBuilderMixin}</li>
  * </ul>
  *
  * <p>Spigot/Bukkit plugins (plugin.yml)</p>
  * <ul>
- *   <li>{@link io.canvasmc.horizon.inject.mixin.initfix.spigot.PluginClassLoaderMixin}</li>
- *   <li>{@link io.canvasmc.horizon.inject.mixin.initfix.spigot.SpigotPluginProviderMixin}</li>
+ *   <li>{@link io.canvasmc.horizon.inject.mixin.plugins.init.spigot.PluginClassLoaderMixin}</li>
+ *   <li>{@link io.canvasmc.horizon.inject.mixin.plugins.init.spigot.SpigotPluginProviderMixin}</li>
  * </ul>
  *
  * @author dueris
  */
-package io.canvasmc.horizon.inject.mixin.initfix;
+package io.canvasmc.horizon.inject.mixin.plugins.init;

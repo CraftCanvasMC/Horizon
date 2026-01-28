@@ -81,7 +81,7 @@ public record ServerProperties(
                 }
             }
             else {
-                HorizonLoader.LOGGER.info("Configuration exists, loading...");
+                HorizonLoader.LOGGER.debug("Configuration exists, loading...");
             }
 
             // read and parse configuration

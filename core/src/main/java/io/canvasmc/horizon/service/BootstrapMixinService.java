@@ -5,6 +5,7 @@ import io.canvasmc.horizon.MixinLaunch;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.service.transform.TransformPhase;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
@@ -32,12 +33,16 @@ import java.util.Collections;
 
 public class BootstrapMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider, IClassTracker, IMixinServiceBootstrap {
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "mixin_service");
+    private static final EmberClassLoader.DynamicClassLoader SETUP_CLASSLOADER = new EmberClassLoader.DynamicClassLoader(new URL[0]);
 
     public static final String SIDE = Constants.SIDE_SERVER;
 
     private final ReEntranceLock lock;
     private final MixinContainerHandle container;
     private final MixinTransformationImpl mixinTransformer;
+
+    private boolean isInit = true;
+    private int totalProcessedDuringInit = 0;
 
     private static @NonNull String getCanonicalName(@NonNull String name) {
         return name.replace('/', '.');
@@ -53,6 +58,24 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
         this.mixinTransformer = HorizonLoader.getInstance().getLaunchService().getTransformer().getService(MixinTransformationImpl.class);
         if (mixinTransformer == null) {
             throw new IllegalStateException("Mixin transformation service not available?");
+        }
+    }
+
+    public static void loadToInit(@NonNull URL url) {
+        SETUP_CLASSLOADER.addURL(url);
+    }
+
+    @ApiStatus.Internal
+    public void markOutOfInit() {
+        isInit = false;
+        try {
+            SETUP_CLASSLOADER.close();
+            // log if we have paper/spigot plugin targets
+            if (totalProcessedDuringInit > 0) {
+                LOGGER.info("Closed setup classloader, loaded ({}) Paper/Spigot plugin targets", totalProcessedDuringInit);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to close setup classloader", e);
         }
     }
 
@@ -209,8 +232,29 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
         final String canonicalName = getCanonicalName(name);
         final String internalName = getInternalName(name);
 
-        final EmberClassLoader.@Nullable ClassData entry = loader.classData(canonicalName, TransformPhase.MIXIN);
-        if (entry == null) throw new ClassNotFoundException(canonicalName);
+        EmberClassLoader.@Nullable ClassData entry = loader.classData(canonicalName, TransformPhase.MIXIN);
+
+        if (entry == null) {
+            if (!isInit) throw new ClassNotFoundException(canonicalName);
+            // we are in init, lets try and see if we can load this shit anyway
+            LOGGER.debug("Hidden class found, '{}', attempting to traverse Spigot/Paper plugin files for class", name);
+            // for (final URL url : BACKUP_CLASSLOADER.getURLs()) {
+            //     LOGGER.info("Using URL {}", url.toString());
+            // }
+            final String resourceName = name.replace('.', '/').concat(".class");
+
+            URL url = SETUP_CLASSLOADER.findResource(resourceName);
+            if (url == null) {
+                throw new ClassNotFoundException(canonicalName);
+            }
+            entry = loader.getClassData(url, resourceName);
+
+            if (entry != null) {
+                LOGGER.debug("Successfully loaded '{}' from backup classloader", name);
+                totalProcessedDuringInit++;
+            }
+            else throw new ClassNotFoundException(canonicalName);
+        }
 
         return mixinTransformer.classNode(canonicalName, internalName, entry.data(), readerFlags);
     }

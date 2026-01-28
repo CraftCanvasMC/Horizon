@@ -48,7 +48,7 @@ public class HorizonLoader {
     public static final Logger LOGGER = Logger.create()
         .name("main")
         .out(OutStream.CONSOLE.allowColors().build())
-        .pattern("[{date: HH:mm:ss}] [{level}" + (DEBUG ? "/{class}" : "") + "]: {message}")
+        .pattern("[{date: HH:mm:ss}] [{level}" + (DEBUG ? "/{tag}" : "") + "]: {message}")
         .level(DEBUG ? Level.DEBUG : Level.INFO)
         .build();
 

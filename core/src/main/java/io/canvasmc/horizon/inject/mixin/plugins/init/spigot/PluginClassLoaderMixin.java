@@ -1,4 +1,4 @@
-package io.canvasmc.horizon.inject.mixin.initfix.spigot;
+package io.canvasmc.horizon.inject.mixin.plugins.init.spigot;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.canvasmc.horizon.HorizonLoader;

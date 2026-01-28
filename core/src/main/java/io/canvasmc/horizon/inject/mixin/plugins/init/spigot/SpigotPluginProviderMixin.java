@@ -1,4 +1,4 @@
-package io.canvasmc.horizon.inject.mixin.initfix.spigot;
+package io.canvasmc.horizon.inject.mixin.plugins.init.spigot;
 
 import io.canvasmc.horizon.MixinPluginLoader;
 import io.canvasmc.horizon.inject.access.IPluginProvider;

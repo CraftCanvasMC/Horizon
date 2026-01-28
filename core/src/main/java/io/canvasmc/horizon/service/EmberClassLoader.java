@@ -353,6 +353,10 @@ public final class EmberClassLoader extends ClassLoader {
             if (url == null) return null;
         }
 
+        return getClassData(url, resourceName);
+    }
+
+    public @Nullable ClassData getClassData(final URL url, final String resourceName) {
         try (final ResourceConnection connection = new ResourceConnection(url, this.manifestLocator, this.sourceLocator)) {
             final int length = connection.contentLength();
             final InputStream stream = connection.stream();
@@ -390,7 +394,7 @@ public final class EmberClassLoader extends ClassLoader {
         }
     }
 
-    private static final class DynamicClassLoader extends URLClassLoader {
+    protected static final class DynamicClassLoader extends URLClassLoader {
 
         static {
             ClassLoader.registerAsParallelCapable();
