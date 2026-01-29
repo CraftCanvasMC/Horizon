@@ -78,9 +78,6 @@ have multiple server JARs and swap between the target Horizons they use.
 Once all options are configured to your liking, you can boot the Horizon JAR as usual, and your server will run with
 Horizon as its bootstrapper!
 
-> [!NOTE]
-> You can disable internal mixin injections by using flags like `-DHorizon.disable.mixin.{mixin package location}`
-
 ### Basics of Developing a Horizon Plugin
 
 Developing with Horizon is *generally* simple. One tool you can use is the Gradle plugin, which is described in more

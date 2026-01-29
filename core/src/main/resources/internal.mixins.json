@@ -19,6 +19,5 @@
     "plugins.mixin.PluginClassLoaderMixin"
   ],
   "package": "io.canvasmc.horizon.inject.mixin",
-  "mixinPriority": 1,
-  "plugin": "io.canvasmc.horizon.inject.mixin.MixinConfig"
+  "mixinPriority": 1
 }
