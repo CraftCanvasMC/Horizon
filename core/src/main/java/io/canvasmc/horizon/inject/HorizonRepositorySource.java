@@ -65,7 +65,7 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
     public void discoverPacks(DirectoryValidator validator, BiConsumer<Path, Pack.ResourcesSupplier> output) throws IOException {
         PluginPackDetector pluginPackDetector = new PluginPackDetector(validator);
 
-        // read from plugins, not folder, because technically we can include submodules in horizon jars // TODO - actually do this
+        // read from plugins, not folder, because technically we can include submodules in horizon jars
         for (HorizonPlugin plugin : HorizonLoader.getInstance().getPlugins().getAll()) {
             if (!plugin.pluginMetadata().loadDatapackEntry()) {
                 continue;
