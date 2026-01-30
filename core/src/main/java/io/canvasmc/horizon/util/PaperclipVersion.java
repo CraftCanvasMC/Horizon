@@ -60,6 +60,9 @@ import java.util.List;
  *     If the release is stable or a development version
  * @param use_editor
  *     Unknown use
+ * @param minecraftVersion
+ *     The API {@link io.canvasmc.horizon.util.MinecraftVersion} instance parsed from the
+ *     {@link io.canvasmc.horizon.util.PaperclipVersion#id} value. Can be used for comparing versions
  *
  * @author dueris
  * @see PackVersion pack_version docs
@@ -75,8 +78,37 @@ public record PaperclipVersion(
     String java_component,
     int java_version,
     boolean stable,
-    boolean use_editor
+    boolean use_editor,
+    MinecraftVersion minecraftVersion
 ) {
+
+    public PaperclipVersion(
+        String id,
+        String name,
+        int world_version,
+        String series_id,
+        int protocol_version,
+        PackVersion pack_version,
+        String build_time,
+        String java_component,
+        int java_version,
+        boolean stable,
+        boolean use_editor
+    ) {
+        this(id,
+            name,
+            world_version,
+            series_id,
+            protocol_version,
+            pack_version,
+            build_time,
+            java_component,
+            java_version,
+            stable,
+            use_editor,
+            MinecraftVersion.fromStringId(id)
+        );
+    }
 
     /**
      * The resource and data pack formats of this version

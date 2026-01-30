@@ -8,10 +8,12 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static io.canvasmc.horizon.MixinPluginLoader.LOGGER;
 
 public class ValidationPhase implements Phase<Set<PluginCandidate>, Set<PluginCandidate>> {
+    private static final Pattern TAKEN_NAMES = Pattern.compile("^(?i)(minecraft|java|asm|horizon)$");
 
     @Override
     public Set<PluginCandidate> execute(@NonNull Set<PluginCandidate> input, LoadContext context) throws PhaseException {
@@ -50,6 +52,10 @@ public class ValidationPhase implements Phase<Set<PluginCandidate>, Set<PluginCa
     private boolean validateCandidate(@NonNull PluginCandidate candidate) {
         if (candidate.metadata().name() == null || candidate.metadata().name().trim().isEmpty()) {
             LOGGER.error("Plugin has invalid name");
+            return false;
+        }
+        else if (TAKEN_NAMES.matcher(candidate.metadata().name()).matches()) {
+            LOGGER.error("Plugin has invalid name, cannot match '{}'", TAKEN_NAMES.pattern());
             return false;
         }
 

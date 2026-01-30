@@ -184,10 +184,8 @@ public class HorizonLoader {
      *     the arguments provided to the server to be passed to the Minecraft main method
      */
     private void start(String[] providedArgs) {
-        LOGGER.info("Preparing Minecraft server");
-        this.plugins = this.pluginLoader.init();
-
         final URL[] unpacked = prepareHorizonServer();
+        this.plugins = this.pluginLoader.init();
 
         for (URL url : unpacked) {
             try {
@@ -264,6 +262,7 @@ public class HorizonLoader {
                     .from(new InputStreamReader(jarFile.getInputStream(jarFile.getJarEntry("version.json"))));
 
                 this.paperclipVersion = versionTree.as(PaperclipVersion.class);
+                LOGGER.info("Booting Horizon {}", this.paperclipVersion.minecraftVersion().getName());
 
                 try {
                     getInstrumentation().addJar(this.paperclipJar.jarFile());
