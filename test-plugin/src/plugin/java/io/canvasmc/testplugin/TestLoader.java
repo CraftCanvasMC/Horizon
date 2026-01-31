@@ -9,6 +9,6 @@ public class TestLoader implements PluginLoader {
 
     @Override
     public void classloader(@NonNull PluginClasspathBuilder classpathBuilder) {
-        System.out.println("AFSDJKFLJDJOFIU($*U(*@#*(*@#$@@%$");
+        System.out.println("Test plugin split source LOADER phase");
     }
 }

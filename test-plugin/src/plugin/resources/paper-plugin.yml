@@ -1,0 +1,7 @@
+name: "TestPluginPaper"
+description: "TestPlugin for PaperMC split source"
+main: "io.canvasmc.testplugin.HorizonTestPlugin"
+bootstrapper: "io.canvasmc.testplugin.TestBootstrapper"
+loader: "io.canvasmc.testplugin.TestLoader"
+api-version: "1.21"
+version: "1.0.0"

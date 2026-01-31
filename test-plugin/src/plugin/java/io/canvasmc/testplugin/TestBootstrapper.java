@@ -10,6 +10,6 @@ public class TestBootstrapper implements PluginBootstrap {
 
     @Override
     public void bootstrap(@NonNull BootstrapContext context) {
-        HorizonLoader.LOGGER.info("ADJFHLSJDHFLSKJDFSDF");
+        HorizonLoader.LOGGER.info("Test plugin BOOTSTRAP init via split source");
     }
 }
