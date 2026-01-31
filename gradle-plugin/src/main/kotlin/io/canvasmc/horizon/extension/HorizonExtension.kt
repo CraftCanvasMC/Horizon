@@ -6,12 +6,14 @@ import io.papermc.paperweight.util.constants.PAPER_MAVEN_REPO_URL
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
@@ -92,6 +94,11 @@ abstract class HorizonExtension @Inject constructor(
             // call get to avoid IDE sync issues
             compileClasspath += main.get().output + main.get().compileClasspath
             runtimeClasspath += main.get().output + main.get().runtimeClasspath
+        }
+
+        // to avoid issues with gradle thinking there's a duplicate when in fact there isn't
+        project.tasks.named<Copy>("processPluginResources") {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
 
         val pluginJar = project.tasks.register<Jar>("pluginJar") {
