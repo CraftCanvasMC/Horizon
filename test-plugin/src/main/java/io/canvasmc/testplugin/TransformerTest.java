@@ -1,5 +1,6 @@
 package io.canvasmc.testplugin;
 
+import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.service.transform.TransformPhase;
 import io.canvasmc.horizon.service.transform.TransformationService;
 import org.jspecify.annotations.NonNull;
@@ -10,7 +11,7 @@ import org.objectweb.asm.tree.ClassNode;
 public class TransformerTest implements TransformationService {
     @Override
     public void preboot() {
-        System.out.println("A");
+        HorizonLoader.LOGGER.info("Transformer test preboot!");
     }
 
     @Override

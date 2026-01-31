@@ -3,13 +3,19 @@ package io.canvasmc.horizon.transformer.widener;
 import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
+import io.canvasmc.horizon.service.BootstrapMixinService;
+import io.canvasmc.horizon.util.Util;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.service.MixinService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -82,6 +88,41 @@ public class TransformerContainer {
             .build();
     }
 
+    private static boolean validateDefinitionTarget(final @NonNull ObjectIterator<Definition> iterator, final ClassNode node) {
+        final Definition definition = iterator.next();
+        boolean failed = false;
+        try {
+            switch (definition.data()) {
+                // class data doesn't need validation for being accurate
+                case Definition.FieldData fdata -> {
+                    String target = fdata.fieldName();
+                    node.fields.stream()
+                        .filter(f -> f.name.equals(target))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Unable to locate AT target '" + target + "'"));
+                }
+                case Definition.MethodData mdata -> {
+                    String methodDescriptor = mdata.methodDescriptor();
+                    int idx = methodDescriptor.indexOf('(');
+                    String methodName = methodDescriptor.substring(0, idx);
+                    String methodDesc = methodDescriptor.substring(idx);
+
+                    node.methods.stream()
+                        .filter(m -> methodName.equals(m.name) && methodDesc.equals(m.desc))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Unable to locate AT target '" + methodDescriptor + "'"));
+                }
+                default -> {
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("{} for '{}'", e.getMessage(), node.name);
+            iterator.remove();
+            failed = true;
+        }
+        return failed;
+    }
+
     public void lock() {
         if (locked) {
             return;
@@ -149,6 +190,27 @@ public class TransformerContainer {
         definitionRegistry.trim();
         definitionRegistry.forEach((k, v) -> v.trim());
 
+        // now we will validate each transformer to ensure these all apply correctly
+        BootstrapMixinService mixinService = (BootstrapMixinService) MixinService.getService();
+        int flags = MixinEnvironment.getCurrentEnvironment().getOption(MixinEnvironment.Option.CLASSREADER_EXPAND_FRAMES) ? ClassReader.EXPAND_FRAMES : 0;
+
+        definitionRegistry.forEach((name, set) -> {
+            try {
+                ClassNode node = mixinService.getClassNode(name, true, flags);
+                LOGGER.debug("Validating AT for {}", node.name);
+                boolean failed = false;
+                for (ObjectIterator<Definition> iterator = set.iterator(); iterator.hasNext(); ) {
+                    failed = validateDefinitionTarget(iterator, node);
+                }
+                if (failed) {
+                    LOGGER.error("Failed to validate one or more AT targets for '{}', logging ClassNode tree", node.name);
+                    Util.logClassNodeTree(node);
+                }
+            } catch (ClassNotFoundException | IOException e) {
+                throw new RuntimeException("Unable to validate AT for " + name, e);
+            }
+        });
+
         locked = true;
     }
 
@@ -182,7 +244,7 @@ public class TransformerContainer {
                     // classes: <access modifier> <fully qualified class name>
                     // fields: <access modifier> <fully qualified class name> <field name>
                     // methods: <access modifier> <fully qualified class name> <method name>(<parameter types>)<return type>
-                    LOGGER.debug("Testing '{}' for transformer definition at line ({})", trimmed, idx);
+                    LOGGER.debug("Attempting to compile '{}' transformer definition at line ({})", trimmed, idx);
                     Definition compiled = tryCompile(trimmed);
                     if (compiled != null) {
                         addDefinition(compiled.nodeTarget(), compiled);

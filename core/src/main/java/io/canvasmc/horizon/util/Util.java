@@ -2,6 +2,9 @@ package io.canvasmc.horizon.util;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.MethodNode;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -200,4 +203,72 @@ public class Util {
         //noinspection unchecked
         return elements.toArray((E[]) Array.newInstance(clazz, 0));
     }
+
+    public static void logClassNodeTree(@NonNull ClassNode node) {
+        StringBuilder sb = new StringBuilder(512);
+
+        sb.append("==== ClassNode Summary ====\n")
+            .append("Class      : ").append(node.name).append('\n');
+
+        if (node.superName != null) {
+            sb.append("Superclass : ").append(node.superName).append('\n');
+        }
+
+        if (!node.interfaces.isEmpty()) {
+            sb.append("Interfaces :\n");
+            for (String itf : node.interfaces) {
+                sb.append("  - ").append(itf).append('\n');
+            }
+        }
+
+        sb.append('\n')
+            .append("Fields (").append(node.fields.size()).append("):\n");
+
+        if (node.fields.isEmpty()) {
+            sb.append("  <none>\n");
+        }
+        else {
+            for (FieldNode field : node.fields) {
+                sb.append("  - ")
+                    .append(field.name)
+                    .append(" : ")
+                    .append(field.desc)
+                    .append('\n');
+            }
+        }
+
+        sb.append('\n')
+            .append("Methods (").append(node.methods.size()).append("):\n");
+
+        boolean anyMethods = false;
+        for (MethodNode method : node.methods) {
+            if (method.name.startsWith("lambda")) {
+                continue;
+            }
+            anyMethods = true;
+
+            sb.append("  - ")
+                .append(method.name)
+                .append(method.desc)
+                .append('\n');
+
+            if (method.exceptions != null && !method.exceptions.isEmpty()) {
+                sb.append("      throws ");
+                for (int i = 0; i < method.exceptions.size(); i++) {
+                    if (i > 0) sb.append(", ");
+                    sb.append(method.exceptions.get(i));
+                }
+                sb.append('\n');
+            }
+        }
+
+        if (!anyMethods) {
+            sb.append("  <none>\n");
+        }
+
+        sb.append("===========================\n");
+
+        LOGGER.error("ClassNode summary for {}:\n{}", node.name, sb);
+    }
+
 }

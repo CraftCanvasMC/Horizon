@@ -5,4 +5,3 @@
 - go through internal todos
 - document the plugin injection support in readme
 - dependency declaration of horizon plugins, and incompatibilities
-- better logging of AT failures, log excessive documentation for what exists so it can be fixed
