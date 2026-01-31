@@ -13,6 +13,7 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
@@ -89,8 +90,9 @@ abstract class HorizonExtension @Inject constructor(
             java.srcDir("src/plugin/java")
             resources.srcDir("src/plugin/resources")
 
-            compileClasspath += project.files(main.map { it.compileClasspath + it.output.classesDirs })
-            runtimeClasspath += project.files(main.map { it.runtimeClasspath + it.output.classesDirs })
+            // call get to avoid IDE sync issues
+            compileClasspath += main.get().output + main.get().compileClasspath
+            runtimeClasspath += main.get().output + main.get().runtimeClasspath
         }
 
         val pluginJar = project.tasks.register<Jar>("pluginJar") {
