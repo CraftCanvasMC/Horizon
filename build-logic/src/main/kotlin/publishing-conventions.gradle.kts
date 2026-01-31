@@ -87,20 +87,16 @@ val createPublicationJar = tasks.register<Jar>("createPublicationJar") {
     }
 }
 
-// setup custom publishing
-val publicationJar = configurations.consumable("publicationJar") {
-    extendsFrom(includeResolvable)
-    attributes {
-        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
-        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
-        attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
-        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
-    }
+// remove the default jar and publish the publication one
+configurations.runtimeElements {
+    outgoing.artifacts.clear()
+    outgoing.artifact(createPublicationJar.flatMap { it.archiveFile })
 }
 
-val publicationComponent = publishing.softwareComponentFactory.adhoc("publicationComponent")
-components.add(publicationComponent)
-publicationComponent.addVariantsFromConfiguration(publicationJar) {}
+configurations.apiElements {
+    outgoing.artifacts.clear()
+    outgoing.artifact(createPublicationJar.flatMap { it.archiveFile })
+}
 
 extensions.configure<PublishingExtension> {
     repositories {
@@ -114,16 +110,7 @@ extensions.configure<PublishingExtension> {
     }
     publications {
         create<MavenPublication>("mavenJava") {
-            from(components["publicationComponent"])
+            from(components["java"])
         }
-    }
-}
-
-// this has to be after evaluate, otherwise things break for some reason
-afterEvaluate {
-    configurations.named("publicationJar") {
-        outgoing.artifact(tasks.named<Jar>("createPublicationJar").flatMap { it.archiveFile })
-        outgoing.artifact(tasks.named<Jar>("javadocJar").flatMap { it.archiveFile })
-        outgoing.artifact(tasks.named<Jar>("sourcesJar").flatMap { it.archiveFile })
     }
 }

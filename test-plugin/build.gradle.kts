@@ -12,7 +12,7 @@ dependencies {
     paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
 
     // add horizon api from the core project
-    horizon.horizonApi(project(":core", configuration = "publicationJar"))
+    horizon.horizonApi(project(":core"))
 }
 
 /*

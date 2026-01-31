@@ -23,6 +23,11 @@ subprojects {
     }
 }
 
+
+tasks.wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 // utilities for accessing the plugin project
 tasks.register("buildPlugin") {
     dependsOn(gradle.includedBuild("gradle-plugin").task(":build"))
