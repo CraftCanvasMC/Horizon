@@ -8,6 +8,7 @@ import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.service.BootstrapMixinService;
 import io.canvasmc.horizon.util.FileJar;
+import io.canvasmc.horizon.util.MinecraftVersion;
 import io.canvasmc.horizon.util.Pair;
 import io.canvasmc.horizon.util.Util;
 import io.canvasmc.horizon.util.tree.Format;
@@ -43,11 +44,6 @@ public class DiscoveryPhase implements Phase<Void, Set<Pair<FileJar, HorizonPlug
         final String name = pluginYaml.getValueOrThrow("name").asString();
         // inject into setup classloader
         BootstrapMixinService.loadToInit(pluginJar.ioFile().toURI().toURL(), name);
-        if (ResolutionPhase.doesPluginExist(name)) {
-            throw new IllegalStateException("Duplicate plugin ID found: " + name);
-        }
-        // store for dependency resolution
-        ResolutionPhase.PAPER_SPIGOT_PL_STORAGE.add(name);
     }
 
     @Override
@@ -116,6 +112,7 @@ public class DiscoveryPhase implements Phase<Void, Set<Pair<FileJar, HorizonPlug
                 ObjectTree jsonTree = ObjectTree.read()
                     // we also need to register all type converters
                     .registerConverter(EntrypointObject.class, ENTRYPOINT_CONVERTER)
+                    .registerConverter(MinecraftVersion.class, value -> MinecraftVersion.fromStringId(value.toString()))
                     // now we need to register object deserializers
                     .registerDeserializer(HorizonPluginMetadata.class, PLUGIN_META_FACTORY)
                     // now we format and read

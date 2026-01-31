@@ -1,6 +1,5 @@
 package io.canvasmc.horizon.plugin.data;
 
-import io.canvasmc.horizon.plugin.phase.impl.ResolutionPhase;
 import io.canvasmc.horizon.util.FileJar;
 import io.canvasmc.horizon.util.Pair;
 import io.canvasmc.horizon.util.tree.ObjectDeserializer;
@@ -34,9 +33,6 @@ public record HorizonPluginMetadata(
         final String name = root.getValueOrThrow("name").asString();
         if (TAKEN_NAMES.matcher(name.toLowerCase()).matches() || name.isEmpty()) {
             throw new IllegalArgumentException("Invalid name used for plugin meta, " + name);
-        }
-        if (ResolutionPhase.doesPluginExist(name)) {
-            throw new IllegalStateException("Duplicate plugin ID found: " + name);
         }
         final String version = root.getValueOrThrow("version").asString();
         final List<String> authors = new ArrayList<>(
