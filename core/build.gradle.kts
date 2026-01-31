@@ -6,7 +6,6 @@ plugins {
 version = project.version.toString() + "." + fetchBuild().get()
 
 val paperMavenPublicUrl = "https://repo.papermc.io/repository/maven-public/"
-val jdkVersion = libs.versions.java.get()
 
 repositories {
     mavenCentral()
@@ -35,12 +34,6 @@ dependencies {
 
     // minecraft setup
     paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(jdkVersion))
-    }
 }
 
 tasks.withType<Javadoc> {

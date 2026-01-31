@@ -8,6 +8,12 @@ subprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
 
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
+    }
+
     tasks.withType<JavaCompile>().configureEach {
         options.encoding = Charsets.UTF_8.name()
         options.isFork = true

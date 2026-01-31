@@ -88,14 +88,15 @@ val createPublicationJar = tasks.register<Jar>("createPublicationJar") {
 }
 
 // remove the default jar and publish the publication one
+// this is purely for run-task integration, as we need to have a runnable jar
 configurations.runtimeElements {
     outgoing.artifacts.clear()
-    outgoing.artifact(createPublicationJar.flatMap { it.archiveFile })
+    outgoing.artifact(createPublicationJar)
 }
 
 configurations.apiElements {
     outgoing.artifacts.clear()
-    outgoing.artifact(createPublicationJar.flatMap { it.archiveFile })
+    outgoing.artifact(createPublicationJar)
 }
 
 extensions.configure<PublishingExtension> {
