@@ -9,14 +9,8 @@
     "datapack.ServerPacksSourceMixin",
     "jij.PluginInitializerManagerMixin",
     "plugins.FileProviderSourceMixin",
-    "plugins.PaperPluginProviderFactoryMixin",
-    "plugins.PluginFileTypeMixin",
-    "plugins.init.JavaPluginMixin",
-    "plugins.init.ModernPluginLoadingStrategyMixin",
-    "plugins.init.paper.PaperClasspathBuilderMixin",
-    "plugins.init.paper.PaperPluginParentMixin",
-    "plugins.init.paper.PaperServerPluginProviderMixin",
-    "plugins.mixin.PaperSimplePluginClassLoaderMixin"
+    "plugins.mixin.PaperSimplePluginClassLoaderMixin",
+    "plugins.mixin.PluginClassLoaderMixin"
   ],
   "package": "io.canvasmc.horizon.inject.mixin",
   "mixinPriority": 1,

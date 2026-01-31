@@ -36,9 +36,6 @@ public class MixinPluginLoader {
 
     public static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "plugin_loader");
 
-    // used for 'mixin.initfix' to store the current plugin provider
-    public static AtomicReference<Object> ACTIVE_PLUGIN_PROVIDER_REF = new AtomicReference<>();
-
     private static @NonNull LoadContext getLoadContext() {
         File pluginsDirectory = HorizonLoader.getInstance().getProperties().pluginsDirectory();
         File cacheDirectory = HorizonLoader.getInstance().getProperties().cacheLocation();

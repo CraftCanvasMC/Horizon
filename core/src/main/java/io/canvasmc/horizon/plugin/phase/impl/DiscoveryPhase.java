@@ -4,7 +4,6 @@ import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.plugin.LoadContext;
 import io.canvasmc.horizon.plugin.data.EntrypointObject;
 import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
-import io.canvasmc.horizon.plugin.data.InstanceInteraction;
 import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.service.BootstrapMixinService;
@@ -32,9 +31,6 @@ import java.util.stream.Collectors;
 
 import static io.canvasmc.horizon.MixinPluginLoader.LOGGER;
 import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.ENTRYPOINT_CONVERTER;
-import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.INTERACTION_CONVERTER;
-import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.INTERACTION_RESOLVER_CONVERTER;
-import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.INTERACTION_TYPE_CONVERTER;
 import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.PLUGIN_META_FACTORY;
 
 public class DiscoveryPhase implements Phase<Void, Set<Pair<FileJar, HorizonPluginMetadata>>> {
@@ -119,10 +115,7 @@ public class DiscoveryPhase implements Phase<Void, Set<Pair<FileJar, HorizonPlug
             try (InputStream in = jar.getInputStream(entry.get())) {
                 ObjectTree jsonTree = ObjectTree.read()
                     // we also need to register all type converters
-                    .registerMappedConverter(InstanceInteraction.Resolver.class, String.class, INTERACTION_RESOLVER_CONVERTER)
-                    .registerMappedConverter(InstanceInteraction.Type.class, String.class, INTERACTION_TYPE_CONVERTER)
                     .registerConverter(EntrypointObject.class, ENTRYPOINT_CONVERTER)
-                    .registerConverter(InstanceInteraction.class, INTERACTION_CONVERTER)
                     // now we need to register object deserializers
                     .registerDeserializer(HorizonPluginMetadata.class, PLUGIN_META_FACTORY)
                     // now we format and read

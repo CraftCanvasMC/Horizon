@@ -36,14 +36,6 @@ public abstract class PaperPluginsCommandMixin {
     @Unique
     private static final TextColor HORIZON_COLOR = TextColor.color(222, 49, 239);
 
-    @Unique
-    private static final List<String> HORIZON_PLUGIN_JARS = HorizonLoader.getInstance().getPlugins().getAll().stream()
-        .filter(HorizonPlugin::isHybrid)
-        .map(HorizonPlugin::pluginMetadata)
-        .map(HorizonPluginMetadata::name)
-        .map(String::toLowerCase)
-        .toList();
-
     @Shadow
     @Final
     private static Component INFO_ICON_SERVER_PLUGIN;
@@ -61,14 +53,6 @@ public abstract class PaperPluginsCommandMixin {
         return List.of();
     }
 
-    @ModifyExpressionValue(method = "formatProvider", at = @At(value = "INVOKE", target = "Lio/papermc/paper/plugin/configuration/PluginMeta;getName()Ljava/lang/String;"))
-    private static @NonNull String horizon$injectPrefix(final @NonNull String original) {
-        if (HORIZON_PLUGIN_JARS.contains(original.toLowerCase())) {
-            return "[Hybrid] " + original;
-        }
-        return original;
-    }
-
     /**
      * @author dueris
      * @reason Add Horizon plugins to the plugins command without greatly overcomplicating the mixins required
@@ -79,7 +63,7 @@ public abstract class PaperPluginsCommandMixin {
 
         final TreeMap<String, PluginProvider<JavaPlugin>> paperPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         final TreeMap<String, PluginProvider<JavaPlugin>> spigotPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        final List<HorizonPlugin> horizonPlugins = HorizonLoader.getInstance().getPlugins().getAll().stream().filter(pl -> !pl.isHybrid()).toList();
+        final List<HorizonPlugin> horizonPlugins = HorizonLoader.getInstance().getPlugins().getAll();
 
         for (PluginProvider<JavaPlugin> provider : LaunchEntryPointHandler.INSTANCE.get(Entrypoint.PLUGIN).getRegisteredProviders()) {
             PluginMeta configuration = provider.getMeta();

@@ -19,16 +19,11 @@ import java.util.stream.Stream;
 
 public class EntrypointContainer {
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "entrypoint_api");
-    private static final Pattern INVALID_KEYS = Pattern.compile("^(?i)(plugin_main|bootstrapper|loader)$");
 
     @Contract("_, _, _ -> new")
     public static <C, R> @NonNull Provider<C, R> buildProvider(@NonNull String key, @NonNull Class<C> interfaceClazz, @NonNull Class<R> retType) {
         HorizonLoader loader = HorizonLoader.getInstance();
         PluginTree pluginTree = loader.getPlugins();
-
-        if (INVALID_KEYS.matcher(key).matches()) {
-            throw new IllegalArgumentException(key + " is an invalid name as its used by internals for plugin hybrids, do not invoke these.");
-        }
 
         if (!interfaceClazz.isInterface()) {
             throw new IllegalArgumentException("Class '" + interfaceClazz.getSimpleName() + "' is not an interface");

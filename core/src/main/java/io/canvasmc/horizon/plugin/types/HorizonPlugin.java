@@ -75,10 +75,6 @@ public final class HorizonPlugin {
         return file().ioFile().toPath().toAbsolutePath();
     }
 
-    public boolean isHybrid() {
-        return pluginMetadata.isHybrid();
-    }
-
     /**
      * A bundle of nested horizon plugins, server plugins, and libraries
      *

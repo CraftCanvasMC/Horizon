@@ -80,24 +80,53 @@ Horizon as its bootstrapper!
 
 ### Basics of Developing a Horizon Plugin
 
-Developing with Horizon is *generally* simple. One tool you can use is the Gradle plugin, which is described in more
-detail below. To start with, developing a Horizon plugin,
-you need to add a few more things to your plugin YML. You need something like this:
+Developing a Horizon plugin is mostly simple. One tool you can use is the Gradle plugin, which is described in more detail below.
+To start with developing a Horizon plugin, you need a plugin metadata file. Instead of adding onto the existing plugin YML
+file, Horizon introduces its own metadata type. You cannot combine the two plugin types. Horizon plugins work fundementally
+different from paper plugins.
 
-```yaml
-horizon:
-  mixins:
-    - "mixins.test.json"
-  wideners:
-    - "wideners.at"
-    - "additional_wideners.at"
-  load-datapack-entry: true
+Horizon plugins **cannot** interact with Paper plugins. However, Paper plugins can interact with Horizon plugins.
+As such, Horizon requires that if you are going to attempt to interact with other Paper plugins, you need to setup a split
+source set. Otherwise, just use a normal setup, however this means it is strictly only a Horizon plugin, and cannot interact
+with other Paper plugins currently present.
+
+TODO - can we explain this more? -- Toffik
+
+The Horizon metadata file is `horizon.plugin.json`. The metadata file follows a *similar* structure to plugin metadata files, but not completely. Here is an example:
+```json5
+{
+  "name": "TestPlugin",
+  "version": "1.0.0-SNAPSHOT",
+  "description": "Hello world",
+  // All entrypoints for the server
+  "entrypoints": [
+    {
+      "server_main": "io.canvasmc.testplugin.ServerMain"
+    }
+  ],
+  /*
+    All class transformers provided by the plugin for the server, documented in
+    the Class Transformers API section
+  */
+  "transformers": [
+    "io.canvasmc.testplugin.TransformerTest"
+  ],
+  // The authors of the plugin
+  "authors": [
+    "CanvasMC"
+  ],
+  "load_datapack_entry": false,
+  "mixins": [
+    "mixins.test.json"
+  ],
+  "wideners": [
+    "widener.at"
+  ],
+  // This is your dependencies block for Horizon TODO - make this system
+  "dependencies": {
+  }
+}
 ```
-
-Horizon reads from the `plugin.yml` or `paper-plugin.yml` from the plugin JAR entries to build the `ObjectTree`
-representing your plugin configuration.
-Each option in the `horizon` field is optional; the only required field is `horizon` for your plugin to be marked and
-loaded by Horizon.
 
 - `mixins` - This is a `String[]` option that defines the SpongePowered mixin configuration files in your plugin
   artifact. Like if it were `test.mixins.json`, the entry should be in the root of your resources, named
@@ -119,9 +148,9 @@ To check if your plugin is loaded as a Horizon plugin successfully, you can read
 logs, which will look similar to this:
 
 ```terminaloutput
-[23:23:34] [INFO]: Found 2 plugin(s):
-        - horizon local
-        - testplugin 1.0.0-SNAPSHOT
+[12:32:43] [INFO]: Found 2 plugin(s):
+        - TestPlugin 1.0.0-SNAPSHOT
+        - Horizon 1.0.0-beta.local
 ```
 
 > [!NOTE]

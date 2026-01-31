@@ -25,7 +25,6 @@ public record HorizonPluginMetadata(
     List<EntrypointObject> entrypoints,
     List<String> transformers,
     List<String> authors,
-    boolean isHybrid,
     boolean loadDatapackEntry,
     List<String> mixins,
     List<String> wideners,
@@ -59,18 +58,10 @@ public record HorizonPluginMetadata(
 
         boolean loadDatapackEntry = root.getValueSafe("load_datapack_entry").asBooleanOptional().orElse(false);
         String description = root.getValueSafe("description").asStringOptional().orElse("");
-        boolean isHybrid = root.getValueSafe("is_hybrid").asBooleanOptional().orElse(false);
 
         List<EntrypointObject> entrypoints = root.getArrayOptional("entrypoints")
             .map((arr) -> arr.asList(EntrypointObject.class))
             .orElse(new ArrayList<>());
-
-        if (isHybrid) {
-            entrypoints.stream()
-                .filter((eo) -> eo.key().equalsIgnoreCase("plugin_main"))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("If declared a Hybrid plugin, must include 'plugin_main' entrypoint"));
-        }
 
         List<String> mixins = root.getArrayOptional("mixins")
             .map((arr) -> arr.asList(String.class))
@@ -80,18 +71,12 @@ public record HorizonPluginMetadata(
             .orElse(new ArrayList<>());
 
         return new HorizonPluginMetadata(
-            name, description, version, entrypoints, transformers, authors, isHybrid,
+            name, description, version, entrypoints, transformers, authors,
             loadDatapackEntry, mixins, wideners, root.getTreeOptional("dependencies").orElse(ObjectTree.builder().build()),
             new NestedData(new HashSet<>(), new HashSet<>(), new HashSet<>())
         );
     };
 
-    public static final MappedTypeConverter<InstanceInteraction.Resolver, String> INTERACTION_RESOLVER_CONVERTER = (final String val) -> {
-        return InstanceInteraction.Resolver.valueOf(val.toUpperCase());
-    };
-    public static final MappedTypeConverter<InstanceInteraction.Type, String> INTERACTION_TYPE_CONVERTER = (final String val) -> {
-        return InstanceInteraction.Type.valueOf(val.toUpperCase());
-    };
     public static final TypeConverter<EntrypointObject> ENTRYPOINT_CONVERTER = (final Object val) -> {
         final ObjectTree root = (ObjectTree) val;
         final String key = root.keys().stream()
@@ -102,52 +87,6 @@ public record HorizonPluginMetadata(
             root.getValueSafe("order").asIntOptional().orElse(0)
         );
     };
-    public static final TypeConverter<InstanceInteraction> INTERACTION_CONVERTER = (final Object val) -> {
-        final ObjectTree root = (ObjectTree) val;
-        final InstanceInteraction.Type type = root.getValueOrThrow("type").as(InstanceInteraction.Type.class);
-        return new InstanceInteraction(
-            switch (type) {
-                case SPIGOT_PLUGIN -> InteractionParser.SPIGOT_PLUGIN.parse(root);
-                case PAPER_PLUGIN -> InteractionParser.PAPER_PLUGIN.parse(root);
-                case MINECRAFT -> InteractionParser.MINECRAFT.parse(root);
-                case JAVA -> InteractionParser.JAVA.parse(root);
-                case ASM -> InteractionParser.ASM.parse(root);
-            },
-            root.getValueOrThrow("interacts").as(InstanceInteraction.Resolver.class)
-        );
-    };
-
-    public String encodeToYaml() {
-        if (!isHybrid) {
-            throw new UnsupportedOperationException("Not hybrid plugin");
-        }
-
-        ObjectTree.Builder builder = ObjectTree.builder();
-        final Map<String, Object> dependencies = this.dependencies.toRawMap();
-        dependencies.entrySet().removeIf(en -> en.getKey().equalsIgnoreCase("horizon"));
-        builder
-            .keepRawValues()
-            .put("name", name)
-            .put("description", description)
-            .put("version", version)
-            .put("api-version", HorizonLoader.getInstance().getVersionMeta().minecraftVersion().getId())
-            .put("authors", authors.toArray(new String[0]))
-            .put("dependencies", dependencies);
-
-        for (final EntrypointObject entrypoint : entrypoints) {
-            if (entrypoint.key().equalsIgnoreCase("plugin_main")) {
-                builder.put("main", entrypoint.clazz());
-            }
-            else {
-                builder.put(entrypoint.key(), entrypoint.clazz());
-            }
-        }
-        try {
-            return ObjectTree.write(builder.build()).format(Format.YAML).asString();
-        } catch (WriteException e) {
-            throw new RuntimeException("Unable to write to YAML", e);
-        }
-    }
 
     public record NestedData(
         Set<Pair<FileJar, HorizonPluginMetadata>> horizonEntries,

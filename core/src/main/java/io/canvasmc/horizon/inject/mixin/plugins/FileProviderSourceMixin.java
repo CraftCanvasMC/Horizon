@@ -41,7 +41,7 @@ public class FileProviderSourceMixin {
             }
 
             if (file.getEntry("horizon.plugin.json") != null) {
-                LOGGER.info("Found non-hybrid Horizon plugin, {}, ignoring", file.getName());
+                LOGGER.info("Found Horizon plugin, {}, ignoring", file.getName());
                 return;
             }
 

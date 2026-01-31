@@ -103,7 +103,6 @@ public class HorizonLoader {
                     ),
                     List.of("CanvasMC"),
                     false,
-                    false,
                     List.of("internal.mixins.json"),
                     List.of("internal.at"),
                     ObjectTree.builder().build(),
