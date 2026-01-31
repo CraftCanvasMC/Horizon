@@ -105,7 +105,7 @@ public class HorizonLoader {
                     List.of("CanvasMC"),
                     false,
                     List.of("internal.mixins.json"),
-                    List.of("internal.at"),
+                    new ArrayList<>(),
                     ObjectTree.builder().build(),
                     new HorizonPluginMetadata.NestedData(Set.of(), Set.of(), Set.of())
                 ), new HorizonPlugin.CompiledNestedPlugins(List.of(), List.of(), List.of())
