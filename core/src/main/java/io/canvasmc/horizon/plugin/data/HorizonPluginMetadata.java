@@ -30,13 +30,13 @@ public record HorizonPluginMetadata(
     List<InstanceInteraction> interactions,
     NestedData nesting
 ) {
-    private static final Pattern TAKEN_NAMES = Pattern.compile("^(?i)(minecraft|java|asm|horizon|bukkit|mojang|spigot|paper)$");
+    private static final Pattern TAKEN_NAMES = Pattern.compile("^(?i)(minecraft|java|asm|horizon|bukkit|mojang|spigot|paper|mixin)$");
 
     public static final ObjectDeserializer<HorizonPluginMetadata> PLUGIN_META_FACTORY = (final ObjectTree root) -> {
         // all required stuff first
         // name, version, authors, type(depending on type, we required plugin_main)
         final String name = root.getValueOrThrow("name").asString();
-        if (TAKEN_NAMES.matcher(name).matches() || name.isEmpty()) {
+        if (TAKEN_NAMES.matcher(name.toLowerCase()).matches() || name.isEmpty()) {
             throw new IllegalArgumentException("Invalid name used for plugin meta, " + name);
         }
         if (DiscoveryPhase.PAPER_SPIGOT_PL_STORAGE.containsKey(name)) {
