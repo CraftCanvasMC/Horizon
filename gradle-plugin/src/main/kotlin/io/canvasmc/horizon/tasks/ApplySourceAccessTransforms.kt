@@ -43,8 +43,7 @@ abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
                     outputJar,
                     atFile.path,
                     temporaryDir.toPath(),
-                    archive = true,
-                    validation = failFast.get(),
+                    failFast.get(),
                 )
             }
             timeSpent.set(generatedIn)

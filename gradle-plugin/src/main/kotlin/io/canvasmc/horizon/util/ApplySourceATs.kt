@@ -53,8 +53,7 @@ abstract class ApplySourceATs {
         output: Path,
         atFile: Path,
         workDir: Path,
-        archive: Boolean = false,
-        validation: Boolean = true,
+        validation: Boolean,
     ) {
         workDir.deleteRecursive()
         workDir.createDirectories()
@@ -63,7 +62,7 @@ abstract class ApplySourceATs {
             workDir,
             workDir.resolve("log.txt"),
             jvmArgs = listOf("-Xmx${memory.get()}"),
-            args = jstArgs(input, output, atFile, archive, validation).toTypedArray()
+            args = jstArgs(input, output, atFile, validation).toTypedArray()
         )
     }
 
@@ -71,14 +70,12 @@ abstract class ApplySourceATs {
         inputDir: Path,
         outputDir: Path,
         atFile: Path,
-        archive: Boolean = false,
-        validation: Boolean = true,
+        validation: Boolean,
     ): List<String> {
-        val format = if (archive) "ARCHIVE" else "FOLDER"
         val validation = if (validation) "ERROR" else "LOG"
         return listOf(
-            "--in-format=$format",
-            "--out-format=$format",
+            "--in-format=ARCHIVE",
+            "--out-format=ARCHIVE",
             "--enable-accesstransformers",
             "--access-transformer=$atFile",
             "--access-transformer-inherit-method=true",
