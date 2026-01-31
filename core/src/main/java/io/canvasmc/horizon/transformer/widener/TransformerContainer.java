@@ -156,7 +156,7 @@ public class TransformerContainer {
         }
         JarFile source = plugin.file().jarFile();
 
-        for (String entry : plugin.pluginMetadata().accessWideners()) {
+        for (String entry : plugin.pluginMetadata().wideners()) {
             var jarEntry = source.getEntry(entry);
             if (jarEntry == null) continue;
 

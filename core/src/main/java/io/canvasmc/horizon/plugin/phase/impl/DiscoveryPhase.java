@@ -1,17 +1,16 @@
 package io.canvasmc.horizon.plugin.phase.impl;
 
-import com.google.common.collect.Sets;
 import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.plugin.LoadContext;
-import io.canvasmc.horizon.plugin.data.CandidateMetadata;
-import io.canvasmc.horizon.plugin.data.HorizonMetadata;
-import io.canvasmc.horizon.plugin.data.HorizonMetadataDeserializer;
-import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
+import io.canvasmc.horizon.plugin.data.EntrypointObject;
+import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
+import io.canvasmc.horizon.plugin.data.InstanceInteraction;
+import io.canvasmc.horizon.plugin.data.Type;
 import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
-import io.canvasmc.horizon.plugin.types.PluginCandidate;
 import io.canvasmc.horizon.service.BootstrapMixinService;
 import io.canvasmc.horizon.util.FileJar;
+import io.canvasmc.horizon.util.Pair;
 import io.canvasmc.horizon.util.Util;
 import io.canvasmc.horizon.util.tree.Format;
 import io.canvasmc.horizon.util.tree.ObjectTree;
@@ -24,7 +23,9 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -33,15 +34,36 @@ import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 import static io.canvasmc.horizon.MixinPluginLoader.LOGGER;
+import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.*;
 
-public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
+public class DiscoveryPhase implements Phase<Void, Set<Pair<FileJar, HorizonPluginMetadata>>> {
     public static final String JIJ_PATH_HORIZON = "META-INF/jars/horizon/";
     public static final String JIJ_PATH_PAPER = "META-INF/jars/plugin/";
     public static final String JIJ_PATH_LIB = "META-INF/jars/libs/";
 
+    // spigot/paper plugin storage, NAME -> <TYPE, VERSION>
+    public static final Map<String, Pair<Type, String>> PAPER_SPIGOT_PL_STORAGE = new HashMap<>();
+
+    private static void loadServerPlugin(final JarEntry jarEntry, final InputStream instream, final @NonNull FileJar pluginJar) throws Throwable {
+        ObjectTree pluginYaml = ObjectTree.read().format(Format.YAML).from(instream);
+        final String name = pluginYaml.getValueOrThrow("name").asString();
+        // inject into setup classloader
+        BootstrapMixinService.loadToInit(pluginJar.ioFile().toURI().toURL(), name);
+        if (PAPER_SPIGOT_PL_STORAGE.containsKey(name)) {
+            throw new IllegalStateException("Duplicate plugin ID found: " + name);
+        }
+        // store for dependency resolution
+        PAPER_SPIGOT_PL_STORAGE.put(
+            name, new Pair<>(
+                jarEntry.getName().equalsIgnoreCase("paper-plugin.yml") ? Type.PAPER : Type.SPIGOT,
+                pluginYaml.getValueOrThrow("version").asString()
+            )
+        );
+    }
+
     @Override
-    public Set<PluginCandidate> execute(Void input, @NonNull LoadContext context) throws PhaseException {
-        Set<PluginCandidate> candidates = new HashSet<>();
+    public Set<Pair<FileJar, HorizonPluginMetadata>> execute(Void input, @NonNull LoadContext context) throws PhaseException {
+        Set<Pair<FileJar, HorizonPluginMetadata>> candidates = new HashSet<>();
         File pluginsDirectory = context.pluginsDirectory();
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(
@@ -56,7 +78,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                 File child = path.toFile();
                 LOGGER.debug("Scanning potential plugin: {}", child.getName());
 
-                Optional<PluginCandidate> candidate = scanJarFile(child);
+                Optional<Pair<FileJar, HorizonPluginMetadata>> candidate = scanJarFile(child);
                 candidate.ifPresent(candidates::add);
             }
 
@@ -73,44 +95,69 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
         return "Discovery";
     }
 
-    private Optional<PluginCandidate> scanJarFile(File jarFile) {
+    private Optional<Pair<FileJar, HorizonPluginMetadata>> scanJarFile(File jarFile) {
         try {
             JarFile jar = new JarFile(jarFile);
             Optional<JarEntry> entry = jar.stream()
                 .filter(e -> !e.isDirectory())
-                .filter(e -> e.getName().equalsIgnoreCase("paper-plugin.yml") ||
-                    e.getName().equalsIgnoreCase("plugin.yml"))
+                .filter(e -> e.getName().equalsIgnoreCase("horizon.plugin.json"))
                 .findFirst();
 
             if (entry.isEmpty()) {
-                LOGGER.debug("No plugin yaml found in {}", jarFile.getName());
+                LOGGER.debug("No horizon json found in {}", jarFile.getName());
+                // check if is spigot or paper plugin
+                entry = jar.stream()
+                    .filter(e -> !e.isDirectory())
+                    .filter(e -> e.getName().equalsIgnoreCase("paper-plugin.yml") ||
+                        e.getName().equalsIgnoreCase("plugin.yml"))
+                    .findFirst();
+                // if is spigot or paper plugin, load into backup
+                if (entry.isPresent()) {
+                    try (InputStream in = jar.getInputStream(entry.get())) {
+                        loadServerPlugin(entry.get(), in, new FileJar(jarFile, jar));
+                    } catch (Throwable thrown) {
+                        LOGGER.error(thrown, "Couldn't load server plugin {}", entry.get().getName());
+                        return Optional.empty();
+                    }
+                }
                 return Optional.empty();
             }
 
             try (InputStream in = jar.getInputStream(entry.get())) {
-                ObjectTree yamlTree = ObjectTree.read()
+                ObjectTree jsonTree = ObjectTree.read()
                     // we also need to register all type converters
-                    .registerDeserializer(HorizonMetadata.class, new HorizonMetadataDeserializer())
-                    .registerDeserializer(PluginServiceProvider.class, PluginServiceProvider.DESERIALIZER)
-                    .format(Format.YAML).from(in);
+                    .registerMappedConverter(InstanceInteraction.Resolver.class, String.class, INTERACTION_RESOLVER_CONVERTER)
+                    .registerMappedConverter(InstanceInteraction.Type.class, String.class, INTERACTION_TYPE_CONVERTER)
+                    .registerMappedConverter(Type.class, String.class, PLUGIN_TYPE_CONVERTER)
+                    .registerConverter(EntrypointObject.class, ENTRYPOINT_CONVERTER)
+                    .registerConverter(InstanceInteraction.class, INTERACTION_CONVERTER)
+                    // now we need to register object deserializers
+                    .registerDeserializer(HorizonPluginMetadata.class, PLUGIN_META_FACTORY)
+                    // now we format and read
+                    .format(Format.JSON).from(in);
 
-                if (!yamlTree.containsKey("horizon")) {
-                    // inject plugin into setup classloader as backup for allowing Paper/Spigot plugin injects
-                    BootstrapMixinService.loadToInit(jarFile.toURI().toURL());
-                    return Optional.empty();
-                }
-
-                CandidateMetadata metadata = parseMetadata(yamlTree);
-
-                PluginCandidate.NestedData nestedData = new PluginCandidate.NestedData(
-                    Sets.newHashSet(),
-                    Sets.newHashSet(),
-                    Sets.newHashSet()
-                );
+                HorizonPluginMetadata metadata = jsonTree.as(HorizonPluginMetadata.class);
+                HorizonPluginMetadata.NestedData nestedData = metadata.nesting();
                 // Note: this loads recursively for nested horizon entries
                 locateAndExtractJIJ(jar, (nested) -> {
                     switch (nested.type()) {
                         case PLUGIN -> {
+                            FileJar pluginJar = nested.obj;
+                            // we need to load this to the setup classloader so plugins can inject into
+                            // jij server plugins, and also insert the plugin into storage
+                            pluginJar.jarFile().stream()
+                                .filter(e -> !e.isDirectory())
+                                .filter(e -> e.getName().equalsIgnoreCase("paper-plugin.yml") ||
+                                    e.getName().equalsIgnoreCase("plugin.yml"))
+                                .findFirst().ifPresent((jarEntry) -> {
+                                    try {
+                                        try (InputStream instream = pluginJar.jarFile().getInputStream(jarEntry)) {
+                                            loadServerPlugin(jarEntry, instream, pluginJar);
+                                        }
+                                    } catch (Throwable thrown) {
+                                        throw new RuntimeException("Unable to load nested server plugin", thrown);
+                                    }
+                                });
                             nestedData.serverPluginEntries().add(nested.obj());
                             break;
                         }
@@ -129,7 +176,7 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                     }
                 });
 
-                return Optional.of(new PluginCandidate(new FileJar(jarFile, jar), metadata, nestedData));
+                return Optional.of(new Pair<>(new FileJar(jarFile, jar), metadata));
             }
         } catch (Exception e) {
             LOGGER.error(e, "Error scanning jar file: {}", jarFile.getName());
@@ -201,13 +248,6 @@ public class DiscoveryPhase implements Phase<Void, Set<PluginCandidate>> {
                     throw new RuntimeException("Failed to extract nested JAR: " + entry.getName(), e);
                 }
             });
-    }
-
-    private @NonNull CandidateMetadata parseMetadata(@NonNull ObjectTree data) {
-        String name = data.getValueOptional("name").orElseThrow(() -> new IllegalArgumentException("Name must be present")).asString();
-        String version = data.getValueOptional("version").orElseThrow(() -> new IllegalArgumentException("Name must be present")).asString();
-
-        return new CandidateMetadata(name, version, data);
     }
 
     private record NestedEntry(Type type, FileJar obj) {

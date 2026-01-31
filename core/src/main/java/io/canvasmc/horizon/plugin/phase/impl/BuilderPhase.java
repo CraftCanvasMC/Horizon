@@ -1,37 +1,35 @@
 package io.canvasmc.horizon.plugin.phase.impl;
 
 import io.canvasmc.horizon.plugin.LoadContext;
-import io.canvasmc.horizon.plugin.data.HorizonMetadata;
+import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
 import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
-import io.canvasmc.horizon.plugin.types.PluginCandidate;
-import io.canvasmc.horizon.util.tree.ObjectTree;
+import io.canvasmc.horizon.util.FileJar;
+import io.canvasmc.horizon.util.Pair;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class BuilderPhase implements Phase<Set<PluginCandidate>, List<HorizonPlugin>> {
+public class BuilderPhase implements Phase<Set<Pair<FileJar, HorizonPluginMetadata>>, List<HorizonPlugin>> {
 
     @Override
-    public List<HorizonPlugin> execute(@NonNull Set<PluginCandidate> input, LoadContext context) throws PhaseException {
+    public List<HorizonPlugin> execute(@NonNull Set<Pair<FileJar, HorizonPluginMetadata>> input, LoadContext context) throws PhaseException {
         List<HorizonPlugin> completed = new ArrayList<>();
 
         try {
-            for (PluginCandidate candidate : input) {
-                ObjectTree tree = candidate.metadata().rawData();
-                HorizonMetadata horizonMetadata = tree.as(HorizonMetadata.class);
-                if (horizonMetadata == null) {
-                    throw new PhaseException("Couldn't deserialize horizon metadata for candidate '" + candidate.metadata().name() + "'");
-                }
-                HorizonPlugin.NestedData newNestedData = new HorizonPlugin.NestedData(
-                    execute(candidate.nestedData().horizonEntries(), context),
-                    candidate.nestedData().serverPluginEntries().stream().toList(),
-                    candidate.nestedData().libraryEntries().stream().toList()
+            for (Pair<FileJar, HorizonPluginMetadata> pair : input) {
+                HorizonPluginMetadata metadata = pair.b();
+                FileJar source = pair.a();
+
+                HorizonPlugin.CompiledNestedPlugins newNestedData = new HorizonPlugin.CompiledNestedPlugins(
+                    execute(metadata.nesting().horizonEntries(), context),
+                    metadata.nesting().serverPluginEntries().stream().toList(),
+                    metadata.nesting().libraryEntries().stream().toList()
                 );
-                completed.add(new HorizonPlugin(horizonMetadata.name(), candidate.fileJar(), horizonMetadata, newNestedData));
+                completed.add(new HorizonPlugin(metadata.name(), source, metadata, newNestedData));
             }
         } catch (Throwable thrown) {
             throw new PhaseException("Couldn't execute builder phase", thrown);

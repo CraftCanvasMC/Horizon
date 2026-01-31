@@ -109,7 +109,7 @@ public record PluginTree(List<PluginNode> roots) {
             String version = plugin.pluginMetadata().version();
             List<PluginNode> children = new ArrayList<>();
 
-            HorizonPlugin.NestedData nestedData = plugin.nestedData();
+            HorizonPlugin.CompiledNestedPlugins nestedData = plugin.nestedData();
 
             for (HorizonPlugin nested : nestedData.horizonEntries()) {
                 children.add(from(nested));

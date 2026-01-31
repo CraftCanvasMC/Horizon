@@ -3,8 +3,8 @@ package io.canvasmc.horizon.service.entrypoint;
 import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.plugin.PluginTree;
-import io.canvasmc.horizon.plugin.data.HorizonMetadata;
-import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
+import io.canvasmc.horizon.plugin.data.EntrypointObject;
+import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
@@ -14,15 +14,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class EntrypointContainer {
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "entrypoint_api");
+    private static final Pattern INVALID_KEYS = Pattern.compile("^(?i)(plugin_main|bootstrapper|loader)$");
 
     @Contract("_, _, _ -> new")
     public static <C, R> @NonNull Provider<C, R> buildProvider(@NonNull String key, @NonNull Class<C> interfaceClazz, @NonNull Class<R> retType) {
         HorizonLoader loader = HorizonLoader.getInstance();
         PluginTree pluginTree = loader.getPlugins();
+
+        if (INVALID_KEYS.matcher(key).matches()) {
+            throw new IllegalArgumentException(key + " is an invalid name as its used by internals for plugin hybrids, do not invoke these.");
+        }
 
         if (!interfaceClazz.isInterface()) {
             throw new IllegalArgumentException("Class '" + interfaceClazz.getSimpleName() + "' is not an interface");
@@ -31,24 +37,16 @@ public class EntrypointContainer {
         final List<EntryInstance<C>> finalizedInstances = new ArrayList<>();
 
         for (HorizonPlugin horizonPlugin : pluginTree.getAll()) {
-            HorizonMetadata metadata = horizonPlugin.pluginMetadata();
-            PluginServiceProvider serviceProvider = metadata.serviceProvider();
+            HorizonPluginMetadata metadata = horizonPlugin.pluginMetadata();
 
-            PluginServiceProvider.Service<PluginServiceProvider.Entrypoints.Entrypoint>[] services =
-                serviceProvider.findServices(PluginServiceProvider.CUSTOM);
-
-            // entrypointer == key
-            // target == class to invoke
-            for (PluginServiceProvider.Service<PluginServiceProvider.Entrypoints.Entrypoint> service : services) {
-                PluginServiceProvider.Entrypoints.Entrypoint entry = service.obj();
-
-                if (!entry.entrypointer().equalsIgnoreCase(key)) {
+            for (final EntrypointObject entrypoint : metadata.entrypoints()) {
+                if (!entrypoint.key().equalsIgnoreCase(key)) {
                     continue;
                 }
                 else {
                     // entry is of this key, try and find class and prepare
                     Class<? extends C> implementationClass;
-                    String target = entry.target();
+                    String target = entrypoint.clazz();
 
                     try {
                         implementationClass = Class.forName(target, true, loader.getLaunchService().getClassLoader())
@@ -64,8 +62,7 @@ public class EntrypointContainer {
                         continue;
                     }
                 }
-
-                LOGGER.debug("Loaded provider {} for {}", entry.target(), key);
+                LOGGER.debug("Loaded provider {} for {}", entrypoint.clazz(), key);
             }
         }
 

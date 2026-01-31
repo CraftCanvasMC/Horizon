@@ -8,6 +8,10 @@
     "datapack.PackRepositoryAccessor",
     "datapack.ServerPacksSourceMixin",
     "jij.PluginInitializerManagerMixin",
+    "plugins.FileProviderSourceMixin",
+    "plugins.PaperPluginProviderFactoryMixin",
+    "plugins.PluginFileTypeMixin",
+    "plugins.SpigotPluginProviderFactoryMixin",
     "plugins.init.JavaPluginMixin",
     "plugins.init.ModernPluginLoadingStrategyMixin",
     "plugins.init.paper.PaperClasspathBuilderMixin",
@@ -19,5 +23,6 @@
     "plugins.mixin.PluginClassLoaderMixin"
   ],
   "package": "io.canvasmc.horizon.inject.mixin",
-  "mixinPriority": 1
+  "mixinPriority": 1,
+  "compatibilityLevel": "JAVA_21"
 }

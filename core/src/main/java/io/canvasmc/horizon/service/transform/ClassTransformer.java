@@ -1,7 +1,6 @@
 package io.canvasmc.horizon.service.transform;
 
 import io.canvasmc.horizon.HorizonLoader;
-import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -38,24 +37,21 @@ public final class ClassTransformer {
         this.exclusionFilter = path -> true;
 
         for (HorizonPlugin horizonPlugin : HorizonLoader.getInstance().getPlugins().getAll()) {
-            for (PluginServiceProvider.Service<String> service : horizonPlugin.pluginMetadata()
-                .serviceProvider()
-                .findServices(PluginServiceProvider.CLASS_TRANSFORMER)
-            ) {
+            for (String service : horizonPlugin.pluginMetadata().transformers()) {
                 try {
-                    Class<?> serviceClazz = Class.forName(service.obj());
+                    Class<?> serviceClazz = Class.forName(service);
                     if (TransformationService.class.isAssignableFrom(serviceClazz)) {
                         TransformationService transformerObj = (TransformationService) serviceClazz.getDeclaredConstructor().newInstance();
                         services.put(transformerObj.getClass(), transformerObj);
                         LOGGER.debug("Registered class transformer from {}, \"{}\"", horizonPlugin.identifier(), serviceClazz.getName());
                     }
                     else
-                        throw new IllegalArgumentException("Declared service class '" + service.obj() + "' is not instanceof a TransformationService");
+                        throw new IllegalArgumentException("Declared service class '" + service + "' is not instanceof a TransformationService");
                 } catch (ClassNotFoundException exe) {
-                    throw new IllegalArgumentException("The service '" + service.obj() + "' was not found or is invalid", exe);
+                    throw new IllegalArgumentException("The service '" + service + "' was not found or is invalid", exe);
                 } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException |
                          InstantiationException exe) {
-                    throw new RuntimeException("Couldn't create transformer class '" + service.obj() + "'", exe);
+                    throw new RuntimeException("Couldn't create transformer class '" + service + "'", exe);
                 }
             }
         }

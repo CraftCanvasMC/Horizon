@@ -1,5 +1,6 @@
 package io.canvasmc.horizon.util.tree;
 
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -31,12 +32,12 @@ public final class ObjectValue implements Value<Object> {
     }
 
     @Override
-    public String asString() {
+    public @NonNull String asString() {
         return convert(String.class);
     }
 
     @Override
-    public Optional<String> asStringOptional() {
+    public @NonNull Optional<String> asStringOptional() {
         return convertOptional(String.class);
     }
 
@@ -46,7 +47,7 @@ public final class ObjectValue implements Value<Object> {
     }
 
     @Override
-    public Optional<Integer> asIntOptional() {
+    public @NonNull Optional<Integer> asIntOptional() {
         return convertOptional(Integer.class);
     }
 
@@ -56,7 +57,7 @@ public final class ObjectValue implements Value<Object> {
     }
 
     @Override
-    public Optional<Long> asLongOptional() {
+    public @NonNull Optional<Long> asLongOptional() {
         return convertOptional(Long.class);
     }
 
@@ -66,7 +67,7 @@ public final class ObjectValue implements Value<Object> {
     }
 
     @Override
-    public Optional<Double> asDoubleOptional() {
+    public @NonNull Optional<Double> asDoubleOptional() {
         return convertOptional(Double.class);
     }
 
@@ -76,7 +77,7 @@ public final class ObjectValue implements Value<Object> {
     }
 
     @Override
-    public Optional<Float> asFloatOptional() {
+    public @NonNull Optional<Float> asFloatOptional() {
         return convertOptional(Float.class);
     }
 
@@ -86,32 +87,32 @@ public final class ObjectValue implements Value<Object> {
     }
 
     @Override
-    public Optional<Boolean> asBooleanOptional() {
+    public @NonNull Optional<Boolean> asBooleanOptional() {
         return convertOptional(Boolean.class);
     }
 
     @Override
-    public BigDecimal asBigDecimal() {
+    public @NonNull BigDecimal asBigDecimal() {
         return convert(BigDecimal.class);
     }
 
     @Override
-    public Optional<BigDecimal> asBigDecimalOptional() {
+    public @NonNull Optional<BigDecimal> asBigDecimalOptional() {
         return convertOptional(BigDecimal.class);
     }
 
     @Override
-    public BigInteger asBigInteger() {
+    public @NonNull BigInteger asBigInteger() {
         return convert(BigInteger.class);
     }
 
     @Override
-    public Optional<BigInteger> asBigIntegerOptional() {
+    public @NonNull Optional<BigInteger> asBigIntegerOptional() {
         return convertOptional(BigInteger.class);
     }
 
     @Override
-    public ObjectTree asTree() {
+    public @NonNull ObjectTree asTree() {
         if (value == null) {
             throw new TypeConversionException("Cannot convert null to ObjectTree");
         }
@@ -122,7 +123,7 @@ public final class ObjectValue implements Value<Object> {
     }
 
     @Override
-    public Optional<ObjectTree> asTreeOptional() {
+    public @NonNull Optional<ObjectTree> asTreeOptional() {
         if (value instanceof ObjectTree) {
             return Optional.of((ObjectTree) value);
         }
@@ -135,7 +136,7 @@ public final class ObjectValue implements Value<Object> {
     }
 
     @Override
-    public <T> Optional<T> asOptional(Class<T> type) {
+    public <T> @NonNull Optional<T> asOptional(Class<T> type) {
         return convertOptional(type);
     }
 

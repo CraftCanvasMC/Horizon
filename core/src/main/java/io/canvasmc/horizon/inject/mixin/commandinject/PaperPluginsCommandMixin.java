@@ -1,8 +1,9 @@
 package io.canvasmc.horizon.inject.mixin.commandinject;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.brigadier.context.CommandContext;
 import io.canvasmc.horizon.HorizonLoader;
-import io.canvasmc.horizon.plugin.data.HorizonMetadata;
+import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.papermc.paper.command.PaperPluginsCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -23,6 +24,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.List;
 import java.util.TreeMap;
@@ -33,9 +35,21 @@ public abstract class PaperPluginsCommandMixin {
 
     @Unique
     private static final TextColor HORIZON_COLOR = TextColor.color(222, 49, 239);
+
+    @Unique
+    private static final List<String> HORIZON_PLUGIN_JARS = HorizonLoader.getInstance().getPlugins().getAll().stream()
+        .filter(HorizonPlugin::isHybrid)
+        .map(HorizonPlugin::pluginMetadata)
+        .map(HorizonPluginMetadata::name)
+        .map(String::toLowerCase)
+        .toList();
+
     @Shadow
     @Final
     private static Component INFO_ICON_SERVER_PLUGIN;
+    @Shadow
+    @Final
+    private static Component PLUGIN_TICK;
 
     @Shadow
     private static Component header(String header, int color, int count, boolean showSize) {
@@ -47,6 +61,14 @@ public abstract class PaperPluginsCommandMixin {
         return List.of();
     }
 
+    @ModifyExpressionValue(method = "formatProvider", at = @At(value = "INVOKE", target = "Lio/papermc/paper/plugin/configuration/PluginMeta;getName()Ljava/lang/String;"))
+    private static @NonNull String horizon$injectPrefix(final @NonNull String original) {
+        if (HORIZON_PLUGIN_JARS.contains(original.toLowerCase())) {
+            return "(Hybrid) " + original;
+        }
+        return original;
+    }
+
     /**
      * @author dueris
      * @reason Add Horizon plugins to the plugins command without greatly overcomplicating the mixins required
@@ -55,22 +77,13 @@ public abstract class PaperPluginsCommandMixin {
     private int execute(@NonNull CommandContext<CommandSourceStack> context) {
         CommandSender sender = context.getSource().getSender();
 
-        final TreeMap<String, PluginProvider<JavaPlugin>> horizonPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         final TreeMap<String, PluginProvider<JavaPlugin>> paperPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         final TreeMap<String, PluginProvider<JavaPlugin>> spigotPlugins = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-
-        final List<String> horizonPluginJars = HorizonLoader.getInstance().getPlugins().getAll().stream()
-            .map(HorizonPlugin::pluginMetadata)
-            .map(HorizonMetadata::name)
-            .map(String::toLowerCase)
-            .toList();
+        final List<HorizonPlugin> horizonPlugins = HorizonLoader.getInstance().getPlugins().getAll().stream().filter(pl -> !pl.isHybrid()).toList();
 
         for (PluginProvider<JavaPlugin> provider : LaunchEntryPointHandler.INSTANCE.get(Entrypoint.PLUGIN).getRegisteredProviders()) {
             PluginMeta configuration = provider.getMeta();
-            if (horizonPluginJars.contains(configuration.getName().toLowerCase())) {
-                horizonPlugins.put(configuration.getDisplayName(), provider);
-            }
-            else if (provider instanceof SpigotPluginProvider) {
+            if (provider instanceof SpigotPluginProvider) {
                 spigotPlugins.put(configuration.getDisplayName(), provider);
             }
             else if (provider instanceof PaperPluginParent.PaperServerPluginProvider) {
@@ -88,10 +101,17 @@ public abstract class PaperPluginsCommandMixin {
 
         if (!horizonPlugins.isEmpty()) {
             sender.sendMessage(header("Horizon Plugins", HORIZON_COLOR.value(), sizeHorizonPlugins, hasAllPluginTypes));
-        }
-
-        for (Component component : formatProviders(horizonPlugins)) {
-            sender.sendMessage(component);
+            Component built = PLUGIN_TICK;
+            built = built.append(Component.text("[", NamedTextColor.DARK_GRAY));
+            for (int i = 0; i < horizonPlugins.size(); i++) {
+                built = built.append(Component.text(horizonPlugins.get(i).pluginMetadata().name(), NamedTextColor.GREEN));
+                if (i != horizonPlugins.size() - 1) {
+                    // add comma
+                    built = built.append(Component.text(", ", NamedTextColor.DARK_GRAY));
+                }
+            }
+            built = built.append(Component.text("]", NamedTextColor.DARK_GRAY));
+            sender.sendMessage(built);
         }
 
         if (!paperPlugins.isEmpty()) {

@@ -61,8 +61,9 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
         }
     }
 
-    public static void loadToInit(@NonNull URL url) {
+    public static void loadToInit(@NonNull URL url, @NonNull String name) {
         SETUP_CLASSLOADER.addURL(url);
+        LOGGER.debug("Added {} to setup classloader", name);
     }
 
     @ApiStatus.Internal

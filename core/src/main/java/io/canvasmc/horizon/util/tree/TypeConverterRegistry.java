@@ -73,11 +73,11 @@ public final class TypeConverterRegistry {
         converters.put(type, converter);
     }
 
-    public <T, B> void registerMapped(Class<T> newType, Class<B> baseType, Function<B, T> mapper) {
-        TypeConverter<B> baseConverter = get(baseType);
+    public <E, S> void registerMapped(Class<E> newType, Class<S> baseType, MappedTypeConverter<E, S> mapper) {
+        TypeConverter<S> baseConverter = get(baseType);
         register(newType, obj -> {
-            B baseValue = baseConverter.convert(obj);
-            return mapper.apply(baseValue);
+            S baseValue = baseConverter.convert(obj);
+            return mapper.convert(baseValue);
         });
     }
 

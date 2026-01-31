@@ -122,7 +122,7 @@ public final class ObjectTree {
      * @apiNote This does not support nesting, so you cannot use the input {@code "thing.nestedthing"} to find a
      *     nested value
      */
-    public @NonNull Value<?> getValueOrThrow(String key) {
+    public @NonNull ObjectValue getValueOrThrow(String key) {
         if (!data.containsKey(key)) {
             throw new NoSuchElementException("Key not found: " + key);
         }
@@ -345,6 +345,14 @@ public final class ObjectTree {
          */
         public <T> ReadBuilder registerConverter(Class<T> type, TypeConverter<T> converter) {
             converters.register(type, converter);
+            return this;
+        }
+
+        /**
+         * Registers a mapped type converter. Should be used when using {@link Value#as(Class)} to parse your object
+         */
+        public <E, S> ReadBuilder registerMappedConverter(Class<E> newType, Class<S> baseType, MappedTypeConverter<E, S> mapper) {
+            converters.registerMapped(newType, baseType, mapper);
             return this;
         }
 

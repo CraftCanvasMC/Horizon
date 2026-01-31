@@ -1,7 +1,8 @@
 package io.canvasmc.horizon.plugin.types;
 
 import com.google.common.collect.ImmutableList;
-import io.canvasmc.horizon.plugin.data.HorizonMetadata;
+import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
+import io.canvasmc.horizon.plugin.data.Type;
 import io.canvasmc.horizon.util.FileJar;
 import org.jspecify.annotations.NonNull;
 
@@ -23,12 +24,12 @@ import java.util.Objects;
 public final class HorizonPlugin {
     private final String identifier;
     private final FileJar file;
-    private final HorizonMetadata pluginMetadata;
-    private final NestedData nestedData;
+    private final HorizonPluginMetadata pluginMetadata;
+    private final CompiledNestedPlugins nestedData;
 
     private FileSystem fileSystem;
 
-    public HorizonPlugin(String identifier, FileJar file, HorizonMetadata pluginMetadata, NestedData nestedData) {
+    public HorizonPlugin(String identifier, FileJar file, HorizonPluginMetadata pluginMetadata, CompiledNestedPlugins nestedData) {
         this.identifier = identifier;
         this.file = file;
         this.pluginMetadata = pluginMetadata;
@@ -43,11 +44,11 @@ public final class HorizonPlugin {
         return file;
     }
 
-    public HorizonMetadata pluginMetadata() {
+    public HorizonPluginMetadata pluginMetadata() {
         return pluginMetadata;
     }
 
-    public NestedData nestedData() {
+    public CompiledNestedPlugins nestedData() {
         return nestedData;
     }
 
@@ -75,6 +76,10 @@ public final class HorizonPlugin {
         return file().ioFile().toPath().toAbsolutePath();
     }
 
+    public boolean isHybrid() {
+        return !pluginMetadata.pluginType().equals(Type.HORIZON);
+    }
+
     /**
      * A bundle of nested horizon plugins, server plugins, and libraries
      *
@@ -85,11 +90,11 @@ public final class HorizonPlugin {
      * @param libraryEntries
      *     library plugins
      */
-    public record NestedData(
+    public record CompiledNestedPlugins(
         List<HorizonPlugin> horizonEntries, List<FileJar> serverPluginEntries,
         List<FileJar> libraryEntries) {
 
-        public NestedData(List<HorizonPlugin> horizonEntries, List<FileJar> serverPluginEntries, List<FileJar> libraryEntries) {
+        public CompiledNestedPlugins(List<HorizonPlugin> horizonEntries, List<FileJar> serverPluginEntries, List<FileJar> libraryEntries) {
             this.horizonEntries = ImmutableList.copyOf(horizonEntries);
             this.serverPluginEntries = ImmutableList.copyOf(serverPluginEntries);
             this.libraryEntries = ImmutableList.copyOf(libraryEntries);

@@ -1,6 +1,7 @@
 plugins {
     id("io.canvasmc.weaver.userdev")
     id("publishing-conventions")
+    id("io.canvasmc.horizon")
 }
 
 version = project.version.toString() + "." + fetchBuild().get()
@@ -34,6 +35,12 @@ dependencies {
 
     // minecraft setup
     paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
+}
+
+horizon {
+    accessTransformerFiles.from(
+        file("src/main/resources/internal.at")
+    )
 }
 
 tasks.withType<Javadoc> {

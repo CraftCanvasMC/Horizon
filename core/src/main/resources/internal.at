@@ -1,0 +1,2 @@
+public io.papermc.paper.plugin.provider.type.PluginFileType <init>(Ljava/lang/String;Lio/papermc/paper/plugin/provider/type/PluginTypeFactory;)V
+public io.papermc.paper.plugin.provider.type.PluginFileType config

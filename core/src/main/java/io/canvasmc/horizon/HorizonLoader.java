@@ -7,8 +7,8 @@ import io.canvasmc.horizon.logger.Level;
 import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.logger.stream.OutStream;
 import io.canvasmc.horizon.plugin.PluginTree;
-import io.canvasmc.horizon.plugin.data.HorizonMetadata;
-import io.canvasmc.horizon.plugin.data.PluginServiceProvider;
+import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
+import io.canvasmc.horizon.plugin.data.Type;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.transformer.AccessTransformationImpl;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
@@ -34,6 +34,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -92,20 +93,22 @@ public class HorizonLoader {
             INTERNAL_PLUGIN = new HorizonPlugin(
                 "horizon",
                 new FileJar(horizonIOFile, new JarFile(horizonIOFile)),
-                new HorizonMetadata(
-                    "horizon",
-                    this.version,
-                    "<void>",
-                    "<void>",
-                    List.of("internal.mixins.json"),
-                    List.of(),
+                new HorizonPluginMetadata(
+                    "Horizon",
+                    version,
+                    new ArrayList<>(),
+                    List.of(
+                        AccessTransformationImpl.class.getName(),
+                        MixinTransformationImpl.class.getName()
+                    ),
+                    List.of("CanvasMC"),
+                    Type.HORIZON,
                     false,
-                    PluginServiceProvider.DESERIALIZER.deserialize(ObjectTree.builder()
-                        .put(PluginServiceProvider.ClassTransformer.INST.getYamlEntryName(), List.of(
-                            AccessTransformationImpl.class.getName(),
-                            MixinTransformationImpl.class.getName()
-                        )).build())
-                ), new HorizonPlugin.NestedData(List.of(), List.of(), List.of())
+                    List.of("internal.mixins.json"),
+                    List.of("internal.at"),
+                    new ArrayList<>(),
+                    new HorizonPluginMetadata.NestedData(Set.of(), Set.of(), Set.of())
+                ), new HorizonPlugin.CompiledNestedPlugins(List.of(), List.of(), List.of())
             );
         } catch (Throwable thrown) {
             throw new RuntimeException("Couldn't build internal plugin", thrown);

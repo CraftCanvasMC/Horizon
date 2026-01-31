@@ -99,9 +99,14 @@ public abstract class JavaPluginMixin implements IHorizonPlugin {
                 Path path = Path.of(codeSource.getLocation().toURI()).toAbsolutePath();
                 HorizonPlugin plugin = HorizonLoader.getInstance().getPlugins().getAll().stream()
                     .filter((pl) -> pl.getPath().equals(path))
+                    .filter(HorizonPlugin::isHybrid)
                     // find the plugin or throw
-                    .findFirst().orElseThrow(() -> new IllegalStateException("Path '" + path + "' was not associated with any Horizon plugins"));
-                return getPlugin(Class.forName(plugin.pluginMetadata().main()).asSubclass(JavaPlugin.class));
+                    .findFirst().orElseThrow(() -> new IllegalStateException("Path '" + path + "' was not associated with any Hybrid-Horizon plugins"));
+                String pluginMain = plugin.pluginMetadata().entrypoints().stream()
+                    .filter((eo) -> eo.key().equalsIgnoreCase("plugin_main"))
+                    .findFirst().orElseThrow(() -> new IllegalArgumentException("Hybrid Horizon plugins need a 'plugin_main' entrypoint, but one was not found in " + plugin.pluginMetadata().name()))
+                    .clazz();
+                return getPlugin(Class.forName(pluginMain).asSubclass(JavaPlugin.class));
             } catch (Throwable thrown) {
                 throw new RuntimeException("Unable to resolve providing plugin for class: " + name, thrown);
             }
