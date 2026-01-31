@@ -1,20 +1,15 @@
 package io.canvasmc.horizon.plugin.data;
 
-import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.plugin.phase.impl.ResolutionPhase;
 import io.canvasmc.horizon.util.FileJar;
 import io.canvasmc.horizon.util.Pair;
-import io.canvasmc.horizon.util.tree.Format;
-import io.canvasmc.horizon.util.tree.MappedTypeConverter;
 import io.canvasmc.horizon.util.tree.ObjectDeserializer;
 import io.canvasmc.horizon.util.tree.ObjectTree;
 import io.canvasmc.horizon.util.tree.TypeConverter;
-import io.canvasmc.horizon.util.tree.WriteException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 

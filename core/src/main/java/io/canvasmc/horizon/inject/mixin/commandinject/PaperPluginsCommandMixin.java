@@ -1,9 +1,7 @@
 package io.canvasmc.horizon.inject.mixin.commandinject;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.brigadier.context.CommandContext;
 import io.canvasmc.horizon.HorizonLoader;
-import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.papermc.paper.command.PaperPluginsCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -24,7 +22,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.List;
 import java.util.TreeMap;
