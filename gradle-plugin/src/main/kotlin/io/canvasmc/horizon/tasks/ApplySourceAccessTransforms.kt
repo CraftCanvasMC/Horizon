@@ -20,7 +20,6 @@ abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
     @get:OutputFile
     abstract val sourceTransformedMappedServerJar: RegularFileProperty
 
-    @get:Optional
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
     abstract val atFile: RegularFileProperty
@@ -33,11 +32,10 @@ abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
 
     @TaskAction
     fun run() {
-        val generatedIn = measureNanoTime {
-            val inputJar = mappedServerJar.get().path
-            val outputJar = sourceTransformedMappedServerJar.get().path.cleanFile()
-
-            if (atFile.isPresent && atFile.path.readText().isNotBlank()) {
+        val inputJar = mappedServerJar.path
+        val outputJar = sourceTransformedMappedServerJar.path.cleanFile()
+        if (atFile.path.readText().isNotBlank()) {
+            val generatedIn = measureNanoTime {
                 println("Applying access transformers 1/2...")
                 ats.run(
                     launcher.get(),
@@ -48,11 +46,11 @@ abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
                     archive = true,
                     validation = failFast.get(),
                 )
-            } else {
-                inputJar.copyTo(outputJar)
             }
+            timeSpent.set(generatedIn)
+            println("Done in ${formatNs(timeSpent.get())}!")
+        } else {
+            inputJar.copyTo(outputJar)
         }
-        timeSpent.set(generatedIn)
-        println("Done in ${formatNs(timeSpent.get())}!")
     }
 }

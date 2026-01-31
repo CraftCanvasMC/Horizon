@@ -115,19 +115,23 @@ abstract class ApplyClassAccessTransforms : JavaLauncherTask() {
 
     @TaskAction
     fun run() {
-        println("Applying access transformers 2/2...")
-        val generatedIn = measureNanoTime {
-            applyAccessTransform(
-                inputJarPath = inputJar.path,
-                outputJarPath = outputJar.path,
-                atFilePath = atFile.path,
-                jvmArgs = jvmargs.get(),
-                workerExecutor = workerExecutor,
-                launcher = launcher.get()
-            )
+        if (atFile.path.readText().isNotBlank()) {
+            val generatedIn = measureNanoTime {
+                println("Applying access transformers 2/2...")
+                applyAccessTransform(
+                    inputJarPath = inputJar.path,
+                    outputJarPath = outputJar.path,
+                    atFilePath = atFile.path,
+                    jvmArgs = jvmargs.get(),
+                    workerExecutor = workerExecutor,
+                    launcher = launcher.get()
+                )
+            }
+            timeSpent.set(generatedIn)
+            println("Done in ${formatNs(timeSpent.get())}!")
+        } else {
+            inputJar.path.copyTo(outputJar.path.cleanFile())
         }
-        timeSpent.set(generatedIn)
-        println("Done in ${formatNs(timeSpent.get())}!")
     }
 
     abstract class AtlasAction : WorkAction<AtlasParameters> {
