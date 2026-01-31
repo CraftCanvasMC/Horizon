@@ -36,6 +36,8 @@ public class TransformerContainer {
         Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\s+([A-Za-z_][A-Za-z0-9_]*(?:[.$][A-Za-z_][A-Za-z0-9_]*)*)\\s*$");
     private static final Pattern FIELD_REGEX =
         Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\s+([A-Za-z_][A-Za-z0-9_]*(?:[.$][A-Za-z_][A-Za-z0-9_]*)*)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*$");
+    private static final Pattern CONSTRUCTOR_REGEX =
+        Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\s+([A-Za-z_][A-Za-z0-9_]*(?:[.$][A-Za-z_][A-Za-z0-9_]*)*)\\s+<init>\\s*\\(([^)]*)\\)\\s*V\\s*$");
     private static final Pattern METHOD_REGEX =
         Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\s+([A-Za-z_][A-Za-z0-9_]*(?:[.$][A-Za-z_][A-Za-z0-9_]*)*)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*\\(([^)]*)\\)\\s*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)\\s*$");
 
@@ -230,6 +232,23 @@ public class TransformerContainer {
             return new Definition(
                 operation,
                 new Definition.FieldData(fieldName),
+                clazzTarget.replace(".", "/")
+            );
+        }
+
+        m = CONSTRUCTOR_REGEX.matcher(trimmed);
+        if (m.matches()) {
+            String op = m.group(1);
+            String f = m.group(2);
+            String clazzTarget = m.group(3);
+            String params = m.group(4);
+
+            TransformOperation operation =
+                tryParseOperation(op + (f == null ? "" : f));
+
+            return new Definition(
+                operation,
+                new Definition.MethodData("<init>(" + params + ")V"),
                 clazzTarget.replace(".", "/")
             );
         }
