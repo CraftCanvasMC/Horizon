@@ -8,7 +8,6 @@ import io.papermc.paper.plugin.entrypoint.strategy.modern.ModernPluginLoadingStr
 import io.papermc.paper.plugin.provider.PluginProvider;
 import io.papermc.paper.plugin.provider.entrypoint.DependencyContext;
 import io.papermc.paper.plugin.provider.type.paper.PaperPluginParent;
-import io.papermc.paper.plugin.provider.type.spigot.SpigotPluginProvider;
 import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,9 +21,6 @@ public class ModernPluginLoadingStrategyMixin<T> {
         // Note: bootstrapper works fine, doesn't need specific patch
         if (tPluginProvider instanceof PaperPluginParent.PaperServerPluginProvider paperPluginProvider) {
             MixinPluginLoader.ACTIVE_PLUGIN_PROVIDER_REF.set(paperPluginProvider);
-        }
-        else if (tPluginProvider instanceof SpigotPluginProvider spigotPluginProvider) {
-            MixinPluginLoader.ACTIVE_PLUGIN_PROVIDER_REF.set(spigotPluginProvider);
         }
     }
 }

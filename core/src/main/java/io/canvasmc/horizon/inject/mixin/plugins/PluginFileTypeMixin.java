@@ -1,6 +1,5 @@
 package io.canvasmc.horizon.inject.mixin.plugins;
 
-import io.canvasmc.horizon.plugin.data.Type;
 import io.canvasmc.horizon.util.tree.Format;
 import io.canvasmc.horizon.util.tree.ObjectTree;
 import io.papermc.paper.plugin.configuration.PluginMeta;
@@ -18,8 +17,6 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.PLUGIN_TYPE_CONVERTER;
 
 @Mixin(PluginFileType.class)
 public class PluginFileTypeMixin<T, C extends PluginMeta> {
@@ -45,14 +42,11 @@ public class PluginFileTypeMixin<T, C extends PluginMeta> {
         try {
             if ((entry = file.getJarEntry(HORIZON_PLUGIN_JSON)) != null) {
                 ObjectTree compiled = ObjectTree.read()
-                    .registerMappedConverter(Type.class, String.class, PLUGIN_TYPE_CONVERTER)
                     .format(Format.JSON)
                     .from(new InputStreamReader(file.getInputStream(entry)));
-                return switch (compiled.getValueOrThrow("type").as(Type.class)) {
-                    case PAPER -> PluginFileType.PAPER;
-                    case SPIGOT -> PluginFileType.SPIGOT;
-                    default -> null;
-                };
+                if (compiled.getValueSafe("is_hybrid").asBooleanOptional().orElse(false)) {
+                    return PluginFileType.PAPER;
+                }
             }
         } catch (Throwable thrown) {
             throw new RuntimeException("InStream couldn't be read", thrown);

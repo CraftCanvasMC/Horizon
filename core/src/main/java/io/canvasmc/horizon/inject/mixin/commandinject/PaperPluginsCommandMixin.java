@@ -64,7 +64,7 @@ public abstract class PaperPluginsCommandMixin {
     @ModifyExpressionValue(method = "formatProvider", at = @At(value = "INVOKE", target = "Lio/papermc/paper/plugin/configuration/PluginMeta;getName()Ljava/lang/String;"))
     private static @NonNull String horizon$injectPrefix(final @NonNull String original) {
         if (HORIZON_PLUGIN_JARS.contains(original.toLowerCase())) {
-            return "(Hybrid) " + original;
+            return "[Hybrid] " + original;
         }
         return original;
     }

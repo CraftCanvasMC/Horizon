@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.plugin.data;
 
 import io.canvasmc.horizon.HorizonLoader;
-import io.canvasmc.horizon.plugin.phase.impl.DiscoveryPhase;
+import io.canvasmc.horizon.plugin.phase.impl.ResolutionPhase;
 import io.canvasmc.horizon.util.FileJar;
 import io.canvasmc.horizon.util.Pair;
 import io.canvasmc.horizon.util.tree.Format;
@@ -14,20 +14,22 @@ import io.canvasmc.horizon.util.tree.WriteException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 public record HorizonPluginMetadata(
     String name,
+    String description,
     String version,
     List<EntrypointObject> entrypoints,
     List<String> transformers,
     List<String> authors,
-    Type pluginType,
+    boolean isHybrid,
     boolean loadDatapackEntry,
     List<String> mixins,
     List<String> wideners,
-    List<InstanceInteraction> interactions,
+    ObjectTree dependencies,
     NestedData nesting
 ) {
     private static final Pattern TAKEN_NAMES = Pattern.compile("^(?i)(minecraft|java|asm|horizon|bukkit|mojang|spigot|paper|mixin)$");
@@ -39,7 +41,7 @@ public record HorizonPluginMetadata(
         if (TAKEN_NAMES.matcher(name.toLowerCase()).matches() || name.isEmpty()) {
             throw new IllegalArgumentException("Invalid name used for plugin meta, " + name);
         }
-        if (DiscoveryPhase.PAPER_SPIGOT_PL_STORAGE.containsKey(name)) {
+        if (ResolutionPhase.doesPluginExist(name)) {
             throw new IllegalStateException("Duplicate plugin ID found: " + name);
         }
         final String version = root.getValueOrThrow("version").asString();
@@ -49,24 +51,26 @@ public record HorizonPluginMetadata(
                 .orElse(List.of())
         );
         root.getValueSafe("author").asStringOptional().ifPresent(authors::add);
-        final Type type = root.getValueOrThrow("type").as(Type.class);
 
         // optional arguments now
+        List<String> transformers = root.getArrayOptional("transformers")
+            .map((arr) -> arr.asList(String.class))
+            .orElse(new ArrayList<>());
+
+        boolean loadDatapackEntry = root.getValueSafe("load_datapack_entry").asBooleanOptional().orElse(false);
+        String description = root.getValueSafe("description").asStringOptional().orElse("");
+        boolean isHybrid = root.getValueSafe("is_hybrid").asBooleanOptional().orElse(false);
+
         List<EntrypointObject> entrypoints = root.getArrayOptional("entrypoints")
             .map((arr) -> arr.asList(EntrypointObject.class))
             .orElse(new ArrayList<>());
 
-        if (!type.equals(Type.HORIZON)) {
+        if (isHybrid) {
             entrypoints.stream()
                 .filter((eo) -> eo.key().equalsIgnoreCase("plugin_main"))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("If declared a Spigot or Paper plugin definition, must include 'plugin_main' entrypoint"));
+                .orElseThrow(() -> new IllegalArgumentException("If declared a Hybrid plugin, must include 'plugin_main' entrypoint"));
         }
-
-        List<String> transformers = root.getArrayOptional("transformers")
-            .map((arr) -> arr.asList(String.class))
-            .orElse(new ArrayList<>());
-        boolean loadDatapackEntry = root.getValueSafe("load_datapack_entry").asBooleanOptional().orElse(false);
 
         List<String> mixins = root.getArrayOptional("mixins")
             .map((arr) -> arr.asList(String.class))
@@ -75,12 +79,9 @@ public record HorizonPluginMetadata(
             .map((arr) -> arr.asList(String.class))
             .orElse(new ArrayList<>());
 
-        List<InstanceInteraction> interactions = root.getArrayOptional("interactions")
-            .map((arr) -> arr.asList(InstanceInteraction.class))
-            .orElse(new ArrayList<>());
-
         return new HorizonPluginMetadata(
-            name, version, entrypoints, transformers, authors, type, loadDatapackEntry, mixins, wideners, interactions,
+            name, description, version, entrypoints, transformers, authors, isHybrid,
+            loadDatapackEntry, mixins, wideners, root.getTreeOptional("dependencies").orElse(ObjectTree.builder().build()),
             new NestedData(new HashSet<>(), new HashSet<>(), new HashSet<>())
         );
     };
@@ -90,9 +91,6 @@ public record HorizonPluginMetadata(
     };
     public static final MappedTypeConverter<InstanceInteraction.Type, String> INTERACTION_TYPE_CONVERTER = (final String val) -> {
         return InstanceInteraction.Type.valueOf(val.toUpperCase());
-    };
-    public static final MappedTypeConverter<Type, String> PLUGIN_TYPE_CONVERTER = (final String val) -> {
-        return Type.valueOf(val.toUpperCase());
     };
     public static final TypeConverter<EntrypointObject> ENTRYPOINT_CONVERTER = (final Object val) -> {
         final ObjectTree root = (ObjectTree) val;
@@ -120,15 +118,22 @@ public record HorizonPluginMetadata(
     };
 
     public String encodeToYaml() {
-        if (pluginType.equals(Type.HORIZON)) {
-            throw new IllegalStateException("Cannot run this on horizon plugin meta");
+        if (!isHybrid) {
+            throw new UnsupportedOperationException("Not hybrid plugin");
         }
+
         ObjectTree.Builder builder = ObjectTree.builder();
+        final Map<String, Object> dependencies = this.dependencies.toRawMap();
+        dependencies.entrySet().removeIf(en -> en.getKey().equalsIgnoreCase("horizon"));
         builder
+            .keepRawValues()
             .put("name", name)
+            .put("description", description)
             .put("version", version)
             .put("api-version", HorizonLoader.getInstance().getVersionMeta().minecraftVersion().getId())
-            .put("authors", authors.toArray(new String[0]));
+            .put("authors", authors.toArray(new String[0]))
+            .put("dependencies", dependencies);
+
         for (final EntrypointObject entrypoint : entrypoints) {
             if (entrypoint.key().equalsIgnoreCase("plugin_main")) {
                 builder.put("main", entrypoint.clazz());

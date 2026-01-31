@@ -1,6 +1,7 @@
 {
   "name": "TestPlugin",
   "version": "1.0.0-SNAPSHOT",
+  "description": "Hello world",
   "entrypoints": [
     {
       "server_main": "io.canvasmc.testplugin.ServerMain"
@@ -21,30 +22,20 @@
   "authors": [
     "CanvasMC"
   ],
-  "type": "PAPER",
   "load_datapack_entry": false,
+  "is_hybrid": true,
   "mixins": [
     "mixins.test.json"
   ],
+  "dependencies": {
+    "server": {
+    },
+    "bootstrap": {
+    },
+    "horizon": {
+    }
+  },
   "wideners": [
     "widener.at"
-  ],
-  "interactions": [
-    {
-      "type": "minecraft",
-      "version": ">=1.21.1",
-      "interacts": "REQUIRED"
-    },
-    {
-      "type": "asm",
-      "version": "9.0",
-      "interacts": "RECOMMENDED"
-    },
-    {
-      "type": "spigot_plugin",
-      "name": "Voicechat",
-      "version": "*",
-      "interacts": "BREAKS"
-    }
   ]
 }

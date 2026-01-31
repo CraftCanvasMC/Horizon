@@ -11,16 +11,12 @@
     "plugins.FileProviderSourceMixin",
     "plugins.PaperPluginProviderFactoryMixin",
     "plugins.PluginFileTypeMixin",
-    "plugins.SpigotPluginProviderFactoryMixin",
     "plugins.init.JavaPluginMixin",
     "plugins.init.ModernPluginLoadingStrategyMixin",
     "plugins.init.paper.PaperClasspathBuilderMixin",
     "plugins.init.paper.PaperPluginParentMixin",
     "plugins.init.paper.PaperServerPluginProviderMixin",
-    "plugins.init.spigot.PluginClassLoaderMixin",
-    "plugins.init.spigot.SpigotPluginProviderMixin",
-    "plugins.mixin.PaperSimplePluginClassLoaderMixin",
-    "plugins.mixin.PluginClassLoaderMixin"
+    "plugins.mixin.PaperSimplePluginClassLoaderMixin"
   ],
   "package": "io.canvasmc.horizon.inject.mixin",
   "mixinPriority": 1,

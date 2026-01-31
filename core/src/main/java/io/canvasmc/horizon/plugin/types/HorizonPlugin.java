@@ -2,7 +2,6 @@ package io.canvasmc.horizon.plugin.types;
 
 import com.google.common.collect.ImmutableList;
 import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
-import io.canvasmc.horizon.plugin.data.Type;
 import io.canvasmc.horizon.util.FileJar;
 import org.jspecify.annotations.NonNull;
 
@@ -77,7 +76,7 @@ public final class HorizonPlugin {
     }
 
     public boolean isHybrid() {
-        return !pluginMetadata.pluginType().equals(Type.HORIZON);
+        return pluginMetadata.isHybrid();
     }
 
     /**

@@ -5,7 +5,6 @@ import io.canvasmc.horizon.plugin.LoadContext;
 import io.canvasmc.horizon.plugin.data.EntrypointObject;
 import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
 import io.canvasmc.horizon.plugin.data.InstanceInteraction;
-import io.canvasmc.horizon.plugin.data.Type;
 import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.service.BootstrapMixinService;
@@ -23,9 +22,7 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -34,31 +31,27 @@ import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 import static io.canvasmc.horizon.MixinPluginLoader.LOGGER;
-import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.*;
+import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.ENTRYPOINT_CONVERTER;
+import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.INTERACTION_CONVERTER;
+import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.INTERACTION_RESOLVER_CONVERTER;
+import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.INTERACTION_TYPE_CONVERTER;
+import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.PLUGIN_META_FACTORY;
 
 public class DiscoveryPhase implements Phase<Void, Set<Pair<FileJar, HorizonPluginMetadata>>> {
     public static final String JIJ_PATH_HORIZON = "META-INF/jars/horizon/";
     public static final String JIJ_PATH_PAPER = "META-INF/jars/plugin/";
     public static final String JIJ_PATH_LIB = "META-INF/jars/libs/";
 
-    // spigot/paper plugin storage, NAME -> <TYPE, VERSION>
-    public static final Map<String, Pair<Type, String>> PAPER_SPIGOT_PL_STORAGE = new HashMap<>();
-
     private static void loadServerPlugin(final JarEntry jarEntry, final InputStream instream, final @NonNull FileJar pluginJar) throws Throwable {
         ObjectTree pluginYaml = ObjectTree.read().format(Format.YAML).from(instream);
         final String name = pluginYaml.getValueOrThrow("name").asString();
         // inject into setup classloader
         BootstrapMixinService.loadToInit(pluginJar.ioFile().toURI().toURL(), name);
-        if (PAPER_SPIGOT_PL_STORAGE.containsKey(name)) {
+        if (ResolutionPhase.doesPluginExist(name)) {
             throw new IllegalStateException("Duplicate plugin ID found: " + name);
         }
         // store for dependency resolution
-        PAPER_SPIGOT_PL_STORAGE.put(
-            name, new Pair<>(
-                jarEntry.getName().equalsIgnoreCase("paper-plugin.yml") ? Type.PAPER : Type.SPIGOT,
-                pluginYaml.getValueOrThrow("version").asString()
-            )
-        );
+        ResolutionPhase.PAPER_SPIGOT_PL_STORAGE.add(name);
     }
 
     @Override
@@ -128,7 +121,6 @@ public class DiscoveryPhase implements Phase<Void, Set<Pair<FileJar, HorizonPlug
                     // we also need to register all type converters
                     .registerMappedConverter(InstanceInteraction.Resolver.class, String.class, INTERACTION_RESOLVER_CONVERTER)
                     .registerMappedConverter(InstanceInteraction.Type.class, String.class, INTERACTION_TYPE_CONVERTER)
-                    .registerMappedConverter(Type.class, String.class, PLUGIN_TYPE_CONVERTER)
                     .registerConverter(EntrypointObject.class, ENTRYPOINT_CONVERTER)
                     .registerConverter(InstanceInteraction.class, INTERACTION_CONVERTER)
                     // now we need to register object deserializers

@@ -72,7 +72,12 @@ public final class ObjectTree {
     }
 
     ObjectTree(Map<String, Object> data, TypeConverterRegistry converters, RemappingContext remappingContext) {
-        this.data = Collections.unmodifiableMap(normalizeData(data, converters, remappingContext));
+        this(data, converters, remappingContext, false);
+    }
+
+    public ObjectTree(final Map<String, Object> data, final TypeConverterRegistry converters, final RemappingContext remappingContext, final boolean keepRawValues) {
+        Map<String, Object> normalized = normalizeData(data, converters, remappingContext);
+        this.data = Collections.unmodifiableMap(keepRawValues ? data : normalized);
         this.converters = converters;
         this.remappingContext = remappingContext;
     }
@@ -101,7 +106,7 @@ public final class ObjectTree {
     /**
      * Converts this tree back to a raw map structure (for serialization)
      */
-    @NonNull Map<String, Object> toRawMap() {
+    public @NonNull Map<String, Object> toRawMap() {
         Map<String, Object> raw = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : data.entrySet()) {
             raw.put(entry.getKey(), denormalizeValue(entry.getValue()));
@@ -722,6 +727,7 @@ public final class ObjectTree {
         private final Map<String, Object> data = new LinkedHashMap<>();
         private final TypeConverterRegistry converters = new TypeConverterRegistry();
         private final Map<String, String> interpolationVariables = new HashMap<>();
+        private boolean keepRawValues = false;
 
         private Builder() {
         }
@@ -767,11 +773,20 @@ public final class ObjectTree {
         }
 
         /**
+         * Allows making it so when building the {@link io.canvasmc.horizon.util.tree.ObjectTree} it won't compile maps
+         * and lists into the OT equivalents. Useful if trying to convert between file types
+         */
+        public Builder keepRawValues() {
+            keepRawValues = true;
+            return this;
+        }
+
+        /**
          * Builds the ObjectTree
          */
         public @NonNull ObjectTree build() {
             RemappingContext context = new RemappingContext(interpolationVariables);
-            return new ObjectTree(data, converters, context);
+            return new ObjectTree(data, converters, context, keepRawValues);
         }
     }
 }

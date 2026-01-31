@@ -8,7 +8,6 @@ import io.canvasmc.horizon.logger.Logger;
 import io.canvasmc.horizon.logger.stream.OutStream;
 import io.canvasmc.horizon.plugin.PluginTree;
 import io.canvasmc.horizon.plugin.data.HorizonPluginMetadata;
-import io.canvasmc.horizon.plugin.data.Type;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.transformer.AccessTransformationImpl;
 import io.canvasmc.horizon.transformer.MixinTransformationImpl;
@@ -95,6 +94,7 @@ public class HorizonLoader {
                 new FileJar(horizonIOFile, new JarFile(horizonIOFile)),
                 new HorizonPluginMetadata(
                     "Horizon",
+                    "The core Horizon internals",
                     version,
                     new ArrayList<>(),
                     List.of(
@@ -102,11 +102,11 @@ public class HorizonLoader {
                         MixinTransformationImpl.class.getName()
                     ),
                     List.of("CanvasMC"),
-                    Type.HORIZON,
+                    false,
                     false,
                     List.of("internal.mixins.json"),
                     List.of("internal.at"),
-                    new ArrayList<>(),
+                    ObjectTree.builder().build(),
                     new HorizonPluginMetadata.NestedData(Set.of(), Set.of(), Set.of())
                 ), new HorizonPlugin.CompiledNestedPlugins(List.of(), List.of(), List.of())
             );
