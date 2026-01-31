@@ -7,6 +7,7 @@ import io.canvasmc.horizon.plugin.phase.Phase;
 import io.canvasmc.horizon.plugin.phase.PhaseException;
 import io.canvasmc.horizon.plugin.phase.impl.BuilderPhase;
 import io.canvasmc.horizon.plugin.phase.impl.DiscoveryPhase;
+import io.canvasmc.horizon.plugin.phase.impl.ResolutionPhase;
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.service.BootstrapMixinService;
 import io.canvasmc.horizon.service.MixinContainerHandle;
@@ -30,6 +31,7 @@ public class MixinPluginLoader {
 
     private static final List<Phase<?, ?>> PHASES = List.of(
         new DiscoveryPhase(),
+        new ResolutionPhase(),
         new BuilderPhase()
     );
 

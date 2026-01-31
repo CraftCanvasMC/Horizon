@@ -51,6 +51,7 @@ public class HorizonLoader {
         .pattern("[{date: HH:mm:ss}] [{level}" + (DEBUG ? "/{tag}" : "") + "]: {message}")
         .level(DEBUG ? Level.DEBUG : Level.INFO)
         .build();
+    public static final int JAVA_VERSION = Runtime.version().feature();
 
     static HorizonPlugin INTERNAL_PLUGIN;
     private static HorizonLoader INSTANCE;
@@ -264,6 +265,9 @@ public class HorizonLoader {
                     .from(new InputStreamReader(jarFile.getInputStream(jarFile.getJarEntry("version.json"))));
 
                 this.paperclipVersion = versionTree.as(PaperclipVersion.class);
+                if (paperclipVersion.minecraftVersion().getJavaVersion() > JAVA_VERSION) {
+                    throw new IllegalStateException("Minimum java version requirement isn't met for version " + paperclipVersion.minecraftVersion().getName() + ", please update your Java");
+                }
                 LOGGER.info("Booting Horizon {}", this.paperclipVersion.minecraftVersion().getName());
 
                 try {
@@ -337,7 +341,7 @@ public class HorizonLoader {
      *
      * @return the version
      */
-    public @NonNull String getVersion() {
+    public @NonNull String getHorizonVersion() {
         return version;
     }
 
