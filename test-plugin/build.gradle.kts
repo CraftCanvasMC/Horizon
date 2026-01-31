@@ -23,6 +23,7 @@ tasks {
 */
 
 horizon {
+    splitPluginSourceSets()
     accessTransformerFiles.from(
         file("src/main/resources/widener.at")
     )

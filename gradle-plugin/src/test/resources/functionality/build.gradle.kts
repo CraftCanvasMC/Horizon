@@ -12,6 +12,7 @@ dependencies {
 
 horizon {
     // failFastOnUnapplicableAT = false
+    // splitPluginSourceSets()
     accessTransformerFiles.from(
         file("src/main/resources/wideners.at"),
         file("src/main/resources/additional_wideners.at"),

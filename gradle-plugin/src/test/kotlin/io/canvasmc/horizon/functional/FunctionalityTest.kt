@@ -75,6 +75,31 @@ class FunctionalityTest {
         val atLog1 = tempDir.resolve("build/tmp/applySourceAccessTransforms/log.txt").readText()
 
         assertContains(atLog1, "did not apply as its target doesn't exist")
+
+        println("\ntesting split source set compilation constraints\n")
+
+        modifyFile(tempDir.resolve("build.gradle.kts")) {
+            it.replace("// splitPluginSourceSets()", "splitPluginSourceSets()")
+        }
+
+        val build3 = runner
+            .withArguments("build", "--stacktrace")
+            .withDebug(debug)
+            .build()
+
+        assertEquals(build3.task(":build")?.outcome, TaskOutcome.SUCCESS)
+
+        println("\ntesting split source set compilation constraints again\n")
+        modifyFile(tempDir.resolve("src/main/java/io/canvasmc/testplugin/TestLoader.java")) {
+            it.replace("// new TestPaperPlugin();", "new TestPaperPlugin();")
+        }
+
+        val build4 = runner
+            .withArguments("build", "--stacktrace")
+            .withDebug(debug)
+            .buildAndFail()
+
+        assertEquals(build4.task(":compileJava")?.outcome, TaskOutcome.FAILED)
     }
 
     fun modifyFile(path: Path, action: (content: String) -> String) {

@@ -1,5 +1,6 @@
 package io.canvasmc.horizon.extension
 
+import io.canvasmc.horizon.util.constants.EMBEDDED_PLUGIN_JAR_PATH
 import io.canvasmc.horizon.util.providerSet
 import io.papermc.paperweight.util.constants.PAPER_MAVEN_REPO_URL
 import org.gradle.api.Project
@@ -8,13 +9,21 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.setProperty
 import javax.inject.Inject
 
-abstract class HorizonExtension @Inject constructor(objects: ObjectFactory, project: Project) {
+abstract class HorizonExtension @Inject constructor(
+    objects: ObjectFactory,
+    private val project: Project
+) {
     /**
      * Access transformer files to apply to the server jar.
      */
@@ -64,4 +73,35 @@ abstract class HorizonExtension @Inject constructor(objects: ObjectFactory, proj
      * A custom server jar override for run-paper. Allows you to use your own jar as the server jar.
      */
     abstract val customRunServerJar: RegularFileProperty
+
+    /**
+     * Splits source sets for Horizon specific plugin code and a normal paper plugin code.
+     * The main source set is used for Horizon code and cannot access the plugin source set,
+     * and the plugin source set is used for paper plugin code that should be JiJ'd into the final jar,
+     * and is able to access classes from the main source set.
+     */
+    fun splitPluginSourceSets() {
+        project.pluginManager.apply(JavaPlugin::class.java)
+        val javaPlugin = project.extensions.getByType<JavaPluginExtension>()
+        val main = javaPlugin.sourceSets.named("main")
+
+        val plugin = javaPlugin.sourceSets.register("plugin") {
+            java.srcDir("src/plugin/java")
+            resources.srcDir("src/plugin/resources")
+
+            compileClasspath += project.files(main.map { it.compileClasspath + it.output.classesDirs })
+            runtimeClasspath += project.files(main.map { it.runtimeClasspath + it.output.classesDirs })
+        }
+
+        val pluginJar = project.tasks.register<Jar>("pluginJar") {
+            archiveClassifier.set("plugin")
+            from(plugin.map { it.output })
+        }
+
+        project.tasks.named<Jar>("jar") {
+            from(pluginJar.map { it.archiveFile }) {
+                into(EMBEDDED_PLUGIN_JAR_PATH)
+            }
+        }
+    }
 }
