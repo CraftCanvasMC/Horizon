@@ -5,7 +5,17 @@
 ## Introduction
 
 Horizon is a MIXIN wrapper for PaperMC servers and forks, expanding plugin capabilities to allow for further
-customization and enhancements. Horizon is a project that is intended to supersede
+customization and enhancements.
+
+Horizon acts more as a replacement wrapper for Paperclip(the launcher for Paper servers and forks). It boots the game in
+a very similar way, as it contains an iteration of the Paperclip launcher. Please read the sections below to
+learn more about how Horizon works and how to develop with it.
+
+- For installing and running, see [here](#Installation-and-Running).
+- For development, start [here](#Basics-of-Developing-a-Horizon-Plugin)
+
+## Background
+Horizon is a project that is intended to supersede
 a project by one of the core team members(Dueris), the project Eclipse. Eclipse was a plugin for Paper based
 off the program Ignite that allowed loading SpongePowered Mixins and access wideners and transformers. Eclipse
 and Ignite code are contained within Horizon since obviously, Horizon supersedes Eclipse, and as such has a
@@ -15,10 +25,6 @@ so, Dueris archived the project and decided to create Horizon, which is the succ
 
 Horizon intends to fix the issues from Eclipse and create a more manageable, workable, and stable environment for
 plugins to work with, while incorporating plugin authors' ideas in a much more powerful and flexible manner.
-
-Horizon acts more as a replacement wrapper for Paperclip(the launcher for Paper servers and forks). It boots the game in
-a very similar way, as it contains an iteration of the Paperclip launcher. Please read the sections below to
-learn more about how Horizon works and how to develop with it.
 
 ## Breakages and Incompatibilities
 
@@ -37,7 +43,7 @@ Horizon tries not to break much of anything; however, there are some things it's
 - **Ignite and Eclipse.** Eclipse is a fork of Ignite, and Horizon derives some source from Eclipse since this project
   supersedes Eclipse. As such, they are both completely and fundamentally incompatible with Horizon. Horizon, in
   comparison
-  to Ignite, is generally more inclined and intended for expanding upon Ignites initial structure and idea aimed for
+  to Ignite, is generally more inclined and intended for expanding upon Ignite's initial structure and idea aimed for
   specifically plugin usage, to match closer to things like Papers patching style and such(transformers as an example).
   This also uses things like the plugin yaml and such, and is compatible with using the `main` entrypoint in plugins,
   unlike Ignite. Horizon is intended to expand plugin capabilities further for Paper, while Ignite is meant for a more
@@ -87,7 +93,7 @@ existing plugin YML file, Horizon introduces its own metadata type. You cannot c
 plugins work fundementally different from paper plugins.
 
 Horizon plugins **cannot** interact with Paper plugins due to how the classloader works(described below). However, Paper
-plugins can interact with Horizon plugins. As such, Horizon requires that if you are going to attempt to interact with
+plugins can interact with Horizon plugins. As such, Horizon requires that, if you are going to attempt to interact with
 other Paper plugins, you need to setup a split source set. Otherwise, just use a normal setup, however this means it is
 strictly only a Horizon plugin, and cannot interact with other Paper plugins in the server, only other Horizon plugins
 and server internals and Horizon API.
