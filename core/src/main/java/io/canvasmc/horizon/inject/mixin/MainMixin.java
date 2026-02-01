@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Main.class)
 public class MainMixin {
 
-    // TODO - readme, along with entrypoint api readme
     @Inject(method = "main", at = @At("HEAD"))
     private static void horizon$serverMainEntrypoint(OptionSet optionSet, CallbackInfo ci) {
         EntrypointContainer.buildProvider("server_main", DedicatedServerInitializer.class, Void.class).invoke();

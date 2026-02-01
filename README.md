@@ -862,3 +862,56 @@ for plugins like Mixins and ATs. It is generally recommended to just use Mixins,
 exposed to plugins.
 
 ### Entrypoint API
+
+Horizon provides an entrypoint API, similar to the Fabric-Loader. This API is driven by the `EntrypointContainer`, which
+provides a lightweight and reflection-driven entrypoint system for Horizon and its plugins. It allows plugins to expose
+implementations of an interface under an entrypoint key, which the API can later discover, instantiate, and invoke in
+bulk. At runtime, when the entrypoint key is called, Horizon scans plugins and finds entrypoints matching a key,
+verifies the target class implementations, and then constructs instances via a **no-arg constructor**. The result is a
+`Provider<C, R>` that contains all discovered implementations and an invocation system.
+
+Invocation is riven by an `@EntrypointHandler` annotation placed on the interface to be invoked, which defines the
+method name and parameter description to call. The provider enforces return-type correctness and executes the handler
+method across all loaded implementations, returning results as a `Stream<R>`. Failures are isolated per-plugin and are
+logged, and optionally routed to an error handler, which ensures one misbehaving plugin doesn't break the entire thing.
+
+This is an example entrypoint interface:
+
+```java
+@EntrypointHandler(
+    value = "onRegister",
+    argTypes = { String.class }
+)
+public interface ExampleEntrypoint {
+    void onRegister(String example);
+}
+```
+
+Implement the interface in a plugin:
+
+```java
+public class ExampleEntrypointImpl implements ExampleEntrypoint {
+    @Override
+    public void onRegister(String example) {
+        HorizonLoader.LOGGER.info("Called entrypoint!");
+    }
+}
+```
+
+The plugin metadata must declare this under the appropriate entrypoint key, for example, "example".
+This is how you invoke the provider:
+
+```java
+EntrypointContainer.Provider<ExampleEntrypoint, Void> provider =
+    EntrypointContainer.buildProvider(
+        "example_key",
+        ExampleEntrypoint.class,
+        Void.class
+    );
+
+provider.invoke("Example!");
+```
+
+Horizon provides a `"server_main"` entrypoint for plugins, which is executed on startup after the server build
+information impl is created, which is very similar to the fabric loader `"server"` entrypoint. All plugins using this
+must implement the `DedicatedServerInitializer` class.

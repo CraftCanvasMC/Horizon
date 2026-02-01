@@ -130,7 +130,6 @@ public class HorizonLoader {
     }
 
     public static void main(String[] args) {
-        // TODO - can we support this..?
         if (Boolean.getBoolean("paper.useLegacyPluginLoading")) {
             throw new IllegalStateException("Legacy plugin loading is unsupported with Horizon");
         }
