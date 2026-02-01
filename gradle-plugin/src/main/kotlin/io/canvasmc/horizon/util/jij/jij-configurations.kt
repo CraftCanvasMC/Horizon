@@ -8,16 +8,12 @@ import io.canvasmc.horizon.util.constants.INCLUDE_LIBRARY
 import io.canvasmc.horizon.util.constants.INCLUDE_MIXIN_PLUGIN
 import io.canvasmc.horizon.util.constants.INCLUDE_PLUGIN
 import org.gradle.api.Project
-import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import kotlin.collections.forEach
-import kotlin.plus
 
 fun Project.configureJiJ(ext: HorizonExtension) {
     ext.addIncludedDependenciesTo.get().forEach {
@@ -45,17 +41,9 @@ fun Project.configureSplitSources() {
     val main = javaPlugin.sourceSets.named("main")
 
     val plugin = javaPlugin.sourceSets.register("plugin") {
-        java.srcDir("src/plugin/java")
-        resources.srcDir("src/plugin/resources")
-
         // call get to avoid IDE sync issues
         compileClasspath += main.get().output + main.get().compileClasspath
         runtimeClasspath += main.get().output + main.get().runtimeClasspath
-    }
-
-    // to avoid issues with gradle thinking there's a duplicate when in fact there isn't
-    tasks.named<Copy>("processPluginResources") {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
     val pluginJar = tasks.register<Jar>("pluginJar") {
