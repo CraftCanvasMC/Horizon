@@ -7,7 +7,7 @@
 Horizon is a MIXIN wrapper for PaperMC servers and forks, expanding plugin capabilities to allow for further
 customization and enhancements.
 
-Horizon acts more as a replacement wrapper for Paperclip(the launcher for Paper servers and forks). It boots the game in
+Horizon acts more like a replacement wrapper for Paperclip (the launcher for Paper servers and forks). It boots the game in
 a very similar way, as it contains an iteration of the Paperclip launcher. Please read the sections below to
 learn more about how Horizon works and how to develop with it.
 
@@ -17,10 +17,10 @@ learn more about how Horizon works and how to develop with it.
 ## Background
 Horizon is a project that is intended to supersede
 a project by one of the core team members(Dueris), the project Eclipse. Eclipse was a plugin for Paper based
-off the program Ignite that allowed loading SpongePowered Mixins and access wideners and transformers. Eclipse
+on the program Ignite that allowed loading SpongePowered Mixins, access wideners, and transformers. Eclipse
 and Ignite code are contained within Horizon since obviously, Horizon supersedes Eclipse, and as such has a
-similar concept and similar/derived code, and Eclipse is based off/forked from Ignite directly.
-This project, of course, came with many issues and drawbacks that made Eclipse hard to work with most of the time. And
+similar concept and similar/derived code, and Eclipse is based on/forked from Ignite directly.
+This project, of course, had many issues and drawbacks that made Eclipse difficult to work with most of the time. And
 so, Dueris archived the project and decided to create Horizon, which is the successor of Eclipse.
 
 Horizon intends to fix the issues from Eclipse and create a more manageable, workable, and stable environment for
@@ -28,7 +28,7 @@ plugins to work with, while incorporating plugin authors' ideas in a much more p
 
 ## Breakages and Incompatibilities
 
-Horizon tries not to break much of anything; however, there are some things it's incompatible with.
+Horizon tries not to break much; however, there are some things it's incompatible with.
 
 - **The legacy plugin loader.** The legacy plugin loader(`LegacyPluginLoadingStrategy.java`) is completely unsupported
   in Horizon. This is due to Horizon having a few internal
@@ -43,9 +43,9 @@ Horizon tries not to break much of anything; however, there are some things it's
 - **Ignite and Eclipse.** Eclipse is a fork of Ignite, and Horizon derives some source from Eclipse since this project
   supersedes Eclipse. As such, they are both completely and fundamentally incompatible with Horizon. Horizon, in
   comparison
-  to Ignite, is generally more inclined and intended for expanding upon Ignite's initial structure and idea aimed for
-  specifically plugin usage, to match closer to things like Papers patching style and such(transformers as an example).
-  This also uses things like the plugin yaml and such, and is compatible with using the `main` entrypoint in plugins,
+  to Ignite, is generally more inclined and intended for expanding upon Ignite's initial structure and idea, aimed at
+  specifically, plugin usage to match closer to things like Paper's patching style and such (transformers, for example).
+  This also uses things like the plugin YAML and such, and is compatible with using the `main` entrypoint in plugins,
   unlike Ignite. Horizon is intended to expand plugin capabilities further for Paper, while Ignite is meant for a more
   universal MIXIN launcher for Java servers.
 
@@ -73,8 +73,8 @@ since not all servers will have their server JAR named `server.jar`, or you can 
 have multiple server JARs and swap between the target Horizons they use.
 
 - The `cacheLocation` is simply for storing JIJ plugins and such, and is cleared on each boot of Horizon. We don't
-  recommend changing it, but
-  you can if there are conflicts or some issue arises, and you need to change the location.
+  recommend changing it, but you can if there are conflicts or some issue
+  arises, and you need to change the location.
 - The option `extraPlugins` allows for adding additional plugins to the Horizon classpath to be loaded. Horizon also
   reads from the `--add-plugin` JVM argument that is passed to the server
 - The `serverName` option is an optional override for the server mod name, as it gets overridden in Horizon
@@ -90,13 +90,13 @@ Horizon as its bootstrapper!
 Developing a Horizon plugin is mostly simple. One tool you can use is the Gradle plugin, which is described in more
 detail below. To start with developing a Horizon plugin, you need a plugin metadata file. Instead of adding onto the
 existing plugin YML file, Horizon introduces its own metadata type. You cannot combine the two plugin types. Horizon
-plugins work fundementally different from paper plugins.
+plugins work fundamentally differently from Paper plugins.
 
-Horizon plugins **cannot** interact with Paper plugins due to how the classloader works(described below). However, Paper
+Horizon plugins **cannot** interact with Paper plugins due to how the classloader works (described below). However, Paper
 plugins can interact with Horizon plugins. As such, Horizon requires that, if you are going to attempt to interact with
-other Paper plugins, you need to setup a split source set. Otherwise, just use a normal setup, however this means it is
+other Paper plugins, you need to setup a split source set. Otherwise, just use a normal setup, which means it is
 strictly only a Horizon plugin, and cannot interact with other Paper plugins in the server, only other Horizon plugins
-and server internals and Horizon API.
+and server internals, and the Horizon API.
 
 The Horizon metadata file is `horizon.plugin.json`. The metadata file follows a *similar* structure to plugin metadata
 files, but not completely. Here is an example:
@@ -177,7 +177,7 @@ logs, which will look similar to this:
 ```
 
 > [!NOTE]
-> You can enable debug logging for Horizon with `-DHorizon.debug=true`
+> You can enable debug logging for Horizon with `-DHorizon.debug=true`.
 
 Another way is by checking the `/plugins` command, which is replaced with the Horizon internal mixins to include Horizon
 plugins.
@@ -201,15 +201,15 @@ added by the server JAR, and will be accessible after Horizon launches the game.
 
 ### Gradle Plugin
 
-In order to start developing plugins for Horizon, it is required that you use the `horizon` gradle plugin in your build
+In order to start developing plugins for Horizon, it is required that you use the `horizon` Gradle plugin in your build
 scripts together with the `weaver-userdev` plugin. The `horizon` plugin automatically applies your ATs to the server
 JAR your plugin is going to be developed against, allowing you to compile against it and access the server's internals,
 and the `userdev` plugin allows it to achieve all that.
 
-Below is shown an example `build.gradle.kts` configuration structure, that compiles, to give you an idea on how to start
+Below is shown an example `build.gradle.kts` configuration structure, that compiles, to give you an idea of how to start
 developing!
 
-Keep in mind that the versions provided below might be outdated and you should always search for and ensure you're
+Keep in mind that the versions provided below might be outdated, and you should always search for and ensure you're
 specifying the latest versions available.
 
 ```kotlin
@@ -220,7 +220,7 @@ plugins {
 }
 
 dependencies {
-    horizon.horizonApi("1.0.0-build.1") // <- required for accesing the Horizon API, and also provides MIXIN deps.
+    horizon.horizonApi("1.0.0-build.1") // <- required for accessing the Horizon API, and also provides MIXIN deps.
     paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 
@@ -232,10 +232,10 @@ horizon {
 }
 ```
 
-The `run-paper` plugin is automatically configured to download a jar for the version specified in the dev bundle,
-however it can be overriden.
+The `run-paper` plugin is automatically configured to download a jar for the version specified in the dev bundle;
+however, it can be overridden.
 
-In addition, using the `shadow` gradle plugin is *unsupported* and you should instead opt-in to JiJ'ing your
+In addition, using the `shadow` Gradle plugin is *unsupported* and you should instead opt-in to JiJ'ing your
 dependencies by using the appropriate configurations, just like this:
 
 ```kotlin
@@ -246,8 +246,8 @@ dependencies {
 }
 ```
 
-The above configurations define in what directory the dependency is going to be placed in the JAR file structure, their
-names are pretty intuitive in themselves, however each one is described in detail below anyway.
+The above configurations define in what directory the dependency is going to be placed in the JAR file structure, and their
+names are pretty intuitive in themselves; however, each one is described in detail below anyway.
 
 For a Horizon-based plugin dependency, the appropriate configuration is `includeMixinPlugin`, which puts it under
 `META-INF/jars/horizon`.
@@ -255,9 +255,9 @@ For a Horizon-based plugin dependency, the appropriate configuration is `include
 For a normal plugin dependency, aka not-horizon, you should use the `includePlugin` configuration, which places it under
 `META-INF/jars/plugin`.
 
-And finally, for a library, the configuration to use is `includeLibrary`, which places it under `META-INF/jars/libs`.
+Finally, for a library, the configuration to use is `includeLibrary`, which places it in `META-INF/jars/libs`.
 
-All of those dependencies will be loaded at the server startup, for a more detailed overlook refer to
+All of those dependencies will be loaded at the server startup. For a more detailed overlook refer to
 the [JIJ](#jijjar-in-jar) section.
 
 TODO TOFFIK - split sources documentation
@@ -276,7 +276,7 @@ being loaded with every other
 plugin in their own classloader, are linked to the Ember classloader. This **does** mean that Horizon plugins **cannot**
 invoke code in non-Horizon plugins.
 
-One way to get around this is by using an abstraction layer and a 2nd plugin. You could have a Paper plugin and a
+One way to work around this is to use an abstraction layer and a 2nd plugin. You could have a Paper plugin and a
 Horizon plugin loaded(using JIJ too for more compact file managing) and create interfaces in the Horizon plugin that
 the Paper plugin implements, of which the Paper plugin will then access code in other non-Horizon plugin JARs.
 By implementing a system like this, you could create a Horizon plugin that can communicate with other Paper plugins.
@@ -285,12 +285,12 @@ Do note, though, that all Horizon plugins are visible to the Paper plugin classl
 ## ObjectTree API
 
 Horizon uses a powerful data API called the `ObjectTree` API for parsing and managing hierarchical immutable data
-structures. OT provides a type-safe way to work with multiple file formats including `JSON`, `YAML`, `TOML`, and
+structures. OT provides a type-safe way to work with multiple file formats, including `JSON`, `YAML`, `TOML`, and
 `PROPERTIES`
 
 ### Overview
 
-OT is an immutable, thread-safe API that represents file data as a tree structure. It provides mutli-format support,
+OT is an immutable, thread-safe API that represents file data as a tree structure. It provides multi-format support,
 type-safe conversions, alias support, variable interpolation, custom serialization, multiple reader inputs, and strong
 error handling.
 
@@ -426,12 +426,12 @@ ObjectTree config = ObjectTree.read()
     .parse();
 
 // This makes it so your YAML file you are parsing can use `db_host`, or `dbHost` in the
-// actual YAML file, but when read it is remapped to `host`, to be fetched like below
+// actual YAML file, but when read, it is remapped to `host`, to be fetched like below
 String host = config.getValue("host").asString();
 ```
 
 > [!NOTE]
-> You cannot access values via nested keys, like "test.example", any attempts will throw a NoSuchElementException
+> You cannot access values via nested keys, like "test.example" any attempts will throw a NoSuchElementException
 
 ### Variable Interpolation
 
@@ -456,7 +456,7 @@ String dataDir = config.getTree("server").getValue("dataDir").asString();
 // Result: "/home/user/horizon" (uses environment variable)
 ```
 
-Builtin variable sources:
+Built-in variable sources:
 
 - **Environment variables**: `${env.VARIABLE_NAME}`
 - **System properties**: `${sys.property.name}`
@@ -480,13 +480,13 @@ try (FileWriter writer = new FileWriter("config.json")) {
         .to(writer);
 }
 
-// Or get as string
+// Or get as a string
 String yaml = ObjectTree.write(config)
     .format(Format.YAML)
     .toString();
 ```
 
-All formats are interchangeable, you can read data in one format and write it in another. There is also safer access
+All formats are interchangeable; you can read data in one format and write it in another. There is also safer access
 with optionals:
 
 ```java
@@ -506,14 +506,14 @@ int port = config.getTreeOptional("server")
 
 For working with Mixins and ATs, it is *HIGHLY* recommended that you use IntelliJ IDEA with
 the [Minecraft Development plugin](https://plugins.jetbrains.com/plugin/8327-minecraft-development).
-This plugin will help autofill entries and such that will be extremely useful for development.
+This plugin will help autofill entries, which will be extremely useful for development.
 
 ### Access Transformers (ATs)
 
 Access Transformers (ATs) are used to widen member visibility and to add or remove the `final` modifier from classes,
 methods, and fields. They allow plugin developers to access and modify members that would otherwise be inaccessible.
 
-AT files are parsed line-by-line at startup and applied during class transformation at load time.
+AT files are parsed line by line at startup and applied during class transformation at load time.
 
 > [!NOTE]
 > Any text following a `#` character until the end of the line is treated as a comment and will be ignored by the
@@ -622,10 +622,10 @@ here - [Java Virtual Machine Specification, SE 8, sections 4.3.2 and 4.3.3](http
 ### Mixins
 
 Horizon comes packaged with the latest **Fabric-SpongePowered Mixin** library and **MixinExtras**. Mixin is the core
-package and system included in Horizon, and is the main system plugins can use in Horizon to modify the server
+package and system included in Horizon, and is the main system that plugins can use in Horizon to modify the server
 internals.
 
-Mixins allow you to inject, redirect, overwrite, or otherwise modify bytecode of existing classes without directly
+Mixins allow you to inject, redirect, overwrite, or otherwise modify the bytecode of existing classes without directly
 patching or forking the upstream server codebase
 
 #### Enabling Mixins in a Horizon Plugin
@@ -664,7 +664,7 @@ This is an example of a SpongePowered Mixin configuration file:
     - Base Java package containing all mixin classes declared in this configuration.
 
 - **mixins**
-    - A list of mixin class names (relative to package) that apply in the Horizon environment.
+    - A list of mixin class names (relative to the package) that apply in the Horizon environment.
 
 - **required**
     - If true, Horizon will fail fast if any mixin in this config fails to apply.
@@ -694,10 +694,10 @@ Horizon bundles MixinExtras with the server, allowing more enhanced and expanded
 recommended to read over the Mixin and MixinExtras documentation pages linked below.
 
 Mixins and ATs are very complementary, with ATs modifying the access and finality of fields, methods, and classes, and
-Mixins injecting and modifying code in the server.
+Mixins are used to inject and modify code on the server.
 
 Due to Horizon plugins and server internals being loaded by the Ember classloader, Mixins can target all server
-internals and some library internals. There are however, some restrictions to what places you can inject into.
+internals and some library internals. There are, however, some restrictions on what places you can inject into.
 For example, you cannot inject into Horizon internals, for obvious reasons. The full list of excluded packages is below:
 
 - `io.canvasmc.horizon.*`
@@ -705,7 +705,7 @@ For example, you cannot inject into Horizon internals, for obvious reasons. The 
       mixin/injection logic to function while protecting the rest of the framework from external mutation.
 
 - `org.tinylog.*`, `org.slf4j.*`, `org.apache.logging.log4j.*`
-    - Logging libraries used by Horizon and NMS. Transforming logging frameworks can cause insane issues, and as such is
+    - Logging libraries used by Horizon and NMS. Transforming logging frameworks can cause insane issues, and as such, is
       prohibited.
 
 - `org.spongepowered.asm.*`, `com.llamalad7.mixinextras.*`
@@ -716,7 +716,7 @@ Horizon plugins **cannot** transform classes in non-Horizon plugins due to class
 **CAN** transform classes by other Horizon plugins, and packages not excluded by Horizon.
 
 > [!NOTE]
-> There is a `remap` field in the injection annotations, this does *nothing* in Horizon.
+> There is a `remap` field in the injection annotations, which does *nothing* in Horizon.
 
 #### Mixin and MixinExtras Technical Writeup Documentation
 
@@ -725,17 +725,17 @@ Horizon plugins **cannot** transform classes in non-Horizon plugins due to class
 
 ## Horizon API
 
-Horizon includes API for Horizon plugins to interact with to better understand its environment and other plugins in the
-server. This part of the documentation is still a WIP, as there is more API being planned, and more API to document.
+Horizon includes an API for Horizon plugins to interact with to better understand its environment and other plugins on the
+server. This part of the documentation is still a WIP, as more API is planned and more API needs to be documented.
 
 ### Paperclip API
 
-Horizon implements a way to view Paperclip version metadata, which contains Minecraft version info, pack info, etc.
+Horizon provides a way to view Paperclip version metadata, which includes Minecraft version information, pack information, etc.
 Currently, Horizon exposes the Paperclip version info and pack info, which can be obtained and used quite simply:
 
 ```java
 // Here is an example of how to fetch the Horizon instance and read server version information
-// Note: there are *many* more methods, and it is best to look at the Javadocs for each class aswell
+// Note: there are *many* more methods, and it is best to look at the Javadocs for each class as well
 HorizonLoader horizon = HorizonLoader.getInstance();
 FileJar paperclip = horizon.getPaperclipJar();
 
@@ -753,14 +753,14 @@ getLogger().info("Pack Version(resources):" + pack.resource_major() + "." + pack
 getLogger().info("Pack Version(data):" + pack.data_major() + "." + pack.data_minor());
 ```
 
-There may be more things exposed in the future about the Paperclip data, but it is currenly not planned, as it isn't
+There may be more things exposed in the future about the Paperclip data, but it is currently not planned, as it isn't
 really something any plugin would need.
 
 ### Instrumentation and ClassLoader Exposure
 
-Horizon exposes the JVM Instrumentation that Horizon uses for its booting of the server. It isn't really recommended
-to touch the Instrumentation directly, but there are APIs available that do call methods in it, which are more safe to
-use and are more recommended for some operations, like appending a jar file to the classloader.
+Horizon exposes the JVM Instrumentation it uses to boot the server. It isn't really recommended
+to touch the Instrumentation directly, but there are APIs available that do call methods in it, which are safer to
+use and are more appropriate for some operations, such as appending a JAR file to the classloader.
 
 ```java
 // Gets the MixinLaunch instance, which contains the classloader,
@@ -768,17 +768,17 @@ use and are more recommended for some operations, like appending a jar file to t
 MixinLaunch launcher = HorizonLoader.getInstance().getLaunchService();
 
 // This contains data like the String[] args that will be passed to the server
-// along with inital game connections, and the actual game jar
+// along with initial game connections, and the actual game jar
 MixinLaunch.LaunchContext launchContext = launcher.getLaunchContext();
 
 // This is the JVM Instrumentation that can be accessed for doing more advanced operations
-// although, it is recommended to use any API provided by Horizon that functions
+// although it is recommended to use any API provided by Horizon that functions
 // similarly or as a replacement to the API that the Instrumentation provides, as it will
 // function safer and better for the Horizon environment
 JavaInstrumentation instrumentation = HorizonLoader.getInstance().getInstrumentation();
 
 // This is the Ember ClassLoader, which is the primary bytecode modification
-// loader for the Horizon environment. Here you can append new jars to the classpath too!
+// loader for the Horizon environment. Here you can append new JARs to the classpath as well!
 EmberClassLoader classLoader = launcher.getClassLoader();
 classLoader.tryAddToHorizonSystemLoader(Paths.get("test.jar"));
 ```
@@ -790,7 +790,7 @@ If you want more information on how Instrumentations work, it is linked below:
 
 ### Plugin API
 
-Horizon introduces a full plugin API that is exposed for all plugins to access. This allows for numerous things like
+Horizon introduces a full plugin API that all plugins can access. This allows for numerous things, like
 viewing what other plugins are on the server, which can be used for dependency declaration(coming soon), incompatibilities,
 etc. This API also allows you to view nested data entries and more. All data in each plugin is immutable, and shouldn't
 be attempted to be modified.
@@ -802,7 +802,7 @@ HorizonLoader horizon = HorizonLoader.getInstance();
 PluginTree plugins = horizon.getPlugins();
 for (HorizonPlugin plugin : plugins.getAll()) {
     // The HorizonMetadata class acts as an object representation of the
-    // Horizon plugin yaml file. It contains the name, version, mixins,
+    // Horizon plugin YAML file. It contains the name, version, mixins,
     // ats, api version, etc.
     HorizonMetadata metadata = plugin.pluginMetadata();
     getLogger().info("Hello " + metadata.name() + "!");
@@ -817,7 +817,7 @@ for (HorizonPlugin plugin : plugins.getAll()) {
 }
 ```
 
-The plugin API is a useful tool for when trying to get other plugins data, or even your own plugins data.
+The plugin API is a useful tool when trying to get other plugins data, or even your own plugins data.
 
 ### Class Transformers API
 
@@ -834,7 +834,7 @@ horizon:
 ```
 
 The Class Transformers API uses a list of `String` values that, upon accessing the values in `ClassTransformer#<init>`,
-is parsed into `Class<? extends TransformationService>`. It is then immediately instantiated, using a **no-args
+are parsed into `Class<? extends TransformationService>`. It is then immediately instantiated, using a **no-args
 constructor**. Class transformers can be used to perform bytecode modifications on class nodes during the game lifecycle.
 An example:
 
@@ -863,7 +863,7 @@ public class TransformerExample implements TransformationService {
 ```
 
 That is an example of how a transformation service should be made. They are extremely powerful and can transform the
-entire class on any class on load. This is used internally for inital patches by Horizon, and for service implementations
+entire class on any class on load. This is used internally for initial patches by Horizon, and for service implementations
 for plugins like Mixins and ATs. It is generally recommended to just use Mixins, but if seriously needed, this API is
 exposed to plugins.
 
