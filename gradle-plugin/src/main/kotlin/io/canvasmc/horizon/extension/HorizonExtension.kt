@@ -1,24 +1,17 @@
 package io.canvasmc.horizon.extension
 
-import io.canvasmc.horizon.util.constants.EMBEDDED_PLUGIN_JAR_PATH
+import io.canvasmc.horizon.util.constants.NEOFORGED_MAVEN_REPO_URL
+import io.canvasmc.horizon.util.jij.configureSplitSources
 import io.canvasmc.horizon.util.providerSet
-import io.papermc.paperweight.util.constants.PAPER_MAVEN_REPO_URL
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
-import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
-import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.setProperty
 import javax.inject.Inject
 
@@ -34,7 +27,7 @@ abstract class HorizonExtension @Inject constructor(
     /**
      * The repository from which JST should be resolved.
      */
-    val jstRepo: Property<String> = objects.property<String>().convention(PAPER_MAVEN_REPO_URL)
+    val jstRepo: Property<String> = objects.property<String>().convention(NEOFORGED_MAVEN_REPO_URL)
 
     /**
      * Whether to automatically inject Canvas's maven repository for easier Horizon API resolution.
@@ -83,33 +76,8 @@ abstract class HorizonExtension @Inject constructor(
      * and is able to access classes from the main source set.
      */
     fun splitPluginSourceSets() {
-        project.pluginManager.apply(JavaPlugin::class.java)
-        val javaPlugin = project.extensions.getByType<JavaPluginExtension>()
-        val main = javaPlugin.sourceSets.named("main")
-
-        val plugin = javaPlugin.sourceSets.register("plugin") {
-            java.srcDir("src/plugin/java")
-            resources.srcDir("src/plugin/resources")
-
-            // call get to avoid IDE sync issues
-            compileClasspath += main.get().output + main.get().compileClasspath
-            runtimeClasspath += main.get().output + main.get().runtimeClasspath
-        }
-
-        // to avoid issues with gradle thinking there's a duplicate when in fact there isn't
-        project.tasks.named<Copy>("processPluginResources") {
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
-
-        val pluginJar = project.tasks.register<Jar>("pluginJar") {
-            archiveClassifier.set("plugin")
-            from(plugin.map { it.output })
-        }
-
-        project.tasks.named<Jar>("jar") {
-            from(pluginJar.map { it.archiveFile }) {
-                into(EMBEDDED_PLUGIN_JAR_PATH)
-            }
+        project.plugins.withType(JavaPlugin::class.java) {
+            project.configureSplitSources()
         }
     }
 }

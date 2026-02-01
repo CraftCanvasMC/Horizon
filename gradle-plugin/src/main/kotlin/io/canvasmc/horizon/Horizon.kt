@@ -1,5 +1,6 @@
 package io.canvasmc.horizon
 
+import io.canvasmc.horizon.compatibility.setupRunPaperCompat
 import io.canvasmc.horizon.extension.HorizonExtension
 import io.canvasmc.horizon.extension.HorizonUserDependenciesExtension
 import io.canvasmc.horizon.tasks.ApplyClassAccessTransforms
@@ -7,20 +8,16 @@ import io.canvasmc.horizon.tasks.ApplySourceAccessTransforms
 import io.canvasmc.horizon.tasks.MergeAccessTransformers
 import io.canvasmc.horizon.util.*
 import io.canvasmc.horizon.util.constants.*
+import io.canvasmc.horizon.util.jij.configureJiJ
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.Delete
-import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import org.gradle.kotlin.dsl.*
-import xyz.jpenilla.runpaper.task.RunServer
 import javax.inject.Inject
-import kotlin.io.path.copyTo
-import kotlin.io.path.createDirectories
-import kotlin.io.path.isDirectory
 
 abstract class Horizon : Plugin<Project> {
 
@@ -43,7 +40,7 @@ abstract class Horizon : Plugin<Project> {
 
         target.configurations.register(JST_CONFIG) {
             defaultDependencies {
-                add(target.dependencies.create("io.papermc.jst:jst-cli-bundle:${LibraryVersions.JST}"))
+                add(target.dependencies.create("net.neoforged.jst:jst-cli-bundle:${LibraryVersions.JST}"))
             }
         }
 
@@ -79,7 +76,7 @@ abstract class Horizon : Plugin<Project> {
         // setup run paper compat layer
         if (ext.setupRunPaperCompatibility.get()) {
             plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
-                setupRunPaperCompat(userdevExt, ext)
+                setupRunPaperCompat(userdevExt, ext, progressLoggerFactory)
             }
         }
 
@@ -102,15 +99,8 @@ abstract class Horizon : Plugin<Project> {
         ext.addHorizonApiDependencyTo.get().forEach {
             it.extendsFrom(configurations.named(HORIZON_API_CONFIG).get())
         }
-
-        // add the JiJ dependencies to appropriate configurations
-        ext.addIncludedDependenciesTo.get().forEach {
-            it.extendsFrom(
-                configurations.named(INCLUDE_MIXIN_PLUGIN).get(),
-                configurations.named(INCLUDE_PLUGIN).get(),
-                configurations.named(INCLUDE_LIBRARY).get()
-            )
-        }
+        // configure JiJ
+        configureJiJ(ext)
 
         val mergeAccessTransformers by tasks.registering<MergeAccessTransformers> {
             files.from(ext.accessTransformerFiles)
@@ -141,19 +131,6 @@ abstract class Horizon : Plugin<Project> {
         val horizonSetup by tasks.registering<Task> {
             group = HORIZON_NAME
             dependsOn(applyClassAccessTransforms)
-        }
-
-        // JiJ
-        tasks.named<Jar>("jar") {
-            from(configurations.named(INCLUDE_MIXIN_PLUGIN)) {
-                into(EMBEDDED_MIXIN_PLUGIN_JAR_PATH)
-            }
-            from(configurations.named(INCLUDE_PLUGIN)) {
-                into(EMBEDDED_PLUGIN_JAR_PATH)
-            }
-            from(configurations.named(INCLUDE_LIBRARY)) {
-                into(EMBEDDED_LIBRARY_JAR_PATH)
-            }
         }
 
         tasks.named("classes") { dependsOn(horizonSetup) } // this also attaches the task to the lifecycle
@@ -200,38 +177,6 @@ abstract class Horizon : Plugin<Project> {
                 "Unable to resolve the Horizon API dependency, which is required in order to work with mixins.\n" +
                     "Add Horizon API to the `horizonHorizonApiConfig` configuration, and ensure there is a repository to resolve it from (the Canvas repository is used by default)."
             throw RuntimeException(message)
-        }
-    }
-
-    private fun Project.setupRunPaperCompat(userdevExt: PaperweightUserExtension, horizonExt: HorizonExtension) {
-        val horizonApiSingleConfig = configurations.named(HORIZON_API_SINGLE_CONFIG)
-        // filter out javadoc and sources jars from the configuration as not to mess with the classpath
-        val horizonJar = horizonApiSingleConfig.map { files ->
-            files.filter { f -> !f.name.endsWith("-sources.jar") && !f.name.endsWith("-javadoc.jar") }
-        }
-        tasks.withType<RunServer>().configureEach {
-            val userJar = horizonExt.customRunServerJar
-            version.convention(userdevExt.minecraftVersion)
-            runClasspath.from(horizonJar).disallowChanges()
-            doFirst {
-                if (userJar.isPresent) {
-                    require(userJar.get().asFile.exists()) {
-                        "customRunServerJar was set but path does not exist: ${userJar.get().asFile.absolutePath}"
-                    }
-                    systemProperty("Horizon.serverJar", userJar.get().asFile.absolutePath)
-                    logger.lifecycle("Using user-provided server jar.")
-                } else if (version.isPresent) {
-                    val serverJar = downloadsApiService.get().resolveBuild(
-                        progressLoggerFactory,
-                        version.get(),
-                        build.get(),
-                    )
-                    systemProperty("Horizon.serverJar", serverJar.toAbsolutePath())
-                } else {
-                    error("No version was specified for the '$name' task. Don't know what version to download.")
-                }
-                logger.lifecycle("Starting Horizon...")
-            }
         }
     }
 }

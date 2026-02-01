@@ -3,6 +3,7 @@ package io.canvasmc.horizon.util.constants
 const val HORIZON_NAME = "horizon"
 const val INTERNAL_TASK_GROUP = "$HORIZON_NAME internal"
 const val CANVAS_MAVEN_RELEASES_REPO_URL = "https://maven.canvasmc.io/releases"
+const val NEOFORGED_MAVEN_REPO_URL = "https://maven.neoforged.net/releases"
 const val JST_REPO_NAME = "${HORIZON_NAME}JstRepository"
 const val JST_CONFIG = "${HORIZON_NAME}JstConfig"
 const val HORIZON_API_REPO_NAME = "${HORIZON_NAME}HorizonApiRepository"
