@@ -2,12 +2,9 @@ package io.canvasmc.horizon.compatibility
 
 import io.canvasmc.horizon.extension.HorizonExtension
 import io.canvasmc.horizon.util.constants.HORIZON_API_SINGLE_CONFIG
-import io.canvasmc.horizon.util.convention
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import org.gradle.api.Project
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
-import org.gradle.kotlin.dsl.from
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.withType
 import xyz.jpenilla.runpaper.task.RunServer
 
