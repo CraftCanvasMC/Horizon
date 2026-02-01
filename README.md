@@ -35,7 +35,8 @@ Horizon tries not to break much of anything; however, there are some things it's
 - **Spigot and Bukkit.** Horizon strictly works only for Paper servers and forks, and is untested on Spigot and Bukkit,
   and you will not receive support for using Spigot or Bukkit with Horizon
 - **Ignite and Eclipse.** Eclipse is a fork of Ignite, and Horizon derives some source from Eclipse since this project
-  supersedes Eclipse. As such, they are both completely and fundamentally incompatible with Horizon. Horizon, in comparison
+  supersedes Eclipse. As such, they are both completely and fundamentally incompatible with Horizon. Horizon, in
+  comparison
   to Ignite, is generally more inclined and intended for expanding upon Ignites initial structure and idea aimed for
   specifically plugin usage, to match closer to things like Papers patching style and such(transformers as an example).
   This also uses things like the plugin yaml and such, and is compatible with using the `main` entrypoint in plugins,
@@ -80,19 +81,20 @@ Horizon as its bootstrapper!
 
 ### Basics of Developing a Horizon Plugin
 
-Developing a Horizon plugin is mostly simple. One tool you can use is the Gradle plugin, which is described in more detail below.
-To start with developing a Horizon plugin, you need a plugin metadata file. Instead of adding onto the existing plugin YML
-file, Horizon introduces its own metadata type. You cannot combine the two plugin types. Horizon plugins work fundementally
-different from paper plugins.
+Developing a Horizon plugin is mostly simple. One tool you can use is the Gradle plugin, which is described in more
+detail below. To start with developing a Horizon plugin, you need a plugin metadata file. Instead of adding onto the
+existing plugin YML file, Horizon introduces its own metadata type. You cannot combine the two plugin types. Horizon
+plugins work fundementally different from paper plugins.
 
-Horizon plugins **cannot** interact with Paper plugins. However, Paper plugins can interact with Horizon plugins.
-As such, Horizon requires that if you are going to attempt to interact with other Paper plugins, you need to setup a split
-source set. Otherwise, just use a normal setup, however this means it is strictly only a Horizon plugin, and cannot interact
-with other Paper plugins currently present.
+Horizon plugins **cannot** interact with Paper plugins due to how the classloader works(described below). However, Paper
+plugins can interact with Horizon plugins. As such, Horizon requires that if you are going to attempt to interact with
+other Paper plugins, you need to setup a split source set. Otherwise, just use a normal setup, however this means it is
+strictly only a Horizon plugin, and cannot interact with other Paper plugins in the server, only other Horizon plugins
+and server internals and Horizon API.
 
-TODO - can we explain this more? -- Toffik
+The Horizon metadata file is `horizon.plugin.json`. The metadata file follows a *similar* structure to plugin metadata
+files, but not completely. Here is an example:
 
-The Horizon metadata file is `horizon.plugin.json`. The metadata file follows a *similar* structure to plugin metadata files, but not completely. Here is an example:
 ```json5
 {
   "name": "TestPlugin",
@@ -105,8 +107,8 @@ The Horizon metadata file is `horizon.plugin.json`. The metadata file follows a 
     }
   ],
   /*
-    All class transformers provided by the plugin for the server, documented in
-    the Class Transformers API section
+    All class transformers provided by the plugin for the server,
+    documented in the Class Transformers API section
   */
   "transformers": [
     "io.canvasmc.testplugin.TransformerTest"
@@ -124,6 +126,21 @@ The Horizon metadata file is `horizon.plugin.json`. The metadata file follows a 
   ],
   // This is your dependencies block for Horizon TODO - make this system
   "dependencies": {
+    /*
+      The "minecraft" value is optional. It's a version constraint that
+      must be above 1.20.6 by requirement, as it is the minimum Horizon
+      supports. This is checked against the Minecraft version being booted
+    */
+    "minecraft": ">=1.21.1",
+    /*
+      The "java" value is also optional, and functions the same as the
+      "minecraft" value. It is guaranteed that the server is running
+      the minimum required Java version or newer for that Minecraft
+      version by the time this is validated.
+    */
+    "java": "25",
+    // Literally same thing as the other 2, but for ASM
+    "asm": "9.0"
   }
 }
 ```
@@ -183,9 +200,11 @@ scripts together with the `weaver-userdev` plugin. The `horizon` plugin automati
 JAR your plugin is going to be developed against, allowing you to compile against it and access the server's internals,
 and the `userdev` plugin allows it to achieve all that.
 
-Below is shown an example `build.gradle.kts` configuration structure, that compiles, to give you an idea on how to start developing!
+Below is shown an example `build.gradle.kts` configuration structure, that compiles, to give you an idea on how to start
+developing!
 
-Keep in mind that the versions provided below might be outdated and you should always search for and ensure you're specifying the latest versions available.
+Keep in mind that the versions provided below might be outdated and you should always search for and ensure you're
+specifying the latest versions available.
 
 ```kotlin
 plugins {
@@ -207,7 +226,8 @@ horizon {
 }
 ```
 
-The `run-paper` plugin is automatically configured to download a jar for the version specified in the dev bundle, however it can be overriden.
+The `run-paper` plugin is automatically configured to download a jar for the version specified in the dev bundle,
+however it can be overriden.
 
 In addition, using the `shadow` gradle plugin is *unsupported* and you should instead opt-in to JiJ'ing your
 dependencies by using the appropriate configurations, just like this:
@@ -233,6 +253,8 @@ And finally, for a library, the configuration to use is `includeLibrary`, which 
 
 All of those dependencies will be loaded at the server startup, for a more detailed overlook refer to
 the [JIJ](#jijjar-in-jar) section.
+
+TODO TOFFIK - split sources documentation
 
 ## New Classloading Tree
 
@@ -762,10 +784,10 @@ If you want more information on how Instrumentations work, it is linked below:
 
 ### Plugin API
 
-Horizon introduces a full plugin API that is exposed for all plugins to access. This allows for numerous things like viewing
-what other plugins are on the server, which can be used for dependency declaration(coming soon), incompatibilities, etc.
-This API also allows you to view nested data entries and more. All data in each plugin is immutable, and shouldn't be attempted
-to be modified.
+Horizon introduces a full plugin API that is exposed for all plugins to access. This allows for numerous things like
+viewing what other plugins are on the server, which can be used for dependency declaration(coming soon), incompatibilities,
+etc. This API also allows you to view nested data entries and more. All data in each plugin is immutable, and shouldn't
+be attempted to be modified.
 
 ```java
 // Get the Horizon instance
@@ -793,19 +815,23 @@ The plugin API is a useful tool for when trying to get other plugins data, or ev
 
 ### Class Transformers API
 
-Horizon contains a ClassTransformer API, which is the primary API that drives Mixins and ATs transformation of ClassNodes.
-With this API, plugins can register their own `TransformationService`s much like the Mixin and AT transformation
-services. The internal plugin includes the Mixin and AT transformers, and plugins can register their own via their service loader.
-The plugin YAML structure should be something like this:
+Horizon contains a ClassTransformer API, which is the primary API that drives Mixins and ATs transformation of
+ClassNodes. With this API, plugins can register their own `TransformationService`s much like the Mixin and AT transformation
+services. The internal plugin includes the Mixin and AT transformers, and plugins can register their own via their
+service loader. The plugin YAML structure should be something like this:
+
 ```yaml
 horizon:
   service:
     transform_service:
       - "io.canvasmc.example.TransformerExample"
 ```
+
 The Class Transformers API uses a list of `String` values that, upon accessing the values in `ClassTransformer#<init>`,
-is parsed into `Class<? extends TransformationService>`. It is then immediately instantiated, using a **no-args constructor**.
-Class transformers can be used to perform bytecode modifications on class nodes during the game lifecycle. An example:
+is parsed into `Class<? extends TransformationService>`. It is then immediately instantiated, using a **no-args
+constructor**. Class transformers can be used to perform bytecode modifications on class nodes during the game lifecycle.
+An example:
+
 ```java
 public class TransformerExample implements TransformationService {
     @Override
@@ -829,8 +855,10 @@ public class TransformerExample implements TransformationService {
     }
 }
 ```
-That is an example of how a transformation service should be made. They are extremely powerful and can transform the entire
-class on any class on load. This is used internally for inital patches by Horizon, and for service implementations for plugins
-like Mixins and ATs. It is generally recommended to just use Mixins, but if seriously needed, this API is exposed to plugins.
+
+That is an example of how a transformation service should be made. They are extremely powerful and can transform the
+entire class on any class on load. This is used internally for inital patches by Horizon, and for service implementations
+for plugins like Mixins and ATs. It is generally recommended to just use Mixins, but if seriously needed, this API is
+exposed to plugins.
 
 ### Entrypoint API
