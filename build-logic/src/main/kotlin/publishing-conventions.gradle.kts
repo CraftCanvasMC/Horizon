@@ -75,7 +75,7 @@ val createPublicationJar = tasks.register<Jar>("createPublicationJar") {
         into("META-INF/")
     }
 
-    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir("publications"))
 
     // include horizon license
     val rootLicense = rootProject.file("LICENSE")
