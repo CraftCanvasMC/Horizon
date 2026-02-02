@@ -2,7 +2,8 @@
 
 set -e
 
-./gradlew buildPlugin && ./gradlew :core:build
+./gradlew clean
+./gradlew buildPlugin
 ./gradlew createPublicationJar
 ./gradlew :core:publishAllPublicationsToCanvasmcRepository
 ./gradlew publishPlugin
