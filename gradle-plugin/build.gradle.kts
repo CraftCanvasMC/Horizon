@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `kotlin-dsl`
+    id("versioning-conventions")
     alias(libs.plugins.blossom)
     alias(libs.plugins.plugin.publish)
     alias(libs.plugins.spotless)

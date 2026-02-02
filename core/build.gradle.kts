@@ -1,10 +1,9 @@
 plugins {
     id("io.canvasmc.weaver.userdev")
     id("publishing-conventions")
+    id("versioning-conventions")
     id("io.canvasmc.horizon")
 }
-
-version = project.version.toString() + "." + fetchBuild().get()
 
 val paperMavenPublicUrl = "https://repo.papermc.io/repository/maven-public/"
 
@@ -45,10 +44,4 @@ horizon {
 
 tasks.withType<Javadoc> {
     exclude("io/canvasmc/horizon/inject/mixin/**")
-}
-
-fun fetchBuild(): Provider<String> {
-    return providers.gradleProperty("buildNumber")
-        .orElse(providers.environmentVariable("BUILD_NUMBER"))
-        .orElse("local")
 }
