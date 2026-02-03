@@ -232,6 +232,6 @@ public enum MinecraftVersion {
         SNAPSHOT,
         RELEASE_CANDIDATE,
         PRE_RELEASE,
-        STABLE;
+        STABLE
     }
 }

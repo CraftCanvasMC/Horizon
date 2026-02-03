@@ -7,10 +7,22 @@ import org.jspecify.annotations.NonNull;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 
+/**
+ * The access transformer implementation provided by the Horizon internal plugin. Contains and applies access
+ * transformers provided by Horizon plugins to the server or other plugin classes
+ *
+ * @author dueris
+ */
 public final class AccessTransformationImpl implements TransformationService {
     private final TransformerContainer container = new TransformerContainer();
     private volatile boolean initialized = false;
 
+    /**
+     * Gets the {@link io.canvasmc.horizon.transformer.widener.TransformerContainer} for this service which contains all
+     * AT registrations and parse/validation logic
+     *
+     * @return the container
+     */
     public TransformerContainer getContainer() {
         return container;
     }

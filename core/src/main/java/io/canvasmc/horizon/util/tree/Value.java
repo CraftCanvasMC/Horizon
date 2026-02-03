@@ -10,16 +10,22 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
 
     /**
      * Gets the raw value
+     *
+     * @return the raw {@link E}
      */
     @Nullable E raw();
 
     /**
      * Checks if the value is null
+     *
+     * @return {@code true} if null, {@code false} otherwise
      */
     boolean isNull();
 
     /**
      * Converts to String
+     *
+     * @return the value as a {@link java.lang.String}
      *
      * @throws TypeConversionException
      *     if conversion fails
@@ -36,6 +42,8 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
     /**
      * Converts to integer
      *
+     * @return the value as an {@code int}
+     *
      * @throws TypeConversionException
      *     if conversion fails
      */
@@ -50,6 +58,11 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
 
     /**
      * Converts to long
+     *
+     * @return the value as a {@code long}
+     *
+     * @throws TypeConversionException
+     *     if conversion fails
      */
     long asLong();
 
@@ -62,6 +75,11 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
 
     /**
      * Converts to double
+     *
+     * @return the value as a {@code double}
+     *
+     * @throws TypeConversionException
+     *     if conversion fails
      */
     double asDouble();
 
@@ -74,6 +92,11 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
 
     /**
      * Converts to float
+     *
+     * @return the value as a {@code float}
+     *
+     * @throws TypeConversionException
+     *     if conversion fails
      */
     float asFloat();
 
@@ -86,6 +109,11 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
 
     /**
      * Converts to bool
+     *
+     * @return the value as a {@code boolean}
+     *
+     * @throws TypeConversionException
+     *     if conversion fails
      */
     boolean asBoolean();
 
@@ -98,6 +126,11 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
 
     /**
      * Converts to {@link BigDecimal}
+     *
+     * @return the value as a {@link java.math.BigDecimal}
+     *
+     * @throws TypeConversionException
+     *     if conversion fails
      */
     BigDecimal asBigDecimal();
 
@@ -110,6 +143,11 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
 
     /**
      * Converts to {@link BigInteger}
+     *
+     * @return the value as a {@link java.math.BigInteger}
+     *
+     * @throws TypeConversionException
+     *     if conversion fails
      */
     BigInteger asBigInteger();
 
@@ -123,6 +161,8 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
     /**
      * Converts to ObjectTree if the value is a tree structure
      *
+     * @return the value as an {@link io.canvasmc.horizon.util.tree.ObjectTree}
+     *
      * @throws TypeConversionException
      *     if the value is not an ObjectTree
      */
@@ -130,11 +170,18 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
 
     /**
      * Converts to ObjectTree if the value is a tree structure, returns empty Optional otherwise
+     *
+     * @return the optional, empty if conversion fails, present if successful
      */
     Optional<ObjectTree> asTreeOptional();
 
     /**
      * Converts to a custom type using registered converter
+     *
+     * @return the value converted to a custom type {@link T}
+     *
+     * @throws TypeConversionException
+     *     if conversion fails
      */
     <T> T as(Class<T> type);
 

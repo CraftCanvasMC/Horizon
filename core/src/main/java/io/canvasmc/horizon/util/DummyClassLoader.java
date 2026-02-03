@@ -7,6 +7,12 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
+/**
+ * A utility dummy classloader used internally, this shouldn't be used for actual class loading purposes, as this
+ * literally does nothing
+ *
+ * @author dueris
+ */
 public class DummyClassLoader extends ClassLoader {
     private static final Enumeration<URL> DUMMY_ENUMERATION = new Enumeration<>() {
         @Override

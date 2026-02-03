@@ -10,13 +10,39 @@ import io.canvasmc.horizon.util.tree.parser.YamlParser;
 import io.canvasmc.horizon.util.tree.parser.YamlWriter;
 import org.jspecify.annotations.NonNull;
 
-// add more formats here if we decide to add more in the future
+/**
+ * The file format the {@link io.canvasmc.horizon.util.tree.ObjectTree} should be parsed from. Used when reading file
+ * structures or streams, and when writing an {@link io.canvasmc.horizon.util.tree.ObjectTree} to String, disk, etc.
+ *
+ * @author dueris
+ */
 public enum Format {
+    /**
+     * YAML format, provided by {@link io.canvasmc.horizon.util.tree.parser.YamlParser} and
+     * {@link io.canvasmc.horizon.util.tree.parser.YamlWriter}
+     */
     YAML,
+    /**
+     * JSON format, provided by {@link io.canvasmc.horizon.util.tree.parser.JsonParser} and
+     * {@link io.canvasmc.horizon.util.tree.parser.JsonWriter}
+     */
     JSON,
+    /**
+     * TOML format, provided by {@link io.canvasmc.horizon.util.tree.parser.TomlParser} and
+     * {@link io.canvasmc.horizon.util.tree.parser.TomlWriter}
+     */
     TOML,
+    /**
+     * PROPERTIES format, provided by {@link io.canvasmc.horizon.util.tree.parser.PropertiesParser} and
+     * {@link io.canvasmc.horizon.util.tree.parser.PropertiesWriter}
+     */
     PROPERTIES;
 
+    /**
+     * Gets the parser for this format
+     *
+     * @return a new parser instance
+     */
     public @NonNull FormatParser getParser() {
         return switch (this) {
             case YAML -> new YamlParser();
@@ -26,6 +52,11 @@ public enum Format {
         };
     }
 
+    /**
+     * Gets the writer for this format
+     *
+     * @return a new writer instance
+     */
     public @NonNull FormatWriter getWriter() {
         return switch (this) {
             case YAML -> new YamlWriter();

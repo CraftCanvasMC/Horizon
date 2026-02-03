@@ -37,6 +37,10 @@ import java.util.function.Consumer;
 /**
  * Acts as a repository source for horizon plugins marked as embedding datapack entries
  *
+ * @param validator
+ *     the {@link net.minecraft.world.level.validation.DirectoryValidator} passed to the other
+ *     {@link net.minecraft.server.packs.repository.RepositorySource}s when creating the pack repository
+ *
  * @author dueris
  */
 public record HorizonRepositorySource(DirectoryValidator validator) implements RepositorySource {

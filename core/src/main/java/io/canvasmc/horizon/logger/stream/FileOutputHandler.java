@@ -9,6 +9,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * Outputs logs to a specified {@link java.io.File}, allowing custom flush times too
+ *
+ * @author dueris
+ */
 public class FileOutputHandler implements OutputHandler {
 
     private final BufferedWriter writer;

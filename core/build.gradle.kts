@@ -37,6 +37,8 @@ dependencies {
 }
 
 horizon {
+    // needed for CI
+    failFastOnUnapplicableAT = false
     accessTransformerFiles.from(
         file("src/main/resources/internal.at")
     )

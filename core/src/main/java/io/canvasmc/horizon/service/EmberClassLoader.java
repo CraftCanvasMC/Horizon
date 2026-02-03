@@ -412,6 +412,15 @@ public final class EmberClassLoader extends ClassLoader {
 
     /**
      * Represents the data for a class.
+     *
+     * @param data
+     *     the byte data for the class
+     * @param manifest
+     *     The manifest of the class
+     * @param source
+     *     The code source of the class
+     *
+     * @author dueris
      */
     public record ClassData(byte[] data, Manifest manifest, CodeSource source) {
 

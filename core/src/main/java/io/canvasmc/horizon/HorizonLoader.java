@@ -44,6 +44,9 @@ import java.util.jar.Manifest;
  * @author dueris
  */
 public class HorizonLoader {
+    /**
+     * Whether debug mode is enabled for Horizon
+     */
     public static final boolean DEBUG = Boolean.getBoolean("Horizon.debug");
     public static final Logger LOGGER = Logger.create()
         .name("main")
@@ -51,6 +54,12 @@ public class HorizonLoader {
         .pattern("[{date: HH:mm:ss}] [{level}" + (DEBUG ? "/{tag}" : "") + "]: {message}")
         .level(DEBUG ? Level.DEBUG : Level.INFO)
         .build();
+    /**
+     * The current runtime Java version, like {@code 21}, or {@code 17}.
+     *
+     * @apiNote This is checked, when building version information, that the Java version is supported by the
+     *     Minecraft version we are running, and also used for checking plugin Java version dependencies
+     */
     public static final int JAVA_VERSION = Runtime.version().feature();
 
     static HorizonPlugin INTERNAL_PLUGIN;
