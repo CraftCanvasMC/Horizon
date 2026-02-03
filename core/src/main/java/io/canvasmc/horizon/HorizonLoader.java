@@ -100,7 +100,6 @@ public class HorizonLoader {
             File horizonIOFile = Path.of(HorizonLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
 
             INTERNAL_PLUGIN = new HorizonPlugin(
-                "horizon",
                 new FileJar(horizonIOFile, new JarFile(horizonIOFile)),
                 new HorizonPluginMetadata(
                     "Horizon",

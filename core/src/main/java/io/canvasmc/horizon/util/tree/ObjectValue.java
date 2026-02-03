@@ -167,11 +167,10 @@ public final class ObjectValue implements Value<Object> {
         TypeConverter<T> converter = converters.get(type);
         try {
             return converter.convert(value);
-        } catch (Exception e) {
+        } catch (Throwable thrown) {
             throw new TypeConversionException(
                 "Failed to convert " + value.getClass().getSimpleName() +
-                    " to " + type.getSimpleName() + ": " + e.getMessage(),
-                e
+                    " to " + type.getSimpleName() + ": " + thrown.getMessage(), thrown
             );
         }
     }

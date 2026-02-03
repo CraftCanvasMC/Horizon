@@ -126,7 +126,7 @@ public class MixinPluginLoader {
                 for (final String config : mixins) {
                     final HorizonPlugin previous = containersByConfig.putIfAbsent(config, plugin);
                     if (previous != null) {
-                        LOGGER.warn("Skipping duplicate mixin configuration: {} (in {} and {})", config, previous.identifier(), plugin.identifier());
+                        LOGGER.warn("Skipping duplicate mixin configuration: {} (in {} and {})", config, previous.pluginMetadata().name(), plugin.pluginMetadata().name());
                         continue;
                     }
 
@@ -142,7 +142,7 @@ public class MixinPluginLoader {
             if (container == null) continue;
 
             final IMixinConfig mixinConfig = config.getConfig();
-            mixinConfig.decorate(FabricUtil.KEY_MOD_ID, container.identifier());
+            mixinConfig.decorate(FabricUtil.KEY_MOD_ID, container.pluginMetadata().name());
             mixinConfig.decorate(FabricUtil.KEY_COMPATIBILITY, FabricUtil.COMPATIBILITY_LATEST);
         }
     }

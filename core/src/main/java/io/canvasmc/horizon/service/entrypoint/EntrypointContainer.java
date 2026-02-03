@@ -113,7 +113,7 @@ public class EntrypointContainer {
                     //noinspection unchecked
                     stream.add((R) toInvoke.invoke(instance.built, args));
                 } catch (Throwable thrown) {
-                    LOGGER.error("Failed to run entrypoint '{}' for plugin '{}'", instance.key, instance.horizonPlugin.identifier());
+                    LOGGER.error("Failed to run entrypoint '{}' for plugin '{}'", instance.key, instance.horizonPlugin.pluginMetadata().name());
                     if (errorHandler != null) {
                         errorHandler.accept(instance, thrown);
                     }

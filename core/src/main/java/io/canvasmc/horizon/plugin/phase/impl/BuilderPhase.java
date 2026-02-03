@@ -29,7 +29,7 @@ public class BuilderPhase implements Phase<Set<Pair<FileJar, HorizonPluginMetada
                     metadata.nesting().serverPluginEntries().stream().toList(),
                     metadata.nesting().libraryEntries().stream().toList()
                 );
-                completed.add(new HorizonPlugin(metadata.name(), source, metadata, newNestedData));
+                completed.add(new HorizonPlugin(source, metadata, newNestedData));
             }
         } catch (Throwable thrown) {
             throw new PhaseException("Couldn't execute builder phase", thrown);

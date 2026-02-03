@@ -10,6 +10,13 @@ import org.spongepowered.asm.logging.LoggerAdapterAbstract;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The horizon mixin logger service. Extending the {@link org.spongepowered.asm.logging.LoggerAdapterAbstract}, this is
+ * used to provide a service into the horizon {@link io.canvasmc.horizon.logger.Logger} implementation for SpongePowered
+ * Mixin to log things to console.
+ *
+ * @author dueris
+ */
 public class HorizonMixinLogger extends LoggerAdapterAbstract {
     private static final Map<String, ILogger> LOGGERS = new ConcurrentHashMap<>();
 
@@ -20,6 +27,15 @@ public class HorizonMixinLogger extends LoggerAdapterAbstract {
         this.logger = Logger.fork(HorizonLoader.LOGGER, id);
     }
 
+    /**
+     * Fetches or creates a new {@link io.canvasmc.horizon.service.HorizonMixinLogger} instance with the provided name
+     * argument
+     *
+     * @param name
+     *     the name of the service
+     *
+     * @return a horizon mixin logger service
+     */
     public static @NonNull ILogger get(@NonNull String name) {
         return LOGGERS.computeIfAbsent(name, HorizonMixinLogger::new);
     }
