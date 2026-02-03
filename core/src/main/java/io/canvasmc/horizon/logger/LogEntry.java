@@ -1,6 +1,9 @@
 package io.canvasmc.horizon.logger;
 
-public class LogEntry {
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Internal
+class LogEntry {
     private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
     final Level level;

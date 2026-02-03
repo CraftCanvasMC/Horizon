@@ -56,4 +56,14 @@ public interface JavaInstrumentation {
      * @see java.lang.instrument.Instrumentation#addTransformer(ClassFileTransformer, boolean)
      */
     void addTransformer(final @NonNull ClassFileTransformer transformer);
+
+    /**
+     * Removes a {@link ClassFileTransformer} from the system classloader
+     *
+     * @param transformer
+     *     the transformer to be removed
+     *
+     * @see java.lang.instrument.Instrumentation#removeTransformer(java.lang.instrument.ClassFileTransformer)
+     */
+    void removeTransformer(final @NonNull ClassFileTransformer transformer);
 }

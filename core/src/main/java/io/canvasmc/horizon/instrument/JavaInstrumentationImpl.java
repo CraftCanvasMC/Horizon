@@ -11,6 +11,12 @@ import java.lang.instrument.Instrumentation;
 import java.nio.file.Path;
 import java.util.jar.JarFile;
 
+/**
+ * The Java instrumentation for Horizon, and interface for Horizon plugins to use
+ *
+ * @author dueris
+ * @see java.lang.instrument.Instrumentation
+ */
 public class JavaInstrumentationImpl implements JavaInstrumentation {
 
     // Note: non-null guaranteed when accessed outside this class
@@ -20,7 +26,7 @@ public class JavaInstrumentationImpl implements JavaInstrumentation {
         agentmain(agentArgs, inst);
     }
 
-    public static void agentmain(String agentArgs, java.lang.instrument.Instrumentation inst) {
+    public static void agentmain(String agentArgs, Instrumentation inst) {
         HorizonLoader.LOGGER.debug("Booted from agent main");
         INSTRUMENTATION = inst;
     }
@@ -30,6 +36,13 @@ public class JavaInstrumentationImpl implements JavaInstrumentation {
         checkSuccess();
 
         INSTRUMENTATION.addTransformer(transformer);
+    }
+
+    @Override
+    public void removeTransformer(final @NonNull ClassFileTransformer transformer) {
+        checkSuccess();
+
+        INSTRUMENTATION.removeTransformer(transformer);
     }
 
     @Override

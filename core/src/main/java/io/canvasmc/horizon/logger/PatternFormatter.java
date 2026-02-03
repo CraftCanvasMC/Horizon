@@ -1,5 +1,6 @@
 package io.canvasmc.horizon.logger;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NonNull;
 
 import java.io.PrintWriter;
@@ -11,17 +12,18 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PatternFormatter {
+@ApiStatus.Internal
+class PatternFormatter {
     protected final String pattern;
     private final Pattern tokenPattern = Pattern.compile("\\{([^}]*)}");
     private final ThreadLocal<Map<String, SimpleDateFormat>> dateFormatters =
         ThreadLocal.withInitial(HashMap::new);
 
-    public PatternFormatter(String pattern) {
+    PatternFormatter(String pattern) {
         this.pattern = pattern;
     }
 
-    public String format(@NonNull LogEntry entry, Object[] args) {
+    String format(@NonNull LogEntry entry, Object[] args) {
         String message = formatMessage(entry.message, args);
 
         Matcher m = tokenPattern.matcher(pattern);

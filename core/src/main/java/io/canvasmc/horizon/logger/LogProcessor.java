@@ -1,5 +1,7 @@
 package io.canvasmc.horizon.logger;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -8,7 +10,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class LogProcessor {
+@ApiStatus.Internal
+class LogProcessor {
     private static final Object lock = new Object();
     private static volatile LogProcessor instance;
 
@@ -27,10 +30,10 @@ public class LogProcessor {
         this.running = new AtomicBoolean(true);
 
         executor.submit(this::processLogs);
-        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
     }
 
-    public static LogProcessor getInstance() {
+    static LogProcessor getInstance() {
         if (instance == null) {
             synchronized (lock) {
                 if (instance == null) {
@@ -67,7 +70,7 @@ public class LogProcessor {
         }
     }
 
-    public void shutdown() {
+    void close() {
         running.set(false);
         try {
             executor.shutdown();
@@ -80,7 +83,7 @@ public class LogProcessor {
         }
     }
 
-    public void submit(LogEntry entry, PatternFormatter formatter, List<OutputHandler> handlers, Object[] args) {
+    void submit(LogEntry entry, PatternFormatter formatter, List<OutputHandler> handlers, Object[] args) {
         if (!queue.offer(new ProcessTask(entry, formatter, handlers, args))) {
             System.err.println("Log queue full - dropping message: " + entry.message);
         }

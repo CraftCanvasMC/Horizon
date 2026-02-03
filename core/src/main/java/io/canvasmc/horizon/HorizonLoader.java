@@ -48,6 +48,16 @@ public class HorizonLoader {
      * Whether debug mode is enabled for Horizon
      */
     public static final boolean DEBUG = Boolean.getBoolean("Horizon.debug");
+    /**
+     * The core logger implementation for Horizon. Other sub-loggers are forked from this logger commonly
+     * <p>
+     * Pattern:
+     * <pre>
+     * {@code "[{date: HH:mm:ss}] [{level}" + (DEBUG ? "/{tag}" : "") + "]: {message}"}
+     * </pre>
+     * <p>
+     * Outputs to console only by default, and logs at {@code DEBUG} level if debugging for Horizon is enabled
+     */
     public static final Logger LOGGER = Logger.create()
         .name("main")
         .out(OutStream.CONSOLE.allowColors().build())
