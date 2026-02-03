@@ -16,11 +16,13 @@ subprojects {
 
     tasks.withType<JavaCompile>().configureEach {
         options.encoding = Charsets.UTF_8.name()
+        options.compilerArgs.add("-Xlint:all")
         options.isFork = true
     }
 
     tasks.withType<Javadoc>().configureEach {
         options.encoding = Charsets.UTF_8.name()
+        (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:all")
         (options as StandardJavadocDocletOptions).tags("apiNote:a:API Note:")
     }
 
