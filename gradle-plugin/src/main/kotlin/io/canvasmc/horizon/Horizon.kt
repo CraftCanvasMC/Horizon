@@ -57,6 +57,9 @@ abstract class Horizon : Plugin<Project> {
         target.configurations.register(INCLUDE_PLUGIN)
         target.configurations.register(INCLUDE_LIBRARY)
 
+        target.configurations.register(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG)
+        target.configurations.register(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG)
+
         target.dependencies.extensions.create(
             HORIZON_NAME,
             HorizonUserDependenciesExtension::class,
@@ -78,6 +81,11 @@ abstract class Horizon : Plugin<Project> {
             plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
                 setupRunPaperCompat(userdevExt, ext, progressLoggerFactory)
             }
+        }
+
+        // populate compile classpath
+        ext.addServerDependencyTo.get().forEach {
+            it.extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
         }
 
         repositories {
@@ -119,7 +127,8 @@ abstract class Horizon : Plugin<Project> {
             )
             failFast.set(ext.failFastOnUnapplicableAT)
             atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
-            ats.jst.from(project.configurations.named(JST_CONFIG))
+            ats.jst.from(configurations.named(JST_CONFIG))
+            ats.jstClasspath.from(configurations.named(Paperweight.MOJANG_MAPPED_SERVER_CONFIG))
         }
 
         val applyClassAccessTransforms by tasks.registering<ApplyClassAccessTransforms> {
@@ -135,20 +144,16 @@ abstract class Horizon : Plugin<Project> {
 
         tasks.named("classes") { dependsOn(horizonSetup) } // this also attaches the task to the lifecycle
 
-        configurations.register(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG) {
-            dependencies.add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
+        configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).configure {
+            defaultDependencies {
+                add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
+            }
         }
 
-        configurations.register(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG) {
-            dependencies.add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
-        }
-
-        // attach sources into original paperweight configurations for compatibility reasons
-        configurations.named(Paperweight.MOJANG_MAPPED_SERVER_CONFIG).configure {
-            extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
-        }
-        configurations.named(Paperweight.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).configure {
-            extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).get())
+        configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).configure {
+            defaultDependencies {
+                add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
+            }
         }
     }
 
