@@ -17,11 +17,10 @@ public class ServerPacksSourceMixin {
 
     @ModifyReturnValue(method = "createPackRepository(Ljava/nio/file/Path;Lnet/minecraft/world/level/validation/DirectoryValidator;)Lnet/minecraft/server/packs/repository/PackRepository;", at = @At("RETURN"))
     private static @NonNull PackRepository horizon$injectPluginSource(PackRepository original) {
-        PackRepositoryAccessor accessor = (PackRepositoryAccessor) original;
-        List<RepositorySource> modifiedSources = new LinkedList<>(accessor.getSources());
-        modifiedSources.addLast(new HorizonRepositorySource(accessor.getValidator()));
+        List<RepositorySource> modifiedSources = new LinkedList<>(original.sources);
+        modifiedSources.addLast(new HorizonRepositorySource(original.validator));
         return new PackRepository(
-            accessor.getValidator(), modifiedSources.toArray(new RepositorySource[0])
+            original.validator, modifiedSources.toArray(new RepositorySource[0])
         );
     }
 }
