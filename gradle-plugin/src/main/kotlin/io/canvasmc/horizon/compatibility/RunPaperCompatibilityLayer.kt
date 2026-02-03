@@ -17,7 +17,8 @@ fun Project.setupRunPaperCompat(userdevExt: PaperweightUserExtension, horizonExt
     tasks.withType<RunServer>().configureEach {
         val userJar = horizonExt.customRunServerJar
         version.convention(userdevExt.minecraftVersion)
-        runClasspath.from(horizonJar).disallowChanges()
+        runClasspath.setFrom(horizonJar)
+        runClasspath.disallowChanges()
         doFirst {
             if (userJar.isPresent) {
                 require(userJar.get().asFile.exists()) {
