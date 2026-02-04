@@ -39,7 +39,7 @@ Horizon tries not to break much; however, there are some things it's incompatibl
   modern plugin loading strategy. To ensure you are using the modern strategy, please ensure your server does not
   contain the startup flag `-Dpaper.useLegacyPluginLoading=true`.
 - **UniverseSpigot.** Due to how Universe's loader is set up, Horizon is fundamentally incompatible with Universe. Do
-  not ask CanvasMC or Universe for support; it will not work and is not planned to work.
+  not ask us or Universe for support; it will not work and is not planned to work.
 - **Spigot and Bukkit.** Horizon strictly works only for Paper servers and forks, and is untested on Spigot and Bukkit,
   and you will not receive support for using Spigot or Bukkit with Horizon
 - **Ignite and Eclipse.** Eclipse is a fork of Ignite, and Horizon derives some source from Eclipse since this project
