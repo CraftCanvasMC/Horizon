@@ -394,7 +394,7 @@ public final class EmberClassLoader extends ClassLoader {
         }
     }
 
-    protected static final class DynamicClassLoader extends URLClassLoader {
+    static final class DynamicClassLoader extends URLClassLoader {
 
         static {
             ClassLoader.registerAsParallelCapable();
