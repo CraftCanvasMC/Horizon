@@ -2,7 +2,15 @@ package io.canvasmc.horizon.util;
 
 import org.jspecify.annotations.NonNull;
 
-// Note: we include snapshots and RCs so Horizon is capable of doing in-dev snapshot versions if Paper decides to release those in-dev
+/**
+ * The Minecraft version API is used to document which versions Horizon supports, and for supporting the Minecraft
+ * dependency for Horizon plugins, and offering those same plugins with a versatile and informative API for different
+ * supported Minecraft versions
+ *
+ * @author dueris
+ * @apiNote Horizon includes snapshots, release candidates, and pre-releases, so that Horizon is capable of doing
+ *     development snapshot versions if Paper chooses to release those on GitHub or to their downloads API
+ */
 public enum MinecraftVersion {
     /**
      * Unknown name, future drop
@@ -188,47 +196,124 @@ public enum MinecraftVersion {
         this.type = type;
     }
 
+    /**
+     * Gets the Minecraft version from the version id, like {@code 26.1-snapshot-4} would return
+     * {@link io.canvasmc.horizon.util.MinecraftVersion#V26_1_SNAPSHOT_4}
+     *
+     * @param id
+     *     the version id, which is case-sensitive
+     *
+     * @return the Minecraft version associated with the id provided
+     */
     public static @NonNull MinecraftVersion fromStringId(String id) {
         for (final MinecraftVersion value : MinecraftVersion.values()) {
-            if (id.equalsIgnoreCase(value.id)) {
+            if (id.equals(value.id)) {
                 return value;
             }
         }
         throw new IllegalArgumentException("Unknown Minecraft version '" + id + "'");
     }
 
+    /**
+     * Compares this Minecraft version to another, returning if this version is newer
+     *
+     * @param other
+     *     the Minecraft version to compare to
+     *
+     * @return {@code true} if this version is newer than the comparison, {@code false} otherwise
+     *
+     * @apiNote Versions are ordered from newest {@code (ordinal 0)} to oldest {@code (highest ordinal)} in the
+     *     enum
+     */
     public boolean isNewerThan(@NonNull MinecraftVersion other) {
         return this.ordinal() < other.ordinal();
     }
 
+    /**
+     * Compares this Minecraft version to another, returning if this version is older
+     *
+     * @param other
+     *     the Minecraft version to compare to
+     *
+     * @return {@code true} if this version is older than the comparison, {@code false} otherwise
+     *
+     * @apiNote Versions are ordered from newest {@code (ordinal 0)} to oldest {@code (highest ordinal)} in the
+     *     enum
+     */
     public boolean isOlderThan(@NonNull MinecraftVersion other) {
         return this.ordinal() > other.ordinal();
     }
 
+    /**
+     * Compares this Minecraft version to another, returning if this version is newer or the same
+     *
+     * @param other
+     *     the Minecraft version to compare to
+     *
+     * @return {@code true} if this version is newer or the same as the comparison, {@code false} otherwise
+     *
+     * @apiNote Versions are ordered from newest {@code (ordinal 0)} to oldest {@code (highest ordinal)} in the
+     *     enum
+     */
     public boolean isNewerThanOrEqualTo(@NonNull MinecraftVersion other) {
         return this.ordinal() <= other.ordinal();
     }
 
+    /**
+     * Compares this Minecraft version to another, returning if this version is older or the same
+     *
+     * @param other
+     *     the Minecraft version to compare to
+     *
+     * @return {@code true} if this version is older or the same as the comparison, {@code false} otherwise
+     *
+     * @apiNote Versions are ordered from newest {@code (ordinal 0)} to oldest {@code (highest ordinal)} in the
+     *     enum
+     */
     public boolean isOlderThanOrEqualTo(@NonNull MinecraftVersion other) {
         return this.ordinal() >= other.ordinal();
     }
 
+    /**
+     * Gets the version id associated with this version. For some versions, this matches the actual name, like snapshots
+     * and full releases
+     *
+     * @return the version id
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Gets the readable name associated with this version, like {@code 26.1 Snapshot 2}
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the required Java version for this version of Minecraft
+     *
+     * @return the Java version requirement
+     */
     public int getJavaVersion() {
         return javaVersion;
     }
 
+    /**
+     * Gets the version type this is, like {@code SNAPSHOT}, {@code STABLE}, {@code PRE_RELEASE}, etc
+     *
+     * @return the version type
+     */
     public VersionType getType() {
         return type;
     }
 
+    /**
+     * The Minecraft version type, primarily useful for differentiating between types technically, and apply filtering
+     */
     public enum VersionType {
         SNAPSHOT,
         RELEASE_CANDIDATE,

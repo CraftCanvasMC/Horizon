@@ -76,7 +76,7 @@ public class HorizonLoader {
     private static HorizonLoader INSTANCE;
 
     // final, all non-null
-    protected @NonNull
+    @NonNull
     final MixinPluginLoader pluginLoader;
     private @NonNull
     final ServerProperties properties;
@@ -94,7 +94,7 @@ public class HorizonLoader {
     private PaperclipVersion paperclipVersion;
     private MixinLaunch launchService;
 
-    public HorizonLoader(@NonNull ServerProperties properties, @NonNull String version, @NonNull JavaInstrumentation instrumentation, @NonNull List<Path> initialClasspath, String @NonNull [] providedArgs) {
+    private HorizonLoader(@NonNull ServerProperties properties, @NonNull String version, @NonNull JavaInstrumentation instrumentation, @NonNull List<Path> initialClasspath, String @NonNull [] providedArgs) {
         this.properties = properties;
         this.version = version;
         this.instrumentation = instrumentation;
@@ -140,6 +140,12 @@ public class HorizonLoader {
         }
     }
 
+    /**
+     * Gets the Horizon loader instance, which is the main executing class for Horizon, and the gateway for all Horizon
+     * API
+     *
+     * @return the Horizon instance
+     */
     public static HorizonLoader getInstance() {
         if (INSTANCE == null) {
             throw new IllegalStateException("Horizon loader hasn't been instantiated yet");
