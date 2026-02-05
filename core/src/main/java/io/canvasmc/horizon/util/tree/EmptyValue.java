@@ -8,6 +8,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
 
+/**
+ * Represents an empty or null value returned from the ObjectTree API.
+ *
+ * @param <E>
+ *     the generic type of the value
+ *
+ * @author dueris
+ * @apiNote All Optionals will return empty, all attempts at conversion will throw
+ *     {@link io.canvasmc.horizon.util.tree.TypeConversionException}
+ */
 public final class EmptyValue<E> implements Value<E> {
 
     @Override
@@ -23,7 +33,7 @@ public final class EmptyValue<E> implements Value<E> {
     @Contract(pure = true)
     @Override
     public @Nullable String asString() {
-        return null;
+        throw new TypeConversionException("Empty value, not String");
     }
 
     @Contract(pure = true)

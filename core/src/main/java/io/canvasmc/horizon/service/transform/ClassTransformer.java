@@ -66,7 +66,7 @@ public final class ClassTransformer {
         return (T) services.get(type);
     }
 
-    public @NonNull @UnmodifiableView Collection<TransformationService> services() {
+    public @NonNull @UnmodifiableView Collection<TransformationService> getServices() {
         return Collections.unmodifiableCollection(this.services.values());
     }
 

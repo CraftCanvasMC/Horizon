@@ -20,6 +20,8 @@ public interface Phase<I, O> {
     O execute(I input, LoadContext context) throws PhaseException;
 
     /**
+     * Gets the plugin loading phase name, used primarily for debugging
+     *
      * @return The name of this phase for logging purposes
      */
     String getName();

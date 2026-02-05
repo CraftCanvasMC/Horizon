@@ -15,7 +15,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 /**
- * Registry for type converters
+ * Registry for type converters for the ObjectTree API
+ *
+ * @author dueris
  */
 public final class TypeConverterRegistry {
     private final Map<Class<?>, TypeConverter<?>> converters = new HashMap<>();

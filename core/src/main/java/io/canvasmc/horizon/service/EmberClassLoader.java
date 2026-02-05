@@ -302,10 +302,10 @@ public final class EmberClassLoader extends ClassLoader {
     }
 
     void findPackage(final @NonNull String name, final @Nullable Manifest manifest) {
-        final Package target = this.getPackage(name);
+        final Package target = this.getDefinedPackage(name);
         if (target == null) {
             synchronized (this.lock) {
-                if (this.getPackage(name) != null) return;
+                if (this.getDefinedPackage(name) != null) return;
 
                 final String path = name.replace('.', '/').concat("/");
                 String specTitle = null, specVersion = null, specVendor = null;
@@ -377,23 +377,6 @@ public final class EmberClassLoader extends ClassLoader {
         }
     }
 
-    public @Nullable ResourceConnection getResourceConnection(final @NonNull String name) {
-        final String resourceName = name.replace('.', '/').concat(".class");
-
-        URL url = this.findResource(resourceName);
-        if (url == null) {
-            url = this.parent.getResource(resourceName);
-            if (url == null) return null;
-        }
-
-        try (final ResourceConnection connection = new ResourceConnection(url, this.manifestLocator, this.sourceLocator)) {
-            return connection;
-        } catch (final Exception exception) {
-            LOGGER.trace(exception, "Failed to resolve resource: {}", resourceName);
-            return null;
-        }
-    }
-
     static final class DynamicClassLoader extends URLClassLoader {
 
         static {
@@ -461,7 +444,7 @@ public final class EmberClassLoader extends ClassLoader {
         }
     }
 
-    public static final class ResourceConnection implements AutoCloseable {
+    private static final class ResourceConnection implements AutoCloseable {
 
         private final URLConnection connection;
         private final InputStream stream;

@@ -99,6 +99,16 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
         return new PackLocationInfo("injected/" + string, Component.literal(string), PackSource.WORLD, Optional.empty());
     }
 
+    /**
+     * The plugin pack detector for Horizon is modeled after the
+     * {@link net.minecraft.server.packs.repository.FolderRepositorySource.FolderPackDetector}, which is used in
+     * {@link
+     * io.canvasmc.horizon.inject.HorizonRepositorySource#discoverPacks(net.minecraft.world.level.validation.DirectoryValidator,
+     * java.util.function.BiConsumer)} to detect packs in jar files, where packs are validated/detected based on Horizon
+     * plugins which have {@code load_datapack_entry} enabled
+     *
+     * @author dueris
+     */
     public class PluginPackDetector extends PackDetector<Pack.@NonNull ResourcesSupplier> {
 
         public PluginPackDetector(DirectoryValidator validator) {

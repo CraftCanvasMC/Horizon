@@ -178,6 +178,11 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
     /**
      * Converts to a custom type using registered converter
      *
+     * @param type
+     *     the class type to convert the value to
+     * @param <T>
+     *     the generic type of the value that it will be converted to
+     *
      * @return the value converted to a custom type {@link T}
      *
      * @throws TypeConversionException
@@ -187,6 +192,11 @@ public sealed interface Value<E> permits EmptyValue, ObjectValue {
 
     /**
      * Converts to a custom type using a registered converter. If unable to, it returns {@link Optional#empty()}
+     *
+     * @param type
+     *     the class type to convert the value to
+     * @param <T>
+     *     the generic type of the value that it will be converted to
      *
      * @return the optional, empty if conversion fails, present if successful
      */

@@ -232,7 +232,7 @@ public final class MixinLaunch {
             LOGGER.error(exception, "Failed to complete mixin bootstrap!");
         }
 
-        for (final TransformationService transformer : this.transformer.services()) {
+        for (final TransformationService transformer : this.transformer.getServices()) {
             transformer.preboot();
         }
 

@@ -32,7 +32,6 @@ public record ServerProperties(
         ObjectArray extraPluginsArray = tree.getArray("extraPlugins");
         for (int i = 0; i < extraPluginsArray.size(); i++) {
             String path = extraPluginsArray.get(i).asString();
-            if (path == null) throw new IllegalArgumentException("Extra plugins array had a null entry at index " + i);
             initial.add(new File(path));
         }
 

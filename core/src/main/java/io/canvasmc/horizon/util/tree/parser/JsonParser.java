@@ -11,6 +11,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The format parser for JSON files using the Jackson library
+ *
+ * @author dueris
+ */
 public final class JsonParser implements FormatParser {
     private final ObjectMapper mapper = new ObjectMapper();
 

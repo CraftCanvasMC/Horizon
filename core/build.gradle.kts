@@ -46,4 +46,5 @@ horizon {
 
 tasks.withType<Javadoc> {
     exclude("io/canvasmc/horizon/inject/mixin/**")
+    exclude("**/taskCache/**")
 }

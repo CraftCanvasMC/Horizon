@@ -35,6 +35,9 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "mixin_service");
     private static final EmberClassLoader.DynamicClassLoader SETUP_CLASSLOADER = new EmberClassLoader.DynamicClassLoader(new URL[0]);
 
+    /**
+     * The SpongePowered Mixin side configured for Horizon
+     */
     public static final String SIDE = Constants.SIDE_SERVER;
 
     private final ReEntranceLock lock;
@@ -61,6 +64,7 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
         }
     }
 
+    @ApiStatus.Internal
     public static void loadToInit(@NonNull URL url, @NonNull String name) {
         SETUP_CLASSLOADER.addURL(url);
         LOGGER.debug("Added {} to setup classloader", name);
