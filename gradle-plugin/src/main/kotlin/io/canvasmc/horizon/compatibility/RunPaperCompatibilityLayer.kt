@@ -1,7 +1,7 @@
 package io.canvasmc.horizon.compatibility
 
 import io.canvasmc.horizon.extension.HorizonExtension
-import io.canvasmc.horizon.util.constants.HORIZON_API_SINGLE_CONFIG
+import io.canvasmc.horizon.util.constants.HORIZON_API_SINGLE_RESOLVABLE_CONFIG
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import org.gradle.api.Project
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
@@ -9,9 +9,9 @@ import org.gradle.kotlin.dsl.withType
 import xyz.jpenilla.runpaper.task.RunServer
 
 fun Project.setupRunPaperCompat(userdevExt: PaperweightUserExtension, horizonExt: HorizonExtension, progressLoggerFactory: ProgressLoggerFactory) {
-    val horizonApiSingleConfig = configurations.named(HORIZON_API_SINGLE_CONFIG)
+    val horizonApi = configurations.named(HORIZON_API_SINGLE_RESOLVABLE_CONFIG)
     // filter out javadoc and sources jars from the configuration as not to mess with the classpath
-    val horizonJar = horizonApiSingleConfig.map { files ->
+    val horizonJar = horizonApi.map { files ->
         files.filter { f -> !f.name.endsWith("-sources.jar") && !f.name.endsWith("-javadoc.jar") }
     }
     tasks.withType<RunServer>().configureEach {

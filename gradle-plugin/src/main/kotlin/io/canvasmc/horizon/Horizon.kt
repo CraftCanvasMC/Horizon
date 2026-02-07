@@ -44,11 +44,17 @@ abstract class Horizon : Plugin<Project> {
             }
         }
 
-        // configuration for Horizon API for compile-time
-        target.configurations.register(HORIZON_API_CONFIG)
+        // user configuration for Horizon API
+        val horizonApi = target.configurations.dependencyScope(HORIZON_API_CONFIG)
 
-        // configuration for Horizon API for run tasks
-        target.configurations.register(HORIZON_API_SINGLE_CONFIG) {
+        // resolvable configuration for Horizon API
+        val horizonApiResolvable = target.configurations.resolvable(HORIZON_API_RESOLVABLE_CONFIG) {
+            extendsFrom(horizonApi.get())
+        }
+
+        // resolvable configuration for Horizon API for run tasks
+        target.configurations.resolvable(HORIZON_API_SINGLE_RESOLVABLE_CONFIG) {
+            extendsFrom(horizonApiResolvable.get())
             isTransitive = false
         }
 
@@ -98,15 +104,18 @@ abstract class Horizon : Plugin<Project> {
             if (ext.injectCanvasRepository.get()) {
                 maven(CANVAS_MAVEN_RELEASES_REPO_URL) {
                     name = HORIZON_API_REPO_NAME
-                    content { includeModule(HORIZON_API_GROUP, HORIZON_API_ARTIFACT_ID) }
+                    content { onlyForConfigurations(HORIZON_API_RESOLVABLE_CONFIG, HORIZON_API_SINGLE_RESOLVABLE_CONFIG) }
                 }
             }
         }
 
         // set up horizon api dependency
         ext.addHorizonApiDependencyTo.get().forEach {
-            it.extendsFrom(configurations.named(HORIZON_API_CONFIG).get())
+            // we want to resolve it from the context of the horizon api configurations so pass only the files
+            // do not extend as that would resolve it from the context of compileClasspath which we dont want
+            it.dependencies.add(dependencyFactory.create(files(configurations.named(HORIZON_API_RESOLVABLE_CONFIG))))
         }
+
         // configure JiJ
         configureJiJ(ext)
 
