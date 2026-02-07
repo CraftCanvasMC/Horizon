@@ -51,6 +51,9 @@ abstract class HorizonExtension @Inject constructor(
 
     /**
      * Configurations to add the Horizon API dependency to.
+     *
+     * The dependency may appear as `unspecified` in the dependency tree. This is expected.
+     * It will still be available for the configured configurations.
      */
     val addHorizonApiDependencyTo: SetProperty<Configuration> = objects.setProperty<Configuration>().convention(
         objects.providerSet(
