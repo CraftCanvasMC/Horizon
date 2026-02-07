@@ -48,13 +48,13 @@ abstract class Horizon : Plugin<Project> {
         val horizonApi = target.configurations.dependencyScope(HORIZON_API_CONFIG)
 
         // resolvable configuration for Horizon API
-        val horizonApiResolvable = target.configurations.resolvable(HORIZON_API_RESOLVABLE_CONFIG) {
+        target.configurations.resolvable(HORIZON_API_RESOLVABLE_CONFIG) {
             extendsFrom(horizonApi.get())
         }
 
-        // resolvable configuration for Horizon API for run tasks
+        // resolvable non-transitive configuration for Horizon API for use in run tasks
         target.configurations.resolvable(HORIZON_API_SINGLE_RESOLVABLE_CONFIG) {
-            extendsFrom(horizonApiResolvable.get())
+            extendsFrom(horizonApi.get())
             isTransitive = false
         }
 
