@@ -30,8 +30,10 @@ import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.tasks.CacheableTask
 import javax.inject.Inject
 
+@CacheableTask
 abstract class BaseTask : DefaultTask() {
 
     @get:Inject

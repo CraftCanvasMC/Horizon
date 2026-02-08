@@ -62,4 +62,3 @@ tasks.register("formatPlugin") {
 tasks.register("printPluginVersion") {
     dependsOn(gradle.includedBuild("gradle-plugin").task(":printVersion"))
 }
-

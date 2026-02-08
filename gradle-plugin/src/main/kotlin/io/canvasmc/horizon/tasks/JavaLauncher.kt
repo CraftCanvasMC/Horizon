@@ -28,6 +28,7 @@ import io.canvasmc.horizon.util.*
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Nested
 import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.jvm.toolchain.JavaToolchainService
@@ -43,6 +44,7 @@ interface JavaLauncherTaskBase {
     val javaToolchainService: JavaToolchainService
 }
 
+@CacheableTask
 abstract class JavaLauncherTask :
     BaseTask(),
     JavaLauncherTaskBase {
@@ -54,6 +56,7 @@ abstract class JavaLauncherTask :
     }
 }
 
+@CacheableTask
 abstract class JavaLauncherZippedTask :
     ZippedTask(),
     JavaLauncherTaskBase {

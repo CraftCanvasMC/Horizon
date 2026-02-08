@@ -26,6 +26,7 @@ package io.canvasmc.horizon.tasks
 
 import io.canvasmc.horizon.util.*
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
@@ -33,6 +34,7 @@ import org.gradle.api.tasks.TaskAction
 import java.nio.file.Path
 import kotlin.io.path.*
 
+@CacheableTask
 abstract class ZippedTask : BaseTask() {
 
     @get:Optional
