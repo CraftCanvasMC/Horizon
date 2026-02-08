@@ -39,6 +39,10 @@ tasks.register("buildPlugin") {
     dependsOn(gradle.includedBuild("gradle-plugin").task(":build"))
 }
 
+tasks.register("testPlugin") {
+    dependsOn(gradle.includedBuild("gradle-plugin").task(":test"))
+}
+
 tasks.register("publishPlugin") {
     dependsOn(gradle.includedBuild("gradle-plugin").task(":publishAllPublicationsToCanvasmcRepository"))
 }
@@ -54,3 +58,8 @@ tasks.register("publishPluginLocally") {
 tasks.register("formatPlugin") {
     dependsOn(gradle.includedBuild("gradle-plugin").task(":format"))
 }
+
+tasks.register("printPluginVersion") {
+    dependsOn(gradle.includedBuild("gradle-plugin").task(":printVersion"))
+}
+
