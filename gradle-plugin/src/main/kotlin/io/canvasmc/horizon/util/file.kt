@@ -26,6 +26,7 @@ package io.canvasmc.horizon.util
 
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.FileSystemLocationProperty
 import org.gradle.api.file.RegularFileProperty
@@ -59,7 +60,13 @@ fun RegularFileProperty.convention(project: Project, path: Provider<Path>) = con
 fun DirectoryProperty.convention(project: Project, path: Path) = convention(project.layout.dir(project.provider { path.toFile() }))
 
 val Path.isLibraryJar: Boolean
-    get() = name.endsWith(".jar") && !name.endsWith("-sources.jar")
+    get() = name.endsWith(".jar") && !name.endsWith("-sources.jar") && !name.endsWith("-javadoc.jar")
+
+fun FileCollection.libraryJars(): FileCollection = filter { f ->
+    f.name.endsWith(".jar") &&
+        !f.name.endsWith("-sources.jar") &&
+        !f.name.endsWith("-javadoc.jar")
+}
 
 fun Path.deleteForcefully() {
     fixWindowsPermissionsForDeletion()

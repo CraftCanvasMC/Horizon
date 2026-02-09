@@ -25,7 +25,7 @@ abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
     abstract val atFile: RegularFileProperty
 
     @get:Input
-    abstract val failFast: Property<Boolean>
+    abstract val validateATs: Property<Boolean>
 
     @get:Internal
     abstract val timeSpent: Property<Long>
@@ -43,7 +43,7 @@ abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
                     outputJar,
                     atFile.path,
                     temporaryDir.toPath(),
-                    failFast.get(),
+                    validateATs.get(),
                 )
             }
             timeSpent.set(generatedIn)

@@ -38,10 +38,8 @@ dependencies {
 
 horizon {
     // needed for CI
-    failFastOnUnapplicableAT = false
-    accessTransformerFiles.from(
-        file("src/main/resources/internal.at")
-    )
+    validateATs = false
+    accessTransformerFiles = files("src/main/resources/internal.at")
 }
 
 tasks.withType<Javadoc> {

@@ -62,7 +62,7 @@ class FunctionalityTest {
 
         println("\nrunning build dependencies with ignore broken ATs\n")
         modifyFile(tempDir.resolve("build.gradle.kts")) {
-            it.replace("// failFastOnUnapplicableAT = false", "failFastOnUnapplicableAT = false")
+            it.replace("// validateATs = false", "validateATs = false")
         }
         val build2 = runner
             .withArguments("build", "dependencies", "--stacktrace")

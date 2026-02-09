@@ -29,8 +29,6 @@ abstract class Horizon : Plugin<Project> {
         val ext = target.extensions.create<HorizonExtension>(HORIZON_NAME, target)
         // check for userdev
         target.checkForWeaverUserdev()
-        val userdevExt = target.extensions.getByType(PaperweightUserExtension::class)
-        userdevExt.injectServerJar.set(false) // dont add the server jar to the configurations as we override it
 
         target.tasks.register<Delete>("cleanHorizonCache") {
             group = HORIZON_NAME
@@ -80,6 +78,9 @@ abstract class Horizon : Plugin<Project> {
         // ensure people specify a dependency on horizon api
         // checkForHorizonApi()
         val userdevExt = extensions.getByType(PaperweightUserExtension::class)
+        // TODO: could we mimic this for normal paperweight??
+        // Probably would be dirty.
+        userdevExt.injectServerJar.set(false) // dont add the server jar to the configurations as we override it
         val userdevTask = tasks.named<UserdevSetupTask>(Paperweight.USERDEV_SETUP_TASK_NAME)
 
         // setup run paper compat layer
@@ -101,11 +102,9 @@ abstract class Horizon : Plugin<Project> {
                 content { onlyForConfigurations(JST_CONFIG) }
             }
             // repository for Horizon API
-            if (ext.injectCanvasRepository.get()) {
-                maven(CANVAS_MAVEN_RELEASES_REPO_URL) {
-                    name = HORIZON_API_REPO_NAME
-                    content { onlyForConfigurations(HORIZON_API_RESOLVABLE_CONFIG, HORIZON_API_SINGLE_RESOLVABLE_CONFIG) }
-                }
+            maven(ext.horizonApiRepo) {
+                name = HORIZON_API_REPO_NAME
+                content { onlyForConfigurations(HORIZON_API_RESOLVABLE_CONFIG, HORIZON_API_SINGLE_RESOLVABLE_CONFIG) }
             }
         }
 
@@ -134,7 +133,7 @@ abstract class Horizon : Plugin<Project> {
                     )
                 )
             )
-            failFast.set(ext.failFastOnUnapplicableAT)
+            validateATs.set(ext.validateATs)
             atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
             ats.jst.from(configurations.named(JST_CONFIG))
             ats.jstClasspath.from(configurations.named(Paperweight.MOJANG_MAPPED_SERVER_CONFIG))

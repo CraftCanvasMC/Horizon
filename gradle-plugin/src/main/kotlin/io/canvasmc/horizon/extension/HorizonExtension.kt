@@ -1,5 +1,6 @@
 package io.canvasmc.horizon.extension
 
+import io.canvasmc.horizon.util.constants.CANVAS_MAVEN_RELEASES_REPO_URL
 import io.canvasmc.horizon.util.constants.NEOFORGED_MAVEN_REPO_URL
 import io.canvasmc.horizon.util.jij.configureSplitSources
 import io.canvasmc.horizon.util.providerSet
@@ -30,14 +31,15 @@ abstract class HorizonExtension @Inject constructor(
     val jstRepo: Property<String> = objects.property<String>().convention(NEOFORGED_MAVEN_REPO_URL)
 
     /**
-     * Whether to automatically inject Canvas's maven repository for easier Horizon API resolution.
+     * The repository from which Horizon API should be resolved.
      */
-    val injectCanvasRepository: Property<Boolean> = objects.property<Boolean>().convention(true)
+    val horizonApiRepo: Property<String> = objects.property<String>().convention(CANVAS_MAVEN_RELEASES_REPO_URL)
 
     /**
-     * Whether to fail the build if an AT fails to be applied to the dev bundle sources.
+     * Whether to validate AT entries.
+     * Will fail the build if any entry doesn't pass the validation.
      */
-    val failFastOnUnapplicableAT: Property<Boolean> = objects.property<Boolean>().convention(true)
+    val validateATs: Property<Boolean> = objects.property<Boolean>().convention(true)
 
     /**
      * Configurations to add the Minecraft server dependency to.
@@ -52,7 +54,7 @@ abstract class HorizonExtension @Inject constructor(
     /**
      * Configurations to add the Horizon API dependency to.
      *
-     * The dependency may appear as `unspecified` in the dependency tree. This is expected.
+     * The dependency may appear as `unspecified` in the dependency tree. This is expected as it's added as a FileCollection.
      * It will still be available for the configured configurations.
      */
     val addHorizonApiDependencyTo: SetProperty<Configuration> = objects.setProperty<Configuration>().convention(
