@@ -12,6 +12,35 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+/**
+ * Horizon plugin data, providing parsed data Horizon uses internally for various services and implementations
+ *
+ * @param name
+ *     the name
+ * @param description
+ *     the description
+ * @param version
+ *     the version
+ * @param entrypoints
+ *     the entrypoints registered by this plugin
+ * @param transformers
+ *     the class transformers registered by this plugin
+ * @param authors
+ *     the authors
+ * @param loadDatapackEntry
+ *     if Horizon should load the plugin as a datapack too
+ * @param mixins
+ *     the registered mixins
+ * @param wideners
+ *     the registered wideners
+ * @param dependencies
+ *     the dependencies
+ * @param nesting
+ *     the nested data of the plugin
+ *
+ * @author dueris
+ * @see io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.NestedData
+ */
 public record HorizonPluginMetadata(
     String name,
     String description,
@@ -79,6 +108,18 @@ public record HorizonPluginMetadata(
         );
     };
 
+    /**
+     * Nested data, containing nested libraries, server plugins, and Horizon plugins
+     *
+     * @param horizonEntries
+     *     nested Horizon plugins
+     * @param serverPluginEntries
+     *     nested server plugins
+     * @param libraryEntries
+     *     nested libraries
+     *
+     * @author dueris
+     */
     public record NestedData(
         Set<Pair<FileJar, HorizonPluginMetadata>> horizonEntries,
         Set<FileJar> serverPluginEntries,

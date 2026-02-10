@@ -35,9 +35,9 @@ import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.ENTRYPOINT_C
 import static io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.PLUGIN_META_FACTORY;
 
 public class DiscoveryPhase implements Phase<Void, Set<Pair<FileJar, HorizonPluginMetadata>>> {
-    public static final String JIJ_PATH_HORIZON = "META-INF/jars/horizon/";
-    public static final String JIJ_PATH_PAPER = "META-INF/jars/plugin/";
-    public static final String JIJ_PATH_LIB = "META-INF/jars/libs/";
+    private static final String JIJ_PATH_HORIZON = "META-INF/jars/horizon/";
+    private static final String JIJ_PATH_PAPER = "META-INF/jars/plugin/";
+    private static final String JIJ_PATH_LIB = "META-INF/jars/libs/";
 
     private static void loadServerPlugin(final JarEntry jarEntry, final InputStream instream, final @NonNull FileJar pluginJar) throws Throwable {
         ObjectTree pluginYaml = ObjectTree.read().format(Format.YAML).from(instream);

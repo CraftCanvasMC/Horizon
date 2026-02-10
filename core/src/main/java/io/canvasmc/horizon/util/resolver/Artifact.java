@@ -11,6 +11,18 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Represents the artifact to be downloaded from the resolver
+ *
+ * @param artifactId
+ *     the artifact id
+ * @param path
+ *     the artifact path
+ * @param sha256
+ *     the sha256 of the artifact
+ *
+ * @author dueris
+ */
 public record Artifact(String artifactId, String path, String sha256) {
 
     private static byte @NonNull [] readAllBytes(@NonNull InputStream in) throws IOException {
@@ -43,7 +55,7 @@ public record Artifact(String artifactId, String path, String sha256) {
         return sb.toString();
     }
 
-    public byte @NonNull [] download(@NonNull URL repository) throws RejectedRepositoryException, SecurityException, IOException {
+    byte @NonNull [] download(@NonNull URL repository) throws RejectedRepositoryException, SecurityException, IOException {
         URL artifactUrl = URI.create(
             repository.toString().endsWith("/")
                 ? repository + path

@@ -111,7 +111,7 @@ public record HorizonRepositorySource(DirectoryValidator validator) implements R
      */
     public class PluginPackDetector extends PackDetector<Pack.@NonNull ResourcesSupplier> {
 
-        public PluginPackDetector(DirectoryValidator validator) {
+        PluginPackDetector(DirectoryValidator validator) {
             super(validator);
         }
 

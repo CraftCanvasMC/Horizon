@@ -44,6 +44,9 @@ public final class EmberClassLoader extends ClassLoader {
         ClassLoader.registerAsParallelCapable();
     }
 
+    /**
+     * The class transformer for this classloader
+     */
     public final ClassTransformer transformer;
 
     private final Object lock = new Object();
@@ -356,6 +359,17 @@ public final class EmberClassLoader extends ClassLoader {
         return getClassData(url, resourceName);
     }
 
+    /**
+     * Gets the raw class data from the {@link java.net.URL} and resource name. Used internally for fetching the raw
+     * file bytes of classes before transformation
+     *
+     * @param url
+     *     the url in the classloader
+     * @param resourceName
+     *     the resource name
+     *
+     * @return the fetched class data, {@code null} if not found
+     */
     public @Nullable ClassData getClassData(final URL url, final String resourceName) {
         try (final ResourceConnection connection = new ResourceConnection(url, this.manifestLocator, this.sourceLocator)) {
             final int length = connection.contentLength();
@@ -397,52 +411,15 @@ public final class EmberClassLoader extends ClassLoader {
      * Represents the data for a class.
      *
      * @param data
-     *     the byte data for the class
+     *     The class data as a byte array.
      * @param manifest
-     *     The manifest of the class
+     *     The jar manifest
      * @param source
      *     The code source of the class
      *
      * @author dueris
      */
-    public record ClassData(byte[] data, Manifest manifest, CodeSource source) {
-
-        public ClassData(final byte[] data, final @Nullable Manifest manifest, final @Nullable CodeSource source) {
-            this.data = data;
-            this.manifest = manifest;
-            this.source = source;
-        }
-
-        /**
-         * The class data as a byte array.
-         *
-         * @return the class data
-         */
-        @Override
-        public byte[] data() {
-            return this.data;
-        }
-
-        /**
-         * The jar manifest.
-         *
-         * @return the jar manifest
-         */
-        @Override
-        public @Nullable Manifest manifest() {
-            return this.manifest;
-        }
-
-        /**
-         * The jar code source.
-         *
-         * @return the jar code source
-         */
-        @Override
-        public @Nullable CodeSource source() {
-            return this.source;
-        }
-    }
+    public record ClassData(byte[] data, Manifest manifest, CodeSource source) {}
 
     private static final class ResourceConnection implements AutoCloseable {
 

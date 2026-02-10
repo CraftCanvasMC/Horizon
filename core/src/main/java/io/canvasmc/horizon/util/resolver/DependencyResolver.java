@@ -16,17 +16,41 @@ import java.util.function.Supplier;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
+/**
+ * The dependency resolver is a simple resolver for artifacts and repositories, designed for downloading and extracting
+ * libraries for the core to use without packaging the libraries in the file itself like with shadowing.
+ *
+ * @author dueris
+ */
 public class DependencyResolver {
     private final File out;
     private final Supplier<Artifact[]> artifactSupplier;
     private final Supplier<Repository[]> repositorySupplier;
 
+    /**
+     * Constructs a new dependency resolver
+     *
+     * @param out
+     *     the output directory
+     * @param artifactSupplier
+     *     the artifact supplier, which builds the definitions of the artifacts to download
+     * @param repositorySupplier
+     *     the repo supplier, which builds the definitions of the repositories to download from
+     */
     public DependencyResolver(File out, Supplier<Artifact[]> artifactSupplier, Supplier<Repository[]> repositorySupplier) {
         this.out = out;
         this.artifactSupplier = artifactSupplier;
         this.repositorySupplier = repositorySupplier;
     }
 
+    /**
+     * Resolves the dependencies from the artifact supplier and repository supplier, downloading and extracting them to
+     * the specified out directory.
+     * <p>
+     * This is executed asynchronously, with each artifact being downloaded and extracted on its own virtual thread
+     *
+     * @return a stream of the resolved dependencies
+     */
     public Stream<FileJar> resolve() {
         // we need to gather artifacts first, then repos, iterate over artifacts
         // and for each repo we try and resolve until we can't anymore
