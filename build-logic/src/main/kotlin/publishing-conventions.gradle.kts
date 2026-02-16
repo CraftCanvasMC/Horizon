@@ -9,8 +9,8 @@ java {
 }
 
 // configuration that includes as an implementation for the core project and stores fetch data
-val include by configurations.creating {
-    extendsFrom(configurations.api.get())
+val include by configurations.registering {
+    extendsFrom(configurations.api)
     isCanBeConsumed = false
     isCanBeResolved = false
 }
@@ -21,14 +21,14 @@ configurations {
     }
 }
 
-val includeResolvable by configurations.creating {
+val includeResolvable by configurations.registering {
     extendsFrom(include)
     isCanBeConsumed = false
     isCanBeResolved = true
 }
 
 val collectIncludedDependencies = tasks.register<CollectDependenciesTask>("collectIncludedDependencies") {
-    dependencies.setFrom(configurations.named("includeResolvable"))
+    dependencies.setFrom(includeResolvable)
     repositoryData.set(
         providers.provider {
             repositories.withType<MavenArtifactRepository>()
@@ -110,7 +110,7 @@ extensions.configure<PublishingExtension> {
         }
     }
     publications {
-        create<MavenPublication>("mavenJava") {
+        register<MavenPublication>("mavenJava") {
             from(components["java"])
         }
     }

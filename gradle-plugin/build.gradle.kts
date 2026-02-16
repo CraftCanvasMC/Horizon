@@ -13,9 +13,15 @@ plugins {
 }
 
 val javaVersion = 17
-val userdev by configurations.creating {
-    configurations.compileOnly.get().extendsFrom(this)
-    configurations.testImplementation.get().extendsFrom(this)
+val userdev by configurations.registering
+
+configurations {
+    compileOnly {
+        extendsFrom(userdev)
+    }
+    testImplementation {
+        extendsFrom(userdev)
+    }
 }
 
 repositories {
@@ -60,7 +66,7 @@ tasks.register("printVersion") {
 val generatedTestSources = layout.buildDirectory.dir("generated/resources/horizon/test")
 
 val copyUserdevForTests = tasks.register<Copy>("copyUserdevForTests") {
-    from(userdev.singleFile)
+    from(userdev.map { it.singleFile })
     into(generatedTestSources.map { it.dir("build-data") })
     rename { "userdev.jar" }
 }

@@ -42,7 +42,7 @@ horizon {
     accessTransformerFiles = files("src/main/resources/internal.at")
 }
 
-tasks.withType<Javadoc> {
+tasks.withType<Javadoc>().configureEach {
     exclude("io/canvasmc/horizon/inject/mixin/**")
     exclude("**/taskCache/**")
 }
