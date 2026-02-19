@@ -2,6 +2,7 @@ package io.canvasmc.horizon.instrument.patch;
 
 import io.canvasmc.horizon.HorizonLoader;
 import io.canvasmc.horizon.util.Util;
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -222,6 +223,7 @@ public final class ServerPatcherEntrypoint {
         return Files.newInputStream(orig);
     }
 
+    @ApiStatus.Internal
     public static URL @NonNull [] setupClasspath() {
         final Path repoDir = Path.of(System.getProperty("bundlerRepoDir", ""));
         final PatchEntry[] patches = findPatches();

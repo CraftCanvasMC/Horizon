@@ -5,7 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-// TODO - javadoc the class head
+/**
+ * Specifies the interface target definition for the interface. Provides the method name, and method argument types for
+ * the entrypoint target
+ *
+ * @author dueris
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface EntrypointHandler {

@@ -5,6 +5,13 @@ import org.jspecify.annotations.NonNull;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Thrown when an {@link io.canvasmc.horizon.util.tree.ObjectTree} fails to parse for any number of reasons, containing
+ * a list of {@link io.canvasmc.horizon.util.tree.ParseError} instances detailing why the parse may have failed for any
+ * number of reasons
+ *
+ * @author dueris
+ */
 public final class ParseException extends Exception {
     private final List<ParseError> errors;
 

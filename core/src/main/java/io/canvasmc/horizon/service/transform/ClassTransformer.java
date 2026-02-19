@@ -25,6 +25,13 @@ import java.util.function.Predicate;
 
 import static io.canvasmc.horizon.HorizonLoader.LOGGER;
 
+/**
+ * The class file transformer for Horizon. This manages and contains the
+ * {@link io.canvasmc.horizon.service.transform.TransformationService} instances for class byte transformations, and
+ * also conducts said transformations
+ *
+ * @author dueris
+ */
 public final class ClassTransformer {
     private final Map<Class<? extends TransformationService>, TransformationService> services;
     private final Map<TransformPhase, List<TransformationService>> orderedCache;
@@ -57,19 +64,52 @@ public final class ClassTransformer {
         }
     }
 
+    /**
+     * Adds an exclusion filter to the package name filterer for bytecode transformation
+     *
+     * @param predicate
+     *     the exclusion filter to add
+     */
     public void addExclusionFilter(final @NonNull Predicate<String> predicate) {
         this.exclusionFilter = predicate.and(predicate);
     }
 
+    /**
+     * Gets the registered service based on the class of the service
+     *
+     * @param type
+     *     the class of the service
+     * @param <T>
+     *     the generic type of the service
+     *
+     * @return the registered service instance
+     */
     @SuppressWarnings("unchecked")
     public <T extends TransformationService> @Nullable T getService(final @NonNull Class<T> type) {
         return (T) services.get(type);
     }
 
+    /**
+     * Gets all the registered service instances in the class transformer
+     *
+     * @return all registered services
+     */
     public @NonNull @UnmodifiableView Collection<TransformationService> getServices() {
         return Collections.unmodifiableCollection(this.services.values());
     }
 
+    /**
+     * Transforms the byte array input with the transformation services registered
+     *
+     * @param className
+     *     the name of the class being transformed
+     * @param input
+     *     the byte array input
+     * @param phase
+     *     the current transformation phase
+     *
+     * @return the transformed byte array
+     */
     public byte @NonNull [] transformBytes(final @NonNull String className, final byte @NonNull [] input, final @NonNull TransformPhase phase) {
         final String internalName = className.replace('.', '/');
 

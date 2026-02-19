@@ -2,6 +2,17 @@ package io.canvasmc.horizon.plugin.phase;
 
 import io.canvasmc.horizon.plugin.LoadContext;
 
+/**
+ * The plugin loading phase, internally it is implemented by 3 phases, {@code BUILDER}, {@code DISCOVERY},
+ * {@code RESOLUTION}
+ *
+ * @param <I>
+ *     the input generic type
+ * @param <O>
+ *     the output generic type
+ *
+ * @author dueris
+ */
 public interface Phase<I, O> {
 
     /**

@@ -12,6 +12,7 @@ import org.jspecify.annotations.NonNull;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -19,6 +20,23 @@ import java.util.stream.Stream;
 public class EntrypointContainer {
     private static final Logger LOGGER = Logger.fork(HorizonLoader.LOGGER, "entrypoint_api");
 
+    /**
+     * Constructs the entrypoint provider. This also runs most validation steps on the registered entrypoints configured
+     * in the plugin metadata
+     *
+     * @param key
+     *     the entrypoint key to invoke
+     * @param interfaceClazz
+     *     the interface all instances must implement
+     * @param retType
+     *     the return type, or {@link Void} if no return value
+     * @param <C>
+     *     the generic type for the interface
+     * @param <R>
+     *     the generic type for the return type
+     *
+     * @return the compiled entrypoint provider
+     */
     @Contract("_, _, _ -> new")
     public static <C, R> @NonNull Provider<C, R> buildProvider(@NonNull String key, @NonNull Class<C> interfaceClazz, @NonNull Class<R> retType) {
         HorizonLoader loader = HorizonLoader.getInstance();
@@ -50,7 +68,7 @@ public class EntrypointContainer {
                         C built = implementationClass.getDeclaredConstructor()
                             .newInstance();
 
-                        finalizedInstances.add(new EntryInstance<>(built, horizonPlugin, key));
+                        finalizedInstances.add(new EntryInstance<>(built, horizonPlugin, key, entrypoint.order()));
                     } catch (Throwable thrown) {
                         LOGGER.error(thrown, "Unable to find target class '" + target + "' for entrypoint '" + key + "'");
                         continue;
@@ -66,6 +84,17 @@ public class EntrypointContainer {
         );
     }
 
+    /**
+     * The entrypoint provider for a compiled key. This contains the methods and date to invoke the compiled entrypoints
+     * from {@link io.canvasmc.horizon.service.entrypoint.EntrypointContainer#buildProvider(String, Class, Class)}
+     *
+     * @param <C>
+     *     the generic type for the interface
+     * @param <R>
+     *     the generic type for the return type
+     *
+     * @author dueris
+     */
     public static class Provider<C, R> {
 
         private final Class<C> requiredImplementation;
@@ -79,9 +108,18 @@ public class EntrypointContainer {
             this.requiredImplementation = requiredImplementation;
             this.retType = retType;
             this.instances = instances;
+            this.instances.sort(Comparator.comparingInt((EntryInstance<C> cEntryInstance) -> cEntryInstance.order));
         }
 
-        // if ret type is void, run invoke void and return an empty stream
+        /**
+         * Invokes the entrypoint with specified arguments that will be passed to the methods being invoked in the
+         * interface implementations
+         *
+         * @param args
+         *     the arguments, can be empty
+         *
+         * @return a stream of return values. Empty stream if the return type is {@code void}
+         */
         public Stream<R> invoke(Object... args) {
             if (!requiredImplementation.isAnnotationPresent(EntrypointHandler.class)) {
                 throw new IllegalStateException("Entrypoint handler '" + requiredImplementation.getName() + "' must be annotated with @EntrypointHandler");
@@ -123,14 +161,29 @@ public class EntrypointContainer {
             return stream.build();
         }
 
+        /**
+         * Get if the return type is {@code void}
+         *
+         * @return {@code true} if is {@code void}, {@code false} otherwise
+         */
         private boolean isVoid() {
             return retType.equals(void.class) || retType.equals(Void.class);
         }
 
+        /**
+         * Get the return type of this entrypoint provider
+         *
+         * @return the return type
+         */
         public Class<R> getReturnType() {
             return retType;
         }
 
+        /**
+         * Get the required interface implementation for this entrypoint provider
+         *
+         * @return the required interface class
+         */
         public Class<C> getRequiredImplementation() {
             return requiredImplementation;
         }
@@ -140,5 +193,5 @@ public class EntrypointContainer {
         }
     }
 
-    public record EntryInstance<C>(C built, HorizonPlugin horizonPlugin, @NonNull String key) {}
+    public record EntryInstance<C>(C built, HorizonPlugin horizonPlugin, @NonNull String key, int order) {}
 }

@@ -1,7 +1,3 @@
-- document which Minecraft versions work, and try and fix as many as possible
-- javadocs
-- dependency declaration of horizon plugins, and incompatibilities
-    - add ability to depend on JDK versions, ASM versions, Horizon versions, and maybe Mixin versions?
 - go through internal todos
 - document the plugin injection support in readme
 - dependency declaration of horizon plugins, and incompatibilities

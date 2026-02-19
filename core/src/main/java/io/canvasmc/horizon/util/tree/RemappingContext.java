@@ -5,6 +5,16 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Represents the remapping context for {@link io.canvasmc.horizon.util.tree.ObjectTree} parsing/building. Object trees
+ * contain the capability of including arguments like {@code {env.JAVA_HOME}}, which will be replaced by the appropriate
+ * environment variable or system property during building
+ *
+ * @param variables
+ *     the {@code key} and the {@code replacement} mappings for custom interpolation registry
+ *
+ * @author dueris
+ */
 public record RemappingContext(Map<String, String> variables) {
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$\\{([^}]+)}");
 
@@ -20,7 +30,7 @@ public record RemappingContext(Map<String, String> variables) {
         );
     }
 
-    public String interpolate(String value) {
+    String interpolate(String value) {
         if (value == null) {
             return null;
         }

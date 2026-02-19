@@ -15,6 +15,8 @@ public enum MinecraftVersion {
     /**
      * Unknown name, future drop
      */
+    V26_1_SNAPSHOT_9("26.1-snapshot-9", "26.1 Snapshot 9", 25, VersionType.SNAPSHOT),
+    V26_1_SNAPSHOT_8("26.1-snapshot-8", "26.1 Snapshot 8", 25, VersionType.SNAPSHOT),
     V26_1_SNAPSHOT_7("26.1-snapshot-7", "26.1 Snapshot 7", 25, VersionType.SNAPSHOT),
     V26_1_SNAPSHOT_6("26.1-snapshot-6", "26.1 Snapshot 6", 25, VersionType.SNAPSHOT),
     V26_1_SNAPSHOT_5("26.1-snapshot-5", "26.1 Snapshot 5", 25, VersionType.SNAPSHOT),

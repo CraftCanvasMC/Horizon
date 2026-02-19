@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Immutable tree structure representing hierarchical configuration data. Supports reading from YAML, JSON, TOML, and
@@ -356,7 +357,7 @@ public final class ObjectTree {
         /**
          * Registers a mapped type converter. Should be used when using {@link Value#as(Class)} to parse your object
          */
-        public <E, S> ReadBuilder registerMappedConverter(Class<E> newType, Class<S> baseType, MappedTypeConverter<E, S> mapper) {
+        public <E, S> ReadBuilder registerMappedConverter(Class<E> newType, Class<S> baseType, Function<S, E> mapper) {
             converters.registerMapped(newType, baseType, mapper);
             return this;
         }

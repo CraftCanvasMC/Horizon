@@ -2,6 +2,7 @@ package io.canvasmc.horizon.plugin;
 
 import io.canvasmc.horizon.plugin.types.HorizonPlugin;
 import io.canvasmc.horizon.util.FileJar;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.jspecify.annotations.NonNull;
@@ -12,8 +13,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * The stored plugin tree created by the Horizon plugin loader, aka {@link io.canvasmc.horizon.MixinPluginLoader}. This
+ * represents a tree-like data structure of Horizon plugins, the internal plugin, and all nested entries too.
+ *
+ * @param roots
+ *     the root plugin node(s)
+ *
+ * @author dueris
+ */
 public record PluginTree(List<PluginNode> roots) {
 
+    @ApiStatus.Internal
     @Contract("_ -> new")
     public static @NonNull PluginTree from(HorizonPlugin @NonNull [] plugins) {
         List<PluginNode> roots = new ArrayList<>();
@@ -25,6 +36,20 @@ public record PluginTree(List<PluginNode> roots) {
         return new PluginTree(roots);
     }
 
+    /**
+     * Formats the tree into a readable printed structure, like this:
+     * <pre>
+     * {@code Found 2 plugin(s):
+     * 	- Example 1.0.0
+     * 	   |-- WowAnotherExample 2.3.1
+     * 	   |   \-- SuperFastLib
+     * 	   |-- Vault
+     * 	   \-- SuperEpicThingie
+     * 	- AnotherCoolThing 0.9.4}
+     * </pre>
+     *
+     * @return the readable pretty-printed structure
+     */
     public @NonNull String format() {
         StringBuilder builder = new StringBuilder();
         AtomicInteger count = new AtomicInteger();
@@ -73,6 +98,11 @@ public record PluginTree(List<PluginNode> roots) {
         }
     }
 
+    /**
+     * Collects and returns all Horizon plugins within the tree, including nested entries
+     *
+     * @return all Horizon plugins
+     */
     public @NonNull List<HorizonPlugin> getAll() {
         List<HorizonPlugin> plugins = new ArrayList<>();
 
@@ -93,12 +123,34 @@ public record PluginTree(List<PluginNode> roots) {
         }
     }
 
+    /**
+     * The type of node this is
+     *
+     * @author dueris
+     */
     public enum NodeType {
         HORIZON_PLUGIN,
         SERVER_PLUGIN,
         LIBRARY
     }
 
+    /**
+     * The plugin node in the tree
+     *
+     * @param name
+     *     the name of the node
+     * @param version
+     *     the version of the node
+     * @param type
+     *     the type of node
+     * @param children
+     *     the children nodes of this node, can be empty
+     * @param plugin
+     *     the <b>nullable</b> Horizon plugin instance associated with this entry. If this node isn't a Horizon plugin,
+     *     this will be null
+     *
+     * @author dueris
+     */
     public record PluginNode(
         String name, String version, NodeType type, List<PluginNode> children,
         @Nullable HorizonPlugin plugin) {

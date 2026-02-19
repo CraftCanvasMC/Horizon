@@ -14,6 +14,15 @@ import org.spongepowered.asm.mixin.transformer.IMixinTransformerFactory;
 import org.spongepowered.asm.service.ISyntheticClassRegistry;
 import org.spongepowered.asm.transformers.MixinClassReader;
 
+/**
+ * The mixin transformation service implementation
+ * <p>
+ * Note: will attempt to transform everything,
+ * {@link io.canvasmc.horizon.service.transform.TransformationService#shouldTransform(org.objectweb.asm.Type,
+ * org.objectweb.asm.tree.ClassNode)} always returns true
+ *
+ * @author dueris
+ */
 public final class MixinTransformationImpl implements TransformationService {
     public static final int ASM_VERSION = Opcodes.ASM9;
 

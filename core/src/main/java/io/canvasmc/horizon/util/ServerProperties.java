@@ -16,7 +16,20 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// TODO - javadocs
+/**
+ * The properties of the Horizon environment setup
+ *
+ * @param pluginsDirectory
+ *     the plugins directory Horizon will read from
+ * @param serverJar
+ *     the server jar file
+ * @param cacheLocation
+ *     the folder to put IO cache, like nested entries
+ * @param extraPlugins
+ *     the paths of extra plugins to add to the Horizon loader
+ *
+ * @author dueris
+ */
 public record ServerProperties(
     File pluginsDirectory,
     File serverJar,
