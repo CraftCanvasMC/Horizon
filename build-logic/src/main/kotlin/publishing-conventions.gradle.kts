@@ -102,7 +102,7 @@ configurations.apiElements {
 extensions.configure<PublishingExtension> {
     repositories {
         maven("https://maven.canvasmc.io/releases") {
-            name = "canvasmc"
+            name = "canvasReleases"
             credentials {
                 username = providers.environmentVariable("PUBLISH_USER").orNull
                 password = providers.environmentVariable("PUBLISH_TOKEN").orNull
