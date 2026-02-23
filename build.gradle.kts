@@ -44,11 +44,11 @@ tasks.register("testPlugin") {
 }
 
 tasks.register("publishPlugin") {
-    dependsOn(gradle.includedBuild("gradle-plugin").task(":publishAllPublicationsToCanvasmcRepository"))
+    dependsOn(gradle.includedBuild("gradle-plugin").task(":publishAllPublicationsToCanvasReleasesRepository"))
 }
 
 tasks.register("publishSnapshotPlugin") {
-    dependsOn(gradle.includedBuild("gradle-plugin").task(":publishAllPublicationsToSnapshotsRepository"))
+    dependsOn(gradle.includedBuild("gradle-plugin").task(":publishAllPublicationsToCanvasSnapshotsRepository"))
 }
 
 tasks.register("publishPluginLocally") {
