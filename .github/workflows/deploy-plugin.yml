@@ -28,11 +28,11 @@ jobs:
         if: endsWith(steps.get_version.outputs.version, '-SNAPSHOT')
         run: ./gradlew -Dorg.gradle.parallel=true publishSnapshotPlugin --stacktrace -Dorg.gradle.internal.http.socketTimeout=90000 -Dorg.gradle.internal.http.connectionTimeout=90000
         env:
-          canvasSnapshotsUsername: ${{ secrets.PUBLISH_USER }}
-          canvasSnapshotsPassword: ${{ secrets.PUBLISH_TOKEN }}
+          PUBLISH_USER: ${{ secrets.PUBLISH_USER }}
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
       - name: Deploy release
         if: ${{ !endsWith(steps.get_version.outputs.version, '-SNAPSHOT') }}
         run: ./gradlew -Dorg.gradle.parallel=true publishPlugin --stacktrace -Dorg.gradle.internal.http.socketTimeout=90000 -Dorg.gradle.internal.http.connectionTimeout=90000
         env:
-          canvasReleasesUsername: ${{ secrets.PUBLISH_USER }}
-          canvasReleasesPassword: ${{ secrets.PUBLISH_TOKEN }}
+          PUBLISH_USER: ${{ secrets.PUBLISH_USER }}
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}

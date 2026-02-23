@@ -189,11 +189,17 @@ publishing {
     repositories {
         maven("https://maven.canvasmc.io/snapshots") {
             name = "canvasSnapshots"
-            credentials(PasswordCredentials::class)
+            credentials {
+                username = providers.environmentVariable("PUBLISH_USER").orNull
+                password = providers.environmentVariable("PUBLISH_TOKEN").orNull
+            }
         }
         maven("https://maven.canvasmc.io/releases") {
             name = "canvasReleases"
-            credentials(PasswordCredentials::class)
+            credentials {
+                username = providers.environmentVariable("PUBLISH_USER").orNull
+                password = providers.environmentVariable("PUBLISH_TOKEN").orNull
+            }
         }
     }
     publications {

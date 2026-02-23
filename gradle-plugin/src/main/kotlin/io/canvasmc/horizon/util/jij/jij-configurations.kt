@@ -16,10 +16,12 @@ import org.gradle.kotlin.dsl.register
 import kotlin.collections.forEach
 
 fun Project.configureJiJ(ext: HorizonExtension) {
-    ext.addIncludedDependenciesTo.get().forEach {
-        it.extendsFrom(configurations.named(INCLUDE_MIXIN_PLUGIN))
-        it.extendsFrom(configurations.named(INCLUDE_PLUGIN))
-        it.extendsFrom(configurations.named(INCLUDE_LIBRARY))
+    afterEvaluate {
+        ext.addIncludedDependenciesTo.get().forEach {
+            it.extendsFrom(configurations.named(INCLUDE_MIXIN_PLUGIN))
+            it.extendsFrom(configurations.named(INCLUDE_PLUGIN))
+            it.extendsFrom(configurations.named(INCLUDE_LIBRARY))
+        }
     }
     tasks.named<Jar>("jar") {
         from(configurations.named(INCLUDE_MIXIN_PLUGIN)) {
