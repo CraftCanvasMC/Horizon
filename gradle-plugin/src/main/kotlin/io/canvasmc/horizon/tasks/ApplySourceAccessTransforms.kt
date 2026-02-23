@@ -4,7 +4,9 @@ import io.canvasmc.horizon.util.*
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import org.gradle.kotlin.dsl.newInstance
+import javax.inject.Inject
 import kotlin.io.path.*
 import kotlin.system.measureNanoTime
 
@@ -27,6 +29,9 @@ abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
     @get:Input
     abstract val validateATs: Property<Boolean>
 
+    @get:Inject
+    abstract val progressLoggerFactory: ProgressLoggerFactory
+
     @get:Internal
     abstract val timeSpent: Property<Long>
 
@@ -35,17 +40,22 @@ abstract class ApplySourceAccessTransforms : JavaLauncherTask() {
         val inputJar = mappedServerJar.path
         val outputJar = sourceTransformedMappedServerJar.path.cleanFile()
         if (atFile.path.readText().isNotBlank()) {
+            val progress = progressLoggerFactory.newOperation(this::class.java)
+            progress.description = "Applying access transforms"
+            progress.started()
             val generatedIn = measureNanoTime {
-                println("Applying access transformers 1/2...")
                 ats.run(
                     launcher.get(),
                     inputJar,
                     outputJar,
+                    progress,
                     atFile.path,
                     temporaryDir.toPath(),
                     validateATs.get(),
                 )
             }
+
+            progress.completed()
             timeSpent.set(generatedIn)
             println("Done in ${formatNs(timeSpent.get())}!")
         } else {

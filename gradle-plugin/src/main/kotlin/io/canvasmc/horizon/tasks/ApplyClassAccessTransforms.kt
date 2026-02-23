@@ -117,7 +117,6 @@ abstract class ApplyClassAccessTransforms : JavaLauncherTask() {
     fun run() {
         if (atFile.path.readText().isNotBlank()) {
             val generatedIn = measureNanoTime {
-                println("Applying access transformers 2/2...")
                 applyAccessTransform(
                     inputJarPath = inputJar.path,
                     outputJarPath = outputJar.path,

@@ -1,31 +1,8 @@
-/*
- * This file is part of the paperweight gradle plugin.
- *
- * paperweight is a Gradle plugin for the PaperMC project.
- *
- * Copyright (c) 2023 Kyle Wood (DenWav)
- *                    Contributors
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation;
- * version 2.1 only, no later versions.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
- * USA
- */
-
 package io.canvasmc.horizon.util
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
+import org.gradle.internal.logging.progress.ProgressLogger
 import org.gradle.jvm.toolchain.JavaLauncher
 import java.io.File
 import java.io.OutputStream
@@ -39,7 +16,7 @@ private val Iterable<File>.asPath
 fun JavaLauncher.runJar(
     classpath: Iterable<File>,
     workingDir: Any,
-    logFile: Any?,
+    progress: ProgressLogger?,
     jvmArgs: List<String> = listOf(),
     vararg args: String
 ) {
@@ -55,18 +32,7 @@ fun JavaLauncher.runJar(
     }
 
     val dir = workingDir.convertToPath()
-
-    val (logFilePath, output) = when {
-        logFile is OutputStream -> Pair(null, logFile)
-
-        logFile != null -> {
-            val log = logFile.convertToPath()
-            log.parent.createDirectories()
-            Pair(log, log.outputStream().buffered())
-        }
-
-        else -> Pair(null, UselessOutputStream)
-    }
+    val output: OutputStream = progress?.let { ProgressLoggerOutputStream(it) } ?: UselessOutputStream
 
     val processBuilder = ProcessBuilder(
         this.executablePath.path.absolutePathString(),
@@ -76,11 +42,6 @@ fun JavaLauncher.runJar(
         mainClass,
         *args
     ).directory(dir)
-
-    output.writer().let {
-        it.appendLine("Command: ${processBuilder.command().joinToString(" ")}")
-        it.flush()
-    }
 
     val process = processBuilder.start()
 
@@ -92,18 +53,44 @@ fun JavaLauncher.runJar(
         outFuture.get(500L, TimeUnit.MILLISECONDS)
         errFuture.get(500L, TimeUnit.MILLISECONDS)
         if (exit != 0) {
-            val logMsg = logFilePath?.let { p -> " Log file: ${p.absolutePathString()}" } ?: ""
-            throw RuntimeException("Execution of '$mainClass' failed with exit code $exit.$logMsg Classpath: ${classpath.asPath}")
+            throw RuntimeException("Execution of '$mainClass' failed with exit code $exit. Classpath: ${classpath.asPath}")
         }
+    }
+}
+
+class ProgressLoggerOutputStream(private val progress: ProgressLogger) : OutputStream() {
+    private val buffer = kotlin.text.StringBuilder()
+
+    override fun write(b: Int) {
+        if (b.toChar() == '\n') {
+            processLine(buffer.toString())
+            buffer.setLength(0)
+        } else {
+            buffer.append(b.toChar())
+        }
+    }
+
+    private fun processLine(line: String) {
+        if (!line.startsWith("Applying AT")) return
+
+        val regex = Regex("""Applying AT (\S+ \S+) .+:(\d+) to (\S+) of (\S+)$""")
+        val match = regex.find(line) ?: return
+
+        val type = match.groupValues[1]
+        val member = match.groupValues[3]
+        val clazz = match.groupValues[4]
+
+        val fqMember = "$clazz.$member"
+        progress.progress("Transforming $fqMember [$type]")
     }
 }
 
 fun Provider<JavaLauncher>.runJar(
     classpath: FileCollection,
     workingDir: Any,
-    logFile: Any?,
+    progress: ProgressLogger?,
     jvmArgs: List<String> = listOf(),
     vararg args: String
 ) {
-    get().runJar(classpath, workingDir, logFile, jvmArgs, *args)
+    get().runJar(classpath, workingDir, progress, jvmArgs, *args)
 }
