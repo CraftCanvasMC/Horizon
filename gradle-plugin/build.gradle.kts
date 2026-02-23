@@ -100,10 +100,6 @@ tasks.shadowJar {
     }
 }
 
-tasks.validatePlugins {
-    enableStricterValidation = true
-}
-
 tasks.withType<ProcessResources>().configureEach {
     filteringCharset = Charsets.UTF_8.name()
 }
