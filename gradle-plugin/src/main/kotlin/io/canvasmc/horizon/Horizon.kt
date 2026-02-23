@@ -81,18 +81,27 @@ abstract class Horizon : Plugin<Project> {
         // TODO: could we mimic this for normal paperweight??
         // Probably would be dirty.
         userdevExt.injectServerJar.set(false) // dont add the server jar to the configurations as we override it
+        userdevExt.injectServerJar.disallowChanges()
         val userdevTask = tasks.named<UserdevSetupTask>(Paperweight.USERDEV_SETUP_TASK_NAME)
 
-        // setup run paper compat layer
-        plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
-            if (ext.setupRunPaperCompatibility.get()) {
-                setupRunPaperCompat(userdevExt, ext, progressLoggerFactory)
+        // these need to be in after evaluate for now
+        afterEvaluate {
+            // setup run paper compat layer
+            plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
+                if (ext.setupRunPaperCompatibility.get()) {
+                    setupRunPaperCompat(userdevExt, ext, progressLoggerFactory)
+                }
             }
-        }
-
-        // populate compile classpath
-        ext.addServerDependencyTo.get().forEach {
-            it.extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
+            // populate compile classpath
+            ext.addServerDependencyTo.get().forEach {
+                it.extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
+            }
+            // set up horizon api dependency
+            ext.addHorizonApiDependencyTo.get().forEach {
+                // we want to resolve it from the context of the horizon api configurations so pass only the files
+                // do not extend as that would resolve it from the context of compileClasspath which we dont want
+                it.dependencies.add(dependencyFactory.create(files(configurations.named(HORIZON_API_RESOLVABLE_CONFIG))))
+            }
         }
 
         repositories {
@@ -106,13 +115,6 @@ abstract class Horizon : Plugin<Project> {
                 name = HORIZON_API_REPO_NAME
                 content { onlyForConfigurations(HORIZON_API_RESOLVABLE_CONFIG, HORIZON_API_SINGLE_RESOLVABLE_CONFIG) }
             }
-        }
-
-        // set up horizon api dependency
-        ext.addHorizonApiDependencyTo.get().forEach {
-            // we want to resolve it from the context of the horizon api configurations so pass only the files
-            // do not extend as that would resolve it from the context of compileClasspath which we dont want
-            it.dependencies.add(dependencyFactory.create(files(configurations.named(HORIZON_API_RESOLVABLE_CONFIG))))
         }
 
         // configure JiJ
