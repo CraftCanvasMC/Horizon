@@ -97,15 +97,27 @@ class ProgressLoggerOutputStream(private val progress: ProgressLogger) : OutputS
     private fun processLine(line: String) {
         if (!line.startsWith("Applying AT")) return
 
-        val regex = Regex("""Applying AT (\S+ \S+) .+:(\d+) to (\S+) of (\S+)$""")
-        val match = regex.find(line) ?: return
+        val memberRegex =
+            Regex("""Applying AT (\S+ \S+) .+ to (\S+) of (\S+)$""")
 
-        val type = match.groupValues[1]
-        val member = match.groupValues[3]
-        val clazz = match.groupValues[4]
+        val classRegex =
+            Regex("""Applying AT (\S+ \S+) .+ to (\S+)$""")
 
-        val fqMember = "$clazz.$member"
-        progress.progress("Transforming $fqMember [$type]")
+        val memberMatch = memberRegex.find(line)
+        if (memberMatch != null) {
+            val type = memberMatch.groupValues[1]
+            val member = memberMatch.groupValues[2]
+            val clazz = memberMatch.groupValues[3]
+            progress.progress("Transforming $clazz.$member [$type]")
+            return
+        }
+
+        val classMatch = classRegex.find(line)
+        if (classMatch != null) {
+            val type = classMatch.groupValues[1]
+            val target = classMatch.groupValues[2]
+            progress.progress("Transforming $target [$type]")
+        }
     }
 }
 
