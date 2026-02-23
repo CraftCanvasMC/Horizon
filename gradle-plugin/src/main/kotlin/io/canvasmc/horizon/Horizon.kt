@@ -47,12 +47,12 @@ abstract class Horizon : Plugin<Project> {
 
         // resolvable configuration for Horizon API
         target.configurations.resolvable(HORIZON_API_RESOLVABLE_CONFIG) {
-            extendsFrom(horizonApi.get())
+            extendsFrom(horizonApi)
         }
 
         // resolvable non-transitive configuration for Horizon API for use in run tasks
         target.configurations.resolvable(HORIZON_API_SINGLE_RESOLVABLE_CONFIG) {
-            extendsFrom(horizonApi.get())
+            extendsFrom(horizonApi)
             isTransitive = false
         }
 
@@ -71,7 +71,7 @@ abstract class Horizon : Plugin<Project> {
             target.dependencyFactory,
         )
 
-        target.afterEvaluate { setup(ext) }
+        target.setup(ext)
     }
 
     private fun Project.setup(ext: HorizonExtension) {
@@ -84,15 +84,15 @@ abstract class Horizon : Plugin<Project> {
         val userdevTask = tasks.named<UserdevSetupTask>(Paperweight.USERDEV_SETUP_TASK_NAME)
 
         // setup run paper compat layer
-        if (ext.setupRunPaperCompatibility.get()) {
-            plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
+        plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
+            if (ext.setupRunPaperCompatibility.get()) {
                 setupRunPaperCompat(userdevExt, ext, progressLoggerFactory)
             }
         }
 
         // populate compile classpath
         ext.addServerDependencyTo.get().forEach {
-            it.extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
+            it.extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG))
         }
 
         repositories {
