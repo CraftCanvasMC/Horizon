@@ -188,14 +188,14 @@ gradlePlugin {
 publishing {
     repositories {
         maven("https://maven.canvasmc.io/snapshots") {
-            name = "snapshots"
+            name = "canvasSnapshots"
             credentials {
                 username = providers.environmentVariable("PUBLISH_USER").orNull
                 password = providers.environmentVariable("PUBLISH_TOKEN").orNull
             }
         }
         maven("https://maven.canvasmc.io/releases") {
-            name = "canvasmc"
+            name = "canvasReleases"
             credentials {
                 username = providers.environmentVariable("PUBLISH_USER").orNull
                 password = providers.environmentVariable("PUBLISH_TOKEN").orNull

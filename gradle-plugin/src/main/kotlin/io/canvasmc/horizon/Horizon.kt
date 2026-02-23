@@ -71,7 +71,7 @@ abstract class Horizon : Plugin<Project> {
             target.dependencyFactory,
         )
 
-        target.afterEvaluate { setup(ext) }
+        target.setup(ext)
     }
 
     private fun Project.setup(ext: HorizonExtension) {
@@ -84,8 +84,8 @@ abstract class Horizon : Plugin<Project> {
         val userdevTask = tasks.named<UserdevSetupTask>(Paperweight.USERDEV_SETUP_TASK_NAME)
 
         // setup run paper compat layer
-        if (ext.setupRunPaperCompatibility.get()) {
-            plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
+        plugins.withId(Plugins.RUN_TASK_PAPER_PLUGIN_ID) {
+            if (ext.setupRunPaperCompatibility.get()) {
                 setupRunPaperCompat(userdevExt, ext, progressLoggerFactory)
             }
         }
