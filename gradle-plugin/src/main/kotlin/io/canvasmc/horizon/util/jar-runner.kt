@@ -40,7 +40,8 @@ private val Iterable<File>.asPath
 fun JavaLauncher.runJar(
     classpath: Iterable<File>,
     workingDir: Any,
-    progress: ProgressLogger?,
+    logFile: Any?,
+    progress: ProgressLogger,
     jvmArgs: List<String> = listOf(),
     vararg args: String
 ) {
@@ -56,7 +57,19 @@ fun JavaLauncher.runJar(
     }
 
     val dir = workingDir.convertToPath()
-    val output: OutputStream = progress?.let { ProgressLoggerOutputStream(it) } ?: UselessOutputStream
+    val (logFilePath, logFileOutput) = when {
+        logFile is OutputStream -> Pair(null, logFile)
+
+        logFile != null -> {
+            val log = logFile.convertToPath()
+            log.parent.createDirectories()
+            Pair(log, log.outputStream().buffered())
+        }
+
+        else -> Pair(null, UselessOutputStream)
+    }
+
+    val output = ProgressLoggerOutputStream(progress, logFileOutput)
 
     val processBuilder = ProcessBuilder(
         this.executablePath.path.absolutePathString(),
@@ -67,34 +80,47 @@ fun JavaLauncher.runJar(
         *args
     ).directory(dir)
 
+    logFileOutput.writer().let {
+        it.appendLine("Command: ${processBuilder.command().joinToString(" ")}")
+        it.flush()
+    }
+
     val process = processBuilder.start()
 
-    output.use {
-        val outFuture = redirect(process.inputStream, it)
-        val errFuture = redirect(process.errorStream, it)
+    val outFuture = redirect(process.inputStream, output)
+    val errFuture = redirect(process.errorStream, output)
 
-        val exit = process.waitFor()
-        outFuture.get(500L, TimeUnit.MILLISECONDS)
-        errFuture.get(500L, TimeUnit.MILLISECONDS)
-        if (exit != 0) {
-            throw RuntimeException("Execution of '$mainClass' failed with exit code $exit. Classpath: ${classpath.asPath}")
-        }
+    val exit = process.waitFor()
+    outFuture.get(500L, TimeUnit.MILLISECONDS)
+    errFuture.get(500L, TimeUnit.MILLISECONDS)
+
+    if (exit != 0) {
+        val logMsg = logFilePath?.let { p -> ". Log file: ${p.absolutePathString()}" } ?: "."
+        throw RuntimeException("Execution of '$mainClass' failed with exit code $exit$logMsg Classpath: ${classpath.asPath}")
     }
 }
 
-class ProgressLoggerOutputStream(private val progress: ProgressLogger) : OutputStream() {
+class ProgressLoggerOutputStream(
+    private val progress: ProgressLogger,
+    private val logFileOutput: OutputStream
+) : OutputStream() {
     private val buffer = kotlin.text.StringBuilder()
 
     override fun write(b: Int) {
         if (b.toChar() == '\n') {
-            processLine(buffer.toString())
+            processLine(buffer.toString(), logFileOutput)
             buffer.setLength(0)
         } else {
             buffer.append(b.toChar())
         }
     }
 
-    private fun processLine(line: String) {
+    private fun processLine(line: String, logFileOutput: OutputStream) {
+        logFileOutput.writer().apply {
+            appendLine(line)
+            flush()
+        }
+
         if (!line.startsWith("Applying AT")) return
 
         val memberRegex =
@@ -124,9 +150,10 @@ class ProgressLoggerOutputStream(private val progress: ProgressLogger) : OutputS
 fun Provider<JavaLauncher>.runJar(
     classpath: FileCollection,
     workingDir: Any,
-    progress: ProgressLogger?,
+    logFile: Any?,
+    progress: ProgressLogger,
     jvmArgs: List<String> = listOf(),
     vararg args: String
 ) {
-    get().runJar(classpath, workingDir, progress, jvmArgs, *args)
+    get().runJar(classpath, workingDir, logFile, progress, jvmArgs, *args)
 }

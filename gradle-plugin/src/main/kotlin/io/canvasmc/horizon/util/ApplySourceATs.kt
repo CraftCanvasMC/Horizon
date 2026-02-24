@@ -62,6 +62,7 @@ abstract class ApplySourceATs {
         javaLauncher.runJar(
             jst,
             workDir,
+            workDir.resolve("log.txt"),
             progress,
             jvmArgs = listOf("-Xmx${memory.get()}"),
             args = jstArgs(input, output, atFile, validate).toTypedArray()
