@@ -26,6 +26,7 @@ package io.canvasmc.horizon.util
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
+import org.gradle.internal.logging.progress.ProgressLogger
 import org.gradle.jvm.toolchain.JavaLauncher
 import java.io.File
 import java.io.OutputStream
@@ -40,6 +41,7 @@ fun JavaLauncher.runJar(
     classpath: Iterable<File>,
     workingDir: Any,
     logFile: Any?,
+    progress: ProgressLogger,
     jvmArgs: List<String> = listOf(),
     vararg args: String
 ) {
@@ -55,8 +57,7 @@ fun JavaLauncher.runJar(
     }
 
     val dir = workingDir.convertToPath()
-
-    val (logFilePath, output) = when {
+    val (logFilePath, logFileOutput) = when {
         logFile is OutputStream -> Pair(null, logFile)
 
         logFile != null -> {
@@ -68,6 +69,8 @@ fun JavaLauncher.runJar(
         else -> Pair(null, UselessOutputStream)
     }
 
+    val output = ProgressLoggerOutputStream(progress, logFileOutput)
+
     val processBuilder = ProcessBuilder(
         this.executablePath.path.absolutePathString(),
         *jvmArgs.toTypedArray(),
@@ -77,23 +80,69 @@ fun JavaLauncher.runJar(
         *args
     ).directory(dir)
 
-    output.writer().let {
+    logFileOutput.writer().let {
         it.appendLine("Command: ${processBuilder.command().joinToString(" ")}")
         it.flush()
     }
 
     val process = processBuilder.start()
 
-    output.use {
-        val outFuture = redirect(process.inputStream, it)
-        val errFuture = redirect(process.errorStream, it)
+    val outFuture = redirect(process.inputStream, output)
+    val errFuture = redirect(process.errorStream, output)
 
-        val exit = process.waitFor()
-        outFuture.get(500L, TimeUnit.MILLISECONDS)
-        errFuture.get(500L, TimeUnit.MILLISECONDS)
-        if (exit != 0) {
-            val logMsg = logFilePath?.let { p -> " Log file: ${p.absolutePathString()}" } ?: ""
-            throw RuntimeException("Execution of '$mainClass' failed with exit code $exit.$logMsg Classpath: ${classpath.asPath}")
+    val exit = process.waitFor()
+    outFuture.get(500L, TimeUnit.MILLISECONDS)
+    errFuture.get(500L, TimeUnit.MILLISECONDS)
+
+    if (exit != 0) {
+        val logMsg = logFilePath?.let { p -> ". Log file: ${p.absolutePathString()}" } ?: "."
+        throw RuntimeException("Execution of '$mainClass' failed with exit code $exit$logMsg Classpath: ${classpath.asPath}")
+    }
+}
+
+class ProgressLoggerOutputStream(
+    private val progress: ProgressLogger,
+    private val logFileOutput: OutputStream
+) : OutputStream() {
+    private val buffer = kotlin.text.StringBuilder()
+
+    override fun write(b: Int) {
+        if (b.toChar() == '\n') {
+            processLine(buffer.toString(), logFileOutput)
+            buffer.setLength(0)
+        } else {
+            buffer.append(b.toChar())
+        }
+    }
+
+    private fun processLine(line: String, logFileOutput: OutputStream) {
+        logFileOutput.writer().apply {
+            appendLine(line)
+            flush()
+        }
+
+        if (!line.startsWith("Applying AT")) return
+
+        val memberRegex =
+            Regex("""Applying AT (\S+ \S+) .+ to (\S+) of (\S+)$""")
+
+        val classRegex =
+            Regex("""Applying AT (\S+ \S+) .+ to (\S+)$""")
+
+        val memberMatch = memberRegex.find(line)
+        if (memberMatch != null) {
+            val type = memberMatch.groupValues[1]
+            val member = memberMatch.groupValues[2]
+            val clazz = memberMatch.groupValues[3]
+            progress.progress("Transforming $clazz.$member [$type]")
+            return
+        }
+
+        val classMatch = classRegex.find(line)
+        if (classMatch != null) {
+            val type = classMatch.groupValues[1]
+            val target = classMatch.groupValues[2]
+            progress.progress("Transforming $target [$type]")
         }
     }
 }
@@ -102,8 +151,9 @@ fun Provider<JavaLauncher>.runJar(
     classpath: FileCollection,
     workingDir: Any,
     logFile: Any?,
+    progress: ProgressLogger,
     jvmArgs: List<String> = listOf(),
     vararg args: String
 ) {
-    get().runJar(classpath, workingDir, logFile, jvmArgs, *args)
+    get().runJar(classpath, workingDir, logFile, progress, jvmArgs, *args)
 }

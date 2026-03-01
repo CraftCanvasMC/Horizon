@@ -80,7 +80,7 @@ public class EntrypointContainer {
 
         // return the built provider with all finalized instances
         return new Provider<>(
-            interfaceClazz, retType, Collections.unmodifiableList(finalizedInstances)
+            interfaceClazz, retType, finalizedInstances
         );
     }
 
@@ -104,11 +104,11 @@ public class EntrypointContainer {
 
         private BiConsumer<EntryInstance<C>, Throwable> errorHandler;
 
-        private Provider(Class<C> requiredImplementation, Class<R> retType, List<EntryInstance<C>> instances) {
+        private Provider(Class<C> requiredImplementation, Class<R> retType, @NonNull List<EntryInstance<C>> instances) {
             this.requiredImplementation = requiredImplementation;
             this.retType = retType;
-            this.instances = instances;
-            this.instances.sort(Comparator.comparingInt((EntryInstance<C> cEntryInstance) -> cEntryInstance.order));
+            instances.sort(Comparator.comparingInt((EntryInstance<C> cEntryInstance) -> cEntryInstance.order));
+            this.instances = Collections.unmodifiableList(instances);
         }
 
         /**

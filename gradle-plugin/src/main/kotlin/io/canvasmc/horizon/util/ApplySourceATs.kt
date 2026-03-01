@@ -29,6 +29,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.CompileClasspath
 import org.gradle.api.tasks.Input
+import org.gradle.internal.logging.progress.ProgressLogger
 import org.gradle.jvm.toolchain.JavaLauncher
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -51,6 +52,7 @@ abstract class ApplySourceATs {
         javaLauncher: JavaLauncher,
         input: Path,
         output: Path,
+        progress: ProgressLogger,
         atFile: Path,
         workDir: Path,
         validate: Boolean,
@@ -61,6 +63,7 @@ abstract class ApplySourceATs {
             jst,
             workDir,
             workDir.resolve("log.txt"),
+            progress,
             jvmArgs = listOf("-Xmx${memory.get()}"),
             args = jstArgs(input, output, atFile, validate).toTypedArray()
         )
@@ -74,6 +77,7 @@ abstract class ApplySourceATs {
     ): List<String> {
         val validation = if (validate) "ERROR" else "LOG"
         return listOf(
+            "--debug",
             "--in-format=ARCHIVE",
             "--out-format=ARCHIVE",
             "--enable-accesstransformers",

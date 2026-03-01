@@ -161,10 +161,10 @@ public class HorizonLoader {
         JarFile sourceJar;
         try {
             //noinspection resource
-            sourceJar = new JarFile(HorizonLoader.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+            sourceJar = new JarFile(Path.of(HorizonLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
             Manifest manifest = sourceJar.getManifest();
             version = manifest.getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             throw new RuntimeException("Couldn't fetch source jar", e);
         }
 
