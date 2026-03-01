@@ -156,13 +156,13 @@ abstract class Horizon : Plugin<Project> {
 
         configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).configure {
             defaultDependencies {
-                add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
+                add(dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar })))
             }
         }
 
         configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).configure {
             defaultDependencies {
-                add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
+                add(dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar })))
             }
         }
     }

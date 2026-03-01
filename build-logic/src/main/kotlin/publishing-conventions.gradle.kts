@@ -68,8 +68,7 @@ val createPublicationJar = tasks.register<Jar>("createPublicationJar") {
     }
 
     archiveFileName.set("horizon.$version.jar")
-    from(tasks.named<Jar>("jar").map { zipTree(it.archiveFile) })
-
+    from(tasks.jar)
     from(collectIncludedDependencies.flatMap { it.outputDir }) {
         include("*.context")
         into("META-INF/")

@@ -18,9 +18,11 @@ import kotlin.collections.forEach
 fun Project.configureJiJ(ext: HorizonExtension) {
     afterEvaluate {
         ext.addIncludedDependenciesTo.get().forEach {
-            it.extendsFrom(configurations.named(INCLUDE_MIXIN_PLUGIN))
-            it.extendsFrom(configurations.named(INCLUDE_PLUGIN))
-            it.extendsFrom(configurations.named(INCLUDE_LIBRARY))
+            it.extendsFrom(
+                configurations.named(INCLUDE_MIXIN_PLUGIN),
+                configurations.named(INCLUDE_PLUGIN),
+                configurations.named(INCLUDE_LIBRARY)
+            )
         }
     }
     tasks.named<Jar>("jar") {
