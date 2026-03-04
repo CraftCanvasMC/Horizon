@@ -10,8 +10,8 @@ paper-dev-bundle = "1.21.11-R0.1-SNAPSHOT"
 userdev = "2.3.12"
 run-paper = "3.0.2"
 jspecify = "1.0.0"
-junit = "6.0.0"
-shadow = "9.2.2"
+junit = "6.0.3"
+shadow = "9.3.2"
 
 [libraries]
 jbsdiff = { module = "io.sigpipe:jbsdiff", version = "1.0" }
@@ -46,7 +46,7 @@ asm = [ "asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util" ]
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 blossom = { id = "net.kyori.blossom", version = "2.2.0" }
-spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.3.0" }
 plugin-publish = { id = "com.gradle.plugin-publish", version = "1.2.0" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.1.0" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.0" }
 userdev = { id = "io.canvasmc.weaver.userdev", version.ref = "userdev" }
