@@ -8,7 +8,9 @@ import io.canvasmc.horizon.util.constants.INCLUDE_LIBRARY
 import io.canvasmc.horizon.util.constants.INCLUDE_MIXIN_PLUGIN
 import io.canvasmc.horizon.util.constants.INCLUDE_PLUGIN
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
@@ -25,7 +27,7 @@ fun Project.configureJiJ(ext: HorizonExtension) {
             )
         }
     }
-    tasks.named<Jar>("jar") {
+    tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
         from(configurations.named(INCLUDE_MIXIN_PLUGIN)) {
             into(EMBEDDED_MIXIN_PLUGIN_JAR_PATH)
         }
@@ -40,7 +42,7 @@ fun Project.configureJiJ(ext: HorizonExtension) {
 
 fun Project.configureSplitSources() {
     val javaPlugin = extensions.getByType<JavaPluginExtension>()
-    val main = javaPlugin.sourceSets.named("main")
+    val main = javaPlugin.sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME)
 
     val plugin = javaPlugin.sourceSets.register("plugin") {
         // call get to avoid IDE sync issues
@@ -53,7 +55,7 @@ fun Project.configureSplitSources() {
         from(plugin.map { it.output })
     }
 
-    tasks.named<Jar>("jar") {
+    tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
         from(pluginJar.map { it.archiveFile }) {
             into(EMBEDDED_PLUGIN_JAR_PATH)
         }
