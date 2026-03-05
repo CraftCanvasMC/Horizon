@@ -13,7 +13,6 @@ import io.papermc.paperweight.userdev.PaperweightUserExtension
 import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.tasks.Delete
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import org.gradle.kotlin.dsl.*
@@ -146,13 +145,6 @@ abstract class Horizon : Plugin<Project> {
             outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedMappedServerJar", "jar")))
             atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
         }
-
-        val horizonSetup by tasks.registering<Task> {
-            group = HORIZON_NAME
-            dependsOn(applyClassAccessTransforms)
-        }
-
-        tasks.named("classes") { dependsOn(horizonSetup) } // this also attaches the task to the lifecycle
 
         configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).configure {
             defaultDependencies {
