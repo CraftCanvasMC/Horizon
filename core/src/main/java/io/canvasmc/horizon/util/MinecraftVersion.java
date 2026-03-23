@@ -16,7 +16,8 @@ public enum MinecraftVersion {
      * <a href="https://minecraft.wiki/w/Tiny_Takeover">Tiny Takeover</a> drop
      * @apiNote This is the active upcoming drop for Minecraft
      */
-    // note: Paper is on pre-2 as of March 15 // TODO - update to latest snapshot when Paper gets dev bundles out
+    V26_1_RC2("26.1-rc-2", "26.1 Release Candidate 2", 25, VersionType.RELEASE_CANDIDATE),
+    V26_1_RC1("26.1-rc-1", "26.1 Release Candidate 1", 25, VersionType.RELEASE_CANDIDATE),
     V26_1_PR3("26.1-pre-3", "26.1 Pre-Release 3", 25, VersionType.PRE_RELEASE),
     V26_1_PR2("26.1-pre-2", "26.1 Pre-Release 2", 25, VersionType.PRE_RELEASE),
     V26_1_PR1("26.1-pre-1", "26.1 Pre-Release 1", 25, VersionType.PRE_RELEASE),
