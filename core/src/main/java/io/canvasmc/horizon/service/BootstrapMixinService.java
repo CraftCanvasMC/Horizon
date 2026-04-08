@@ -13,15 +13,7 @@ import org.spongepowered.asm.launch.platform.container.IContainerHandle;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformerFactory;
-import org.spongepowered.asm.service.IClassBytecodeProvider;
-import org.spongepowered.asm.service.IClassProvider;
-import org.spongepowered.asm.service.IClassTracker;
-import org.spongepowered.asm.service.IMixinAuditTrail;
-import org.spongepowered.asm.service.IMixinInternal;
-import org.spongepowered.asm.service.IMixinService;
-import org.spongepowered.asm.service.IMixinServiceBootstrap;
-import org.spongepowered.asm.service.ITransformer;
-import org.spongepowered.asm.service.ITransformerProvider;
+import org.spongepowered.asm.service.*;
 import org.spongepowered.asm.util.Constants;
 import org.spongepowered.asm.util.ReEntranceLock;
 
@@ -157,6 +149,16 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
     }
 
     @Override
+    public IFeatureValidator getFeatureValidator() {
+        return IFeatureValidator.ALLOW_ALL; // TODO: check if this is right.
+    }
+
+    @Override
+    public IAdviceProvider getAdviceProvider() {
+        return IAdviceProvider.GENERIC; // TODO: check if this is right.
+    }
+
+    @Override
     public Collection<String> getPlatformAgents() {
         return Collections.emptyList();
     }
@@ -189,7 +191,7 @@ public class BootstrapMixinService implements IMixinService, IClassProvider, ICl
 
     @Override
     public MixinEnvironment.CompatibilityLevel getMaxCompatibilityLevel() {
-        return MixinEnvironment.CompatibilityLevel.JAVA_22;
+        return MixinEnvironment.CompatibilityLevel.JAVA_25;
     }
 
     @Override

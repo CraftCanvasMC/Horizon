@@ -13,9 +13,26 @@ import org.jspecify.annotations.NonNull;
  */
 public enum MinecraftVersion {
     /**
-     * <a href="https://minecraft.wiki/w/Tiny_Takeover">Tiny Takeover</a> drop
-     * @apiNote This is the active upcoming drop for Minecraft
+     * Upcoming second hotfix update for {@link io.canvasmc.horizon.util.MinecraftVersion#V26_1}
      */
+    V26_1_2_RC1("26.1.2-rc-1", "26.1.2 Release Candidate 1", 25, VersionType.RELEASE_CANDIDATE),
+
+    /**
+     * First hotfix update for {@link io.canvasmc.horizon.util.MinecraftVersion#V26_1}
+     */
+    V26_1_1("26.1.1", "26.1.1", 25, VersionType.STABLE),
+    V26_1_1_RC1("26.1.1-rc-1", "26.1.1 Release Candidate 1", 25, VersionType.RELEASE_CANDIDATE),
+
+    /**
+     * <a href="https://minecraft.wiki/w/Tiny_Takeover">Tiny Takeover</a> drop
+     */
+    V26_1("26.1", "26.1", 25, VersionType.STABLE),
+    V26_1_RC3("26.1-rc-3", "26.1 Release Candidate 3", 25, VersionType.RELEASE_CANDIDATE),
+    V26_1_RC2("26.1-rc-2", "26.1 Release Candidate 2", 25, VersionType.RELEASE_CANDIDATE),
+    V26_1_RC1("26.1-rc-1", "26.1 Release Candidate 1", 25, VersionType.RELEASE_CANDIDATE),
+    V26_1_PR3("26.1-pre-3", "26.1 Pre-Release 3", 25, VersionType.PRE_RELEASE),
+    V26_1_PR2("26.1-pre-2", "26.1 Pre-Release 2", 25, VersionType.PRE_RELEASE),
+    V26_1_PR1("26.1-pre-1", "26.1 Pre-Release 1", 25, VersionType.PRE_RELEASE),
     V26_1_SNAPSHOT_11("26.1-snapshot-11", "26.1 Snapshot 11", 25, VersionType.SNAPSHOT),
     V26_1_SNAPSHOT_10("26.1-snapshot-10", "26.1 Snapshot 10", 25, VersionType.SNAPSHOT),
     V26_1_SNAPSHOT_9("26.1-snapshot-9", "26.1 Snapshot 9", 25, VersionType.SNAPSHOT),

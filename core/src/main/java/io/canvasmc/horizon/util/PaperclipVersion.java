@@ -9,7 +9,7 @@ import org.jspecify.annotations.NonNull;
 import java.util.List;
 
 /**
- * Represents the paperclip launcher version meta. The raw data looks something like this:
+ * Represents the paperclip launcher version meta. The raw data looks something like this(example using 1.21.11):
  * <pre>{@code
  * {
  *     "id": "1.21.11",

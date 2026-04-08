@@ -172,6 +172,7 @@ public class HorizonLoader {
         // init instrumentation interface early, we need this before we can access Horizon API
         JavaInstrumentation javaInstrumentation = new JavaInstrumentationImpl();
 
+        // TODO - rework dependency resolver. try and make it so that we can load the *server* libraries
         // first, boot dependency resolver so we can actually run things without dying
         new DependencyResolver(new File("libraries"), () -> {
             return Util.parseFrom(sourceJar, "META-INF/artifacts.context", (line) -> {

@@ -3,7 +3,7 @@
     "MainMixin",
     "branding.MinecraftServerGuiMixin",
     "branding.MinecraftServerMixin",
-    "commandinject.PaperPluginsCommandMixin",
+    "commandinject.PaperCommandsMixin",
     "commandinject.ReloadCommandMixin",
     "datapack.ServerPacksSourceMixin",
     "jij.PluginInitializerManagerMixin",
