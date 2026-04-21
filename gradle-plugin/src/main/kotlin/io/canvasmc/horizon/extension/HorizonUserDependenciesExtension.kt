@@ -3,6 +3,7 @@ package io.canvasmc.horizon.extension
 import io.canvasmc.horizon.util.constants.HORIZON_API_ARTIFACT_ID
 import io.canvasmc.horizon.util.constants.HORIZON_API_CONFIG
 import io.canvasmc.horizon.util.constants.HORIZON_API_GROUP
+import io.canvasmc.horizon.util.constants.MIXIN_PLUGIN_IMPLEMENTATION_CONFIG
 import org.gradle.api.Action
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
@@ -100,6 +101,57 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
         val dep = dependencyFactory.create(buildDependencyString(group, artifactId, version))
         configurationAction(dep)
         return dep
+    }
+
+    /**
+     * Adds a provided mixin plugin dependency to the project.
+     *
+     * The dependency is exposed on the compile classpath and added to run-paper plugin loading,
+     * but is not embedded into the produced plugin jar.
+     */
+    @JvmOverloads
+    fun mixinPluginImplementation(
+        version: String? = null,
+        group: String,
+        artifactId: String,
+        configurationName: String = MIXIN_PLUGIN_IMPLEMENTATION_CONFIG,
+        configurationAction: Action<ExternalModuleDependency> = nullAction()
+    ): ExternalModuleDependency {
+        val dep = dependencyFactory.create(buildDependencyString(group, artifactId, version))
+        configurationAction(dep)
+        dependencies.add(configurationName, dep)
+        return dep
+    }
+
+    /**
+     * Adds a provided mixin plugin dependency to the default configuration.
+     *
+     * Intended for use with Gradle version catalogs.
+     */
+    @JvmOverloads
+    fun mixinPluginImplementation(
+        dependencyNotation: Provider<String>,
+        configurationAction: Action<ExternalModuleDependency> = nullAction()
+    ) {
+        dependencies.addProvider(
+            MIXIN_PLUGIN_IMPLEMENTATION_CONFIG,
+            dependencyNotation,
+            configurationAction
+        )
+    }
+
+    /**
+     * Adds a provided mixin plugin dependency from a local project.
+     */
+    @JvmOverloads
+    fun mixinPluginImplementation(
+        project: ProjectDependency,
+        configurationName: String = MIXIN_PLUGIN_IMPLEMENTATION_CONFIG,
+        configurationAction: Action<ProjectDependency> = nullAction()
+    ): ProjectDependency {
+        configurationAction(project)
+        dependencies.add(configurationName, project)
+        return project
     }
 
     // taken from paperweight-userdev
