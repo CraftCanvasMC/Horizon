@@ -56,11 +56,11 @@ public class HorizonPluginsCommand {
         plugins.put(Type.PAPER, new ArrayList<>());
         plugins.put(Type.SPIGOT, new ArrayList<>());
         for (final Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
-            Component pluignComponent = Component.text(plugin.getName()).color(plugin.isEnabled() ? NamedTextColor.GREEN : NamedTextColor.RED);
+            Component pluginComponent = Component.text(plugin.getName()).color(plugin.isEnabled() ? NamedTextColor.GREEN : NamedTextColor.RED);
             if (plugin.getPluginMeta() instanceof PaperPluginMeta) {
-                plugins.get(Type.PAPER).add(pluignComponent);
+                plugins.get(Type.PAPER).add(pluginComponent);
             }
-            else plugins.get(Type.SPIGOT).add(pluignComponent);
+            else plugins.get(Type.SPIGOT).add(pluginComponent);
         }
 
         final Map<String, HorizonPlugin> providers = providersByIdentifier();
