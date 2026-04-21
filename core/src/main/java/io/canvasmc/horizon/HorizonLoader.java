@@ -112,6 +112,8 @@ public class HorizonLoader {
             INTERNAL_PLUGIN = new HorizonPlugin(
                 new FileJar(horizonIOFile, new JarFile(horizonIOFile)),
                 new HorizonPluginMetadata(
+                    "horizon",
+                    List.of(),
                     "Horizon",
                     "The core Horizon internals",
                     version,
@@ -121,6 +123,7 @@ public class HorizonLoader {
                         MixinTransformationImpl.class.getName()
                     ),
                     List.of("CanvasMC"),
+                    false,
                     false,
                     List.of("internal.mixins.json"),
                     List.of("internal.at"),
@@ -380,5 +383,12 @@ public class HorizonLoader {
     public PluginTree getPlugins() {
         if (this.plugins == null) throw new IllegalStateException("Server hasn't loaded plugins yet");
         return this.plugins;
+    }
+
+    public static @NonNull HorizonPlugin getInternalPlugin() {
+        if (INTERNAL_PLUGIN == null) {
+            throw new IllegalStateException("Internal Horizon plugin has not been initialized yet");
+        }
+        return INTERNAL_PLUGIN;
     }
 }
