@@ -7,16 +7,22 @@ import io.canvasmc.horizon.util.tree.ObjectTree;
 import io.canvasmc.horizon.util.tree.TypeConverter;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
  * Horizon plugin data, providing parsed data Horizon uses internally for various services and implementations
  *
+ * @param id
+ *     the stable plugin identifier
+ * @param provides
+ *     additional identifiers this plugin provides
  * @param name
- *     the name
+ *     the display name
  * @param description
  *     the description
  * @param version
@@ -29,6 +35,8 @@ import java.util.regex.Pattern;
  *     the authors
  * @param loadDatapackEntry
  *     if Horizon should load the plugin as a datapack too
+ * @param bundle
+ *     whether this plugin should be presented as a bundle root in Horizon UI
  * @param mixins
  *     the registered mixins
  * @param wideners
@@ -42,6 +50,8 @@ import java.util.regex.Pattern;
  * @see io.canvasmc.horizon.plugin.data.HorizonPluginMetadata.NestedData
  */
 public record HorizonPluginMetadata(
+    String id,
+    List<String> provides,
     String name,
     String description,
     String version,
@@ -49,12 +59,14 @@ public record HorizonPluginMetadata(
     List<String> transformers,
     List<String> authors,
     boolean loadDatapackEntry,
+    boolean bundle,
     List<String> mixins,
     List<String> wideners,
     ObjectTree dependencies,
     NestedData nesting
 ) {
     private static final Pattern TAKEN_NAMES = Pattern.compile("^(?i)(minecraft|java|asm|horizon|bukkit|mojang|spigot|paper|mixin)$");
+    private static final Pattern VALID_IDENTIFIER = Pattern.compile("^[a-z][a-z0-9_.-]{1,63}$");
 
     public static final ObjectDeserializer<HorizonPluginMetadata> PLUGIN_META_FACTORY = (final ObjectTree root) -> {
         // all required stuff first
@@ -62,6 +74,25 @@ public record HorizonPluginMetadata(
         final String name = root.getValueOrThrow("name").asString();
         if (TAKEN_NAMES.matcher(name.toLowerCase()).matches() || name.isEmpty()) {
             throw new IllegalArgumentException("Invalid name used for plugin meta, " + name);
+        }
+        final String id = validateIdentifier(
+            root.getValueSafe("id").asStringOptional().orElseGet(() -> defaultIdForName(name)),
+            "id"
+        );
+        final List<String> provides = new ArrayList<>(
+            root.getArrayOptional("provides")
+                .map((arr) -> arr.asList(String.class))
+                .orElse(List.of())
+        );
+        final Set<String> seenProvides = new HashSet<>();
+        for (final String providedId : provides) {
+            final String normalized = validateIdentifier(providedId, "provides");
+            if (normalized.equals(id)) {
+                throw new IllegalArgumentException("Plugin '" + name + "' cannot provide its own id twice: " + id);
+            }
+            if (!seenProvides.add(normalized)) {
+                throw new IllegalArgumentException("Duplicate provided id '" + normalized + "' declared by plugin '" + name + "'");
+            }
         }
         final String version = root.getValueOrThrow("version").asString();
         final List<String> authors = new ArrayList<>(
@@ -77,6 +108,7 @@ public record HorizonPluginMetadata(
             .orElse(new ArrayList<>());
 
         boolean loadDatapackEntry = root.getValueSafe("load_datapack_entry").asBooleanOptional().orElse(false);
+        boolean bundle = root.getValueSafe("bundle").asBooleanOptional().orElse(false);
         String description = root.getValueSafe("description").asStringOptional().orElse("");
 
         List<EntrypointObject> entrypoints = root.getArrayOptional("entrypoints")
@@ -91,8 +123,10 @@ public record HorizonPluginMetadata(
             .orElse(new ArrayList<>());
 
         return new HorizonPluginMetadata(
+            id,
+            List.copyOf(provides),
             name, description, version, entrypoints, transformers, authors,
-            loadDatapackEntry, mixins, wideners, root.getTreeOptional("dependencies").orElse(ObjectTree.builder().build()),
+            loadDatapackEntry, bundle, mixins, wideners, root.getTreeOptional("dependencies").orElse(ObjectTree.builder().build()),
             new NestedData(new HashSet<>(), new HashSet<>(), new HashSet<>())
         );
     };
@@ -107,6 +141,38 @@ public record HorizonPluginMetadata(
             root.getValueSafe("order").asIntOptional().orElse(0)
         );
     };
+
+    public Set<String> identifiers() {
+        final LinkedHashSet<String> ids = new LinkedHashSet<>();
+        ids.add(this.id);
+        ids.addAll(this.provides);
+        return Set.copyOf(ids);
+    }
+
+    private static String validateIdentifier(final String identifier, final String fieldName) {
+        final String normalized = identifier.toLowerCase(Locale.ROOT);
+        if (!normalized.equals(identifier)) {
+            throw new IllegalArgumentException("Plugin " + fieldName + " must be lowercase: " + identifier);
+        }
+        if (!VALID_IDENTIFIER.matcher(identifier).matches() || TAKEN_NAMES.matcher(identifier).matches()) {
+            throw new IllegalArgumentException("Invalid plugin " + fieldName + ": " + identifier);
+        }
+        return identifier;
+    }
+
+    private static String defaultIdForName(final String name) {
+        final String normalized = name.toLowerCase(Locale.ROOT)
+            .replaceAll("[^a-z0-9_.-]+", "-")
+            .replaceAll("^[^a-z]+", "")
+            .replaceAll("[-_.]{2,}", "-")
+            .replaceAll("[-_.]+$", "");
+
+        if (normalized.isEmpty()) {
+            throw new IllegalArgumentException("Unable to derive a valid plugin id from name: " + name);
+        }
+
+        return normalized;
+    }
 
     /**
      * Nested data, containing nested libraries, server plugins, and Horizon plugins
