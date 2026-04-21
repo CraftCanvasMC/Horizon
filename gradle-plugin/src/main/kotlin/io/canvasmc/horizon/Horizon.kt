@@ -14,11 +14,6 @@ import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.attributes.Bundling
-import org.gradle.api.attributes.Category
-import org.gradle.api.attributes.LibraryElements
-import org.gradle.api.attributes.Usage
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Delete
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import org.gradle.kotlin.dsl.*
@@ -62,18 +57,7 @@ abstract class Horizon : Plugin<Project> {
         }
 
         // user configuration for provided mixin plugins
-        val mixinPluginImplementation = target.configurations.dependencyScope(MIXIN_PLUGIN_IMPLEMENTATION_CONFIG)
-
-        // resolvable configuration for provided mixin plugins, resolving the runtime variant so transitive API jars are visible
-        target.configurations.resolvable(MIXIN_PLUGIN_IMPLEMENTATION_RESOLVABLE_CONFIG) {
-            extendsFrom(mixinPluginImplementation)
-        }
-
-        // non-transitive runtime resolution for provided mixin plugins, used to place only the bundle jar in runServer
-        target.configurations.resolvable(MIXIN_PLUGIN_IMPLEMENTATION_SINGLE_RESOLVABLE_CONFIG) {
-            extendsFrom(mixinPluginImplementation)
-            isTransitive = false
-        }
+        target.configurations.register(MIXIN_PLUGIN_IMPLEMENTATION_CONFIG)
 
         // configurations for JiJ
         target.configurations.register(INCLUDE_MIXIN_PLUGIN)
@@ -124,7 +108,7 @@ abstract class Horizon : Plugin<Project> {
             // set up provided mixin plugin dependencies
             ext.addMixinPluginImplementationTo.get().forEach {
                 // resolve from the dedicated runtime-variant configuration so a single bundle dependency can expose its API jars
-                it.dependencies.add(dependencyFactory.create(files(configurations.named(MIXIN_PLUGIN_IMPLEMENTATION_RESOLVABLE_CONFIG))))
+                it.dependencies.add(dependencyFactory.create(files(configurations.named(MIXIN_PLUGIN_IMPLEMENTATION_CONFIG))))
             }
         }
 
