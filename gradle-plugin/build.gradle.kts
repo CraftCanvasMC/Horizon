@@ -17,10 +17,10 @@ val userdev by configurations.registering
 
 configurations {
     compileOnly {
-        extendsFrom(userdev.get())
+        extendsFrom(userdev)
     }
     testImplementation {
-        extendsFrom(userdev.get())
+        extendsFrom(userdev)
     }
 }
 

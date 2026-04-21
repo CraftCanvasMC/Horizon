@@ -18,6 +18,7 @@ import org.gradle.api.attributes.Usage
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Delete
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import org.gradle.kotlin.dsl.*
@@ -42,7 +43,7 @@ abstract class Horizon : Plugin<Project> {
 
         target.configurations.register(JST_CONFIG) {
             defaultDependencies {
-                add(target.dependencies.create("net.neoforged.jst:jst-cli-bundle:2.0.7"))
+                add(target.dependencies.create("net.neoforged.jst:jst-cli-bundle:${LibraryVersions.JST}"))
             }
         }
 
@@ -65,25 +66,13 @@ abstract class Horizon : Plugin<Project> {
 
         // resolvable configuration for provided mixin plugins, resolving the runtime variant so transitive API jars are visible
         target.configurations.resolvable(MIXIN_PLUGIN_IMPLEMENTATION_RESOLVABLE_CONFIG) {
-            extendsFrom(mixinPluginImplementation.get())
-            attributes {
-                attribute(Usage.USAGE_ATTRIBUTE, target.objects.named(Usage.JAVA_RUNTIME))
-                attribute(Category.CATEGORY_ATTRIBUTE, target.objects.named(Category.LIBRARY))
-                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.objects.named(LibraryElements.JAR))
-                attribute(Bundling.BUNDLING_ATTRIBUTE, target.objects.named(Bundling.EXTERNAL))
-            }
+            extendsFrom(mixinPluginImplementation)
         }
 
         // non-transitive runtime resolution for provided mixin plugins, used to place only the bundle jar in runServer
         target.configurations.resolvable(MIXIN_PLUGIN_IMPLEMENTATION_SINGLE_RESOLVABLE_CONFIG) {
-            extendsFrom(mixinPluginImplementation.get())
+            extendsFrom(mixinPluginImplementation)
             isTransitive = false
-            attributes {
-                attribute(Usage.USAGE_ATTRIBUTE, target.objects.named(Usage.JAVA_RUNTIME))
-                attribute(Category.CATEGORY_ATTRIBUTE, target.objects.named(Category.LIBRARY))
-                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.objects.named(LibraryElements.JAR))
-                attribute(Bundling.BUNDLING_ATTRIBUTE, target.objects.named(Bundling.EXTERNAL))
-            }
         }
 
         // configurations for JiJ
