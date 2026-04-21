@@ -3,7 +3,6 @@ package io.canvasmc.horizon.extension
 import io.canvasmc.horizon.util.constants.HORIZON_API_ARTIFACT_ID
 import io.canvasmc.horizon.util.constants.HORIZON_API_CONFIG
 import io.canvasmc.horizon.util.constants.HORIZON_API_GROUP
-import io.canvasmc.horizon.util.constants.MIXIN_PLUGIN_IMPLEMENTATION_CONFIG
 import org.gradle.api.Action
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
