@@ -12,6 +12,8 @@ dependencies {
 
     // add horizon api from the core project
     horizon.horizonApi(projects.core)
+    // verify provided mixin plugin wiring without JiJ-ing the dependency into the final jar
+    horizon.mixinPluginImplementation(projects.core)
 }
 
 /*

@@ -11,6 +11,10 @@ import io.canvasmc.horizon.util.constants.*
 import io.canvasmc.horizon.util.jij.configureJiJ
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import io.papermc.paperweight.userdev.internal.setup.UserdevSetupTask
+import org.gradle.api.attributes.Bundling
+import org.gradle.api.attributes.Category
+import org.gradle.api.attributes.LibraryElements
+import org.gradle.api.attributes.Usage
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -38,7 +42,7 @@ abstract class Horizon : Plugin<Project> {
 
         target.configurations.register(JST_CONFIG) {
             defaultDependencies {
-                add(target.dependencies.create("net.neoforged.jst:jst-cli-bundle:${LibraryVersions.JST}"))
+                add(target.dependencies.create("net.neoforged.jst:jst-cli-bundle:2.0.7"))
             }
         }
 
@@ -54,6 +58,32 @@ abstract class Horizon : Plugin<Project> {
         target.configurations.resolvable(HORIZON_API_SINGLE_RESOLVABLE_CONFIG) {
             extendsFrom(horizonApi.get())
             isTransitive = false
+        }
+
+        // user configuration for provided mixin plugins
+        val mixinPluginImplementation = target.configurations.dependencyScope(MIXIN_PLUGIN_IMPLEMENTATION_CONFIG)
+
+        // resolvable configuration for provided mixin plugins, resolving the runtime variant so transitive API jars are visible
+        target.configurations.resolvable(MIXIN_PLUGIN_IMPLEMENTATION_RESOLVABLE_CONFIG) {
+            extendsFrom(mixinPluginImplementation.get())
+            attributes {
+                attribute(Usage.USAGE_ATTRIBUTE, target.objects.named(Usage.JAVA_RUNTIME))
+                attribute(Category.CATEGORY_ATTRIBUTE, target.objects.named(Category.LIBRARY))
+                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.objects.named(LibraryElements.JAR))
+                attribute(Bundling.BUNDLING_ATTRIBUTE, target.objects.named(Bundling.EXTERNAL))
+            }
+        }
+
+        // non-transitive runtime resolution for provided mixin plugins, used to place only the bundle jar in runServer
+        target.configurations.resolvable(MIXIN_PLUGIN_IMPLEMENTATION_SINGLE_RESOLVABLE_CONFIG) {
+            extendsFrom(mixinPluginImplementation.get())
+            isTransitive = false
+            attributes {
+                attribute(Usage.USAGE_ATTRIBUTE, target.objects.named(Usage.JAVA_RUNTIME))
+                attribute(Category.CATEGORY_ATTRIBUTE, target.objects.named(Category.LIBRARY))
+                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.objects.named(LibraryElements.JAR))
+                attribute(Bundling.BUNDLING_ATTRIBUTE, target.objects.named(Bundling.EXTERNAL))
+            }
         }
 
         // configurations for JiJ
@@ -101,6 +131,11 @@ abstract class Horizon : Plugin<Project> {
                 // we want to resolve it from the context of the horizon api configurations so pass only the files
                 // do not extend as that would resolve it from the context of compileClasspath which we dont want
                 it.dependencies.add(dependencyFactory.create(files(configurations.named(HORIZON_API_RESOLVABLE_CONFIG))))
+            }
+            // set up provided mixin plugin dependencies
+            ext.addMixinPluginImplementationTo.get().forEach {
+                // resolve from the dedicated runtime-variant configuration so a single bundle dependency can expose its API jars
+                it.dependencies.add(dependencyFactory.create(files(configurations.named(MIXIN_PLUGIN_IMPLEMENTATION_RESOLVABLE_CONFIG))))
             }
         }
 
