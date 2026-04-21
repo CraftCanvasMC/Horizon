@@ -10,19 +10,19 @@ java {
 
 // configuration that includes as an implementation for the core project and stores fetch data
 val include by configurations.registering {
-    extendsFrom(configurations.api.get())
+    extendsFrom(configurations.api)
     isCanBeConsumed = false
     isCanBeResolved = false
 }
 
 configurations {
     implementation {
-        extendsFrom(include.get())
+        extendsFrom(include)
     }
 }
 
 val includeResolvable by configurations.registering {
-    extendsFrom(include.get())
+    extendsFrom(include)
     isCanBeConsumed = false
     isCanBeResolved = true
 }
