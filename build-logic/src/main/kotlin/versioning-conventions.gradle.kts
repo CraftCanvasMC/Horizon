@@ -1,4 +1,4 @@
-version = project.version.toString() + "." + fetchBuild().get()
+version = project.version.toString() + "+" + fetchBuild().get()
 
 fun fetchBuild(): Provider<String> {
     return providers.gradleProperty("buildNumber")
