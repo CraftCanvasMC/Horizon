@@ -27,7 +27,7 @@ configurations {
 repositories {
     gradlePluginPortal()
     mavenCentral()
-    maven("https://maven.canvasmc.io/releases")
+    maven("https://maven.canvasmc.io/public")
 }
 
 dependencies {

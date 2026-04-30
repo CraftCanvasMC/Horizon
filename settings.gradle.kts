@@ -3,7 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         maven {
             name = "Canvas"
-            url = uri("https://maven.canvasmc.io/releases")
+            url = uri("https://maven.canvasmc.io/public")
         }
     }
     includeBuild("build-logic")
