@@ -142,6 +142,11 @@ public record HorizonPluginMetadata(
         );
     };
 
+    /**
+     * Returns all identifiers associated with this plugin.
+     * The first identifier is the core plugin id,
+     * followed by any provided identifiers.
+     */
     public Set<String> identifiers() {
         final LinkedHashSet<String> ids = new LinkedHashSet<>();
         ids.add(this.id);
