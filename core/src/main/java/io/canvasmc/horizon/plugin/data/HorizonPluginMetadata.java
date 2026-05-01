@@ -5,6 +5,9 @@ import io.canvasmc.horizon.util.Pair;
 import io.canvasmc.horizon.util.tree.ObjectDeserializer;
 import io.canvasmc.horizon.util.tree.ObjectTree;
 import io.canvasmc.horizon.util.tree.TypeConverter;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -143,14 +146,15 @@ public record HorizonPluginMetadata(
      * The first identifier is the core plugin id,
      * followed by any provided identifiers.
      */
-    public Set<String> identifiers() {
+    public @NonNull @Unmodifiable Set<String> identifiers() {
         final LinkedHashSet<String> ids = new LinkedHashSet<>();
         ids.add(this.id);
         ids.addAll(this.provides);
         return Set.copyOf(ids);
     }
 
-    private static String validateIdentifier(final String identifier, final String fieldName) {
+    @Contract("_, _ -> param1")
+    private static @NonNull String validateIdentifier(final @NonNull String identifier, final String fieldName) {
         final String normalized = identifier.toLowerCase(Locale.ROOT);
         if (!normalized.equals(identifier)) {
             throw new IllegalArgumentException("Plugin " + fieldName + " must be lowercase: " + identifier);
@@ -161,7 +165,7 @@ public record HorizonPluginMetadata(
         return identifier;
     }
 
-    private static String defaultIdForName(final String name) {
+    private static @NonNull String defaultIdForName(final @NonNull String name) {
         final String normalized = name.toLowerCase(Locale.ROOT)
             .replaceAll("[^a-z0-9_.-]+", "-")
             .replaceAll("^[^a-z]+", "")
