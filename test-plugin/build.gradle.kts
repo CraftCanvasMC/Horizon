@@ -14,6 +14,9 @@ dependencies {
     horizon.horizonApi(projects.core) {
         targetConfiguration = "runtimeElements"
     }
+
+    // verify provided mixin plugin wiring without JiJ-ing the dependency into the final jar
+    mixinPluginImplementation(projects.core)
 }
 
 /*

@@ -2,6 +2,7 @@ package io.canvasmc.horizon.compatibility
 
 import io.canvasmc.horizon.extension.HorizonExtension
 import io.canvasmc.horizon.util.constants.HORIZON_API_SINGLE_RESOLVABLE_CONFIG
+import io.canvasmc.horizon.util.constants.MIXIN_PLUGIN_IMPLEMENTATION_CONFIG
 import io.canvasmc.horizon.util.libraryJars
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import org.gradle.api.Project
@@ -11,6 +12,7 @@ import xyz.jpenilla.runpaper.task.RunServer
 
 fun Project.setupRunPaperCompat(userdevExt: PaperweightUserExtension, horizonExt: HorizonExtension, progressLoggerFactory: ProgressLoggerFactory) {
     val horizonApi = configurations.named(HORIZON_API_SINGLE_RESOLVABLE_CONFIG)
+    val mixinPlugins = configurations.named(MIXIN_PLUGIN_IMPLEMENTATION_CONFIG)
     // filter out javadoc and sources jars from the configuration as not to mess with the classpath
     val horizonJar = horizonApi.map { it.libraryJars().singleFile }
     tasks.withType<RunServer>().configureEach {
@@ -18,6 +20,7 @@ fun Project.setupRunPaperCompat(userdevExt: PaperweightUserExtension, horizonExt
         version.convention(userdevExt.minecraftVersion)
         runClasspath.setFrom(horizonJar)
         runClasspath.disallowChanges()
+        pluginJars.from(mixinPlugins.map { it.libraryJars() })
         doFirst {
             if (userJar.isPresent) {
                 require(userJar.get().asFile.exists()) {

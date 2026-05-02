@@ -28,12 +28,7 @@
     "mixins.test.json"
   ],
   "dependencies": {
-    "server": {
-    },
-    "bootstrap": {
-    },
-    "horizon": {
-    }
+    "minecraft": ">=1.21"
   },
   "wideners": [
     "widener.at"
