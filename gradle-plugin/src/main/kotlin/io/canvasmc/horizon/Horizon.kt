@@ -56,8 +56,8 @@ abstract class Horizon : Plugin<Project> {
             isTransitive = false
         }
 
-        // user configuration for provided mixin plugins
-        target.configurations.register(MIXIN_PLUGIN_IMPLEMENTATION_CONFIG)
+        // user configuration for provided runtime plugins
+        target.configurations.register(RUNTIME_PLUGIN_CONFIG)
 
         // configurations for JiJ
         target.configurations.register(INCLUDE_MIXIN_PLUGIN)
@@ -105,10 +105,9 @@ abstract class Horizon : Plugin<Project> {
                 // do not extend as that would resolve it from the context of compileClasspath which we dont want
                 it.dependencies.add(dependencyFactory.create(files(configurations.named(HORIZON_API_RESOLVABLE_CONFIG))))
             }
-            // set up provided mixin plugin dependencies
-            ext.addMixinPluginImplementationTo.get().forEach {
-                // resolve from the dedicated runtime-variant configuration so a single bundle dependency can expose its API jars
-                it.dependencies.add(dependencyFactory.create(files(configurations.named(MIXIN_PLUGIN_IMPLEMENTATION_CONFIG))))
+            // set up provided runtime plugin dependencies
+            ext.addRuntimePluginTo.get().forEach {
+                it.extendsFrom(configurations.named(RUNTIME_PLUGIN_CONFIG).get())
             }
         }
 
