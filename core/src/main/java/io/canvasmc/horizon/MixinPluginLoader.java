@@ -142,7 +142,7 @@ public class MixinPluginLoader {
             if (container == null) continue;
 
             final IMixinConfig mixinConfig = config.getConfig();
-            mixinConfig.decorate(FabricUtil.KEY_MOD_ID, container.pluginMetadata().name());
+            mixinConfig.decorate(FabricUtil.KEY_MOD_ID, container.pluginMetadata().id());
             mixinConfig.decorate(FabricUtil.KEY_COMPATIBILITY, FabricUtil.COMPATIBILITY_LATEST);
         }
     }

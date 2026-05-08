@@ -73,6 +73,16 @@ public final class HorizonPlugin {
     }
 
     /**
+     * Returns whether this plugin contains nested Horizon or server plugins and should be treated as a bundle.
+     *
+     * @return {@code true} if this plugin contains nested plugin entries
+     */
+    public boolean isBundle() {
+        return !nestedData.horizonEntries().isEmpty()
+            || !nestedData.serverPluginEntries().isEmpty();
+    }
+
+    /**
      * Get the file system for the plugin file
      *
      * @return a file system for this plugin

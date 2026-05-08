@@ -56,6 +56,9 @@ abstract class Horizon : Plugin<Project> {
             isTransitive = false
         }
 
+        // user configuration for provided runtime plugins
+        target.configurations.register(RUNTIME_PLUGIN_CONFIG)
+
         // configurations for JiJ
         target.configurations.register(INCLUDE_MIXIN_PLUGIN)
         target.configurations.register(INCLUDE_PLUGIN)
@@ -101,6 +104,10 @@ abstract class Horizon : Plugin<Project> {
                 // we want to resolve it from the context of the horizon api configurations so pass only the files
                 // do not extend as that would resolve it from the context of compileClasspath which we dont want
                 it.dependencies.add(dependencyFactory.create(files(configurations.named(HORIZON_API_RESOLVABLE_CONFIG))))
+            }
+            // set up provided runtime plugin dependencies
+            ext.addRuntimePluginTo.get().forEach {
+                it.extendsFrom(configurations.named(RUNTIME_PLUGIN_CONFIG).get())
             }
         }
 

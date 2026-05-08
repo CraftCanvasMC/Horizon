@@ -65,6 +65,19 @@ abstract class HorizonExtension @Inject constructor(
     )
 
     /**
+     * Configurations to add provided runtime plugin dependencies to.
+     *
+     * These dependencies are available on the compile classpath and in the dev server,
+     * but are not embedded into the produced plugin jar.
+     */
+    val addRuntimePluginTo: SetProperty<Configuration> = objects.setProperty<Configuration>().convention(
+        objects.providerSet(
+            project.configurations.named(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME),
+            project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+        )
+    )
+
+    /**
      * Configurations to add included (JiJ) dependencies to.
      */
     val addIncludedDependenciesTo: SetProperty<Configuration> = objects.setProperty<Configuration>().convention(
