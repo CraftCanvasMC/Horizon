@@ -46,8 +46,8 @@ val createPublicationJar = tasks.register<Jar>("createPublicationJar") {
     val version = project.version
 
     // configure manifest
-    val main = project.properties["mainClass"]
-    val launchAgent = project.properties["instrumentation"]
+    val main = project.extra["mainClass"]
+    val launchAgent = project.extra["instrumentation"]
     manifest {
         attributes(
             mapOf(
