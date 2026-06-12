@@ -13,6 +13,26 @@ import org.jspecify.annotations.NonNull;
  */
 public enum MinecraftVersion {
     /**
+     * <a href="https://minecraft.wiki/w/Chaos_Cubed">Chaos Cubed</a> drop
+     * @apiNote This is the active upcoming drop for Minecraft
+     */
+    V26_2_RC2("26.2-rc-2", "26.2 Release Candidate 2", 25, VersionType.RELEASE_CANDIDATE),
+    V26_2_RC1("26.2-rc-1", "26.2 Release Candidate 1", 25, VersionType.RELEASE_CANDIDATE),
+    V26_2_PR6("26.2-pre-6", "26.2 Pre-Release 6", 25, VersionType.PRE_RELEASE),
+    V26_2_PR5("26.2-pre-5", "26.2 Pre-Release 5", 25, VersionType.PRE_RELEASE),
+    V26_2_PR4("26.2-pre-4", "26.2 Pre-Release 4", 25, VersionType.PRE_RELEASE),
+    V26_2_PR3("26.2-pre-3", "26.2 Pre-Release 3", 25, VersionType.PRE_RELEASE),
+    V26_2_PR2("26.2-pre-2", "26.2 Pre-Release 2", 25, VersionType.PRE_RELEASE),
+    V26_2_PR1("26.2-pre-1", "26.2 Pre-Release 1", 25, VersionType.PRE_RELEASE),
+    V26_2_SNAPSHOT_8("26.2-snapshot-8", "26.2 Snapshot 8", 25, VersionType.SNAPSHOT),
+    V26_2_SNAPSHOT_7("26.2-snapshot-7", "26.2 Snapshot 7", 25, VersionType.SNAPSHOT),
+    V26_2_SNAPSHOT_6("26.2-snapshot-6", "26.2 Snapshot 6", 25, VersionType.SNAPSHOT),
+    V26_2_SNAPSHOT_5("26.2-snapshot-5", "26.2 Snapshot 5", 25, VersionType.SNAPSHOT),
+    V26_2_SNAPSHOT_4("26.2-snapshot-4", "26.2 Snapshot 4", 25, VersionType.SNAPSHOT),
+    V26_2_SNAPSHOT_3("26.2-snapshot-3", "26.2 Snapshot 3", 25, VersionType.SNAPSHOT),
+    V26_2_SNAPSHOT_2("26.2-snapshot-2", "26.2 Snapshot 2", 25, VersionType.SNAPSHOT),
+    V26_2_SNAPSHOT_1("26.2-snapshot-1", "26.2 Snapshot 1", 25, VersionType.SNAPSHOT),
+    /**
      * Second hotfix update for {@link io.canvasmc.horizon.util.MinecraftVersion#V26_1}
      */
     V26_1_2("26.1.2", "26.1.2", 25, VersionType.STABLE),
