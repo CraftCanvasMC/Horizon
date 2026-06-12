@@ -33,6 +33,7 @@ public enum MinecraftVersion {
     V26_2_SNAPSHOT_3("26.2-snapshot-3", "26.2 Snapshot 3", 25, VersionType.SNAPSHOT),
     V26_2_SNAPSHOT_2("26.2-snapshot-2", "26.2 Snapshot 2", 25, VersionType.SNAPSHOT),
     V26_2_SNAPSHOT_1("26.2-snapshot-1", "26.2 Snapshot 1", 25, VersionType.SNAPSHOT),
+
     /**
      * Second hotfix update for {@link io.canvasmc.horizon.util.MinecraftVersion#V26_1}
      */
