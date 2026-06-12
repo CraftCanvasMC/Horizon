@@ -1,6 +1,6 @@
 package io.canvasmc.horizon.util;
 
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * The Minecraft version API is used to document which versions Horizon supports, and for supporting the Minecraft
@@ -11,6 +11,7 @@ import org.jspecify.annotations.NonNull;
  * @apiNote Horizon includes snapshots, release candidates, and pre-releases, so that Horizon is capable of doing
  *     development snapshot versions if Paper chooses to release those on GitHub or to their downloads API
  */
+@NullMarked
 public enum MinecraftVersion {
     /**
      * <a href="https://minecraft.wiki/w/Chaos_Cubed">Chaos Cubed</a> drop
@@ -249,7 +250,7 @@ public enum MinecraftVersion {
      *
      * @return the Minecraft version associated with the id provided
      */
-    public static @NonNull MinecraftVersion fromStringId(String id) {
+    public static MinecraftVersion fromStringId(String id) {
         for (final MinecraftVersion value : MinecraftVersion.values()) {
             if (id.equals(value.id)) {
                 return value;
@@ -269,7 +270,7 @@ public enum MinecraftVersion {
      * @apiNote Versions are ordered from newest {@code (ordinal 0)} to oldest {@code (highest ordinal)} in the
      *     enum
      */
-    public boolean isNewerThan(@NonNull MinecraftVersion other) {
+    public boolean isNewerThan(MinecraftVersion other) {
         return this.ordinal() < other.ordinal();
     }
 
@@ -284,7 +285,7 @@ public enum MinecraftVersion {
      * @apiNote Versions are ordered from newest {@code (ordinal 0)} to oldest {@code (highest ordinal)} in the
      *     enum
      */
-    public boolean isOlderThan(@NonNull MinecraftVersion other) {
+    public boolean isOlderThan(MinecraftVersion other) {
         return this.ordinal() > other.ordinal();
     }
 
@@ -299,7 +300,7 @@ public enum MinecraftVersion {
      * @apiNote Versions are ordered from newest {@code (ordinal 0)} to oldest {@code (highest ordinal)} in the
      *     enum
      */
-    public boolean isNewerThanOrEqualTo(@NonNull MinecraftVersion other) {
+    public boolean isNewerThanOrEqualTo(MinecraftVersion other) {
         return this.ordinal() <= other.ordinal();
     }
 
@@ -314,7 +315,7 @@ public enum MinecraftVersion {
      * @apiNote Versions are ordered from newest {@code (ordinal 0)} to oldest {@code (highest ordinal)} in the
      *     enum
      */
-    public boolean isOlderThanOrEqualTo(@NonNull MinecraftVersion other) {
+    public boolean isOlderThanOrEqualTo(MinecraftVersion other) {
         return this.ordinal() >= other.ordinal();
     }
 
