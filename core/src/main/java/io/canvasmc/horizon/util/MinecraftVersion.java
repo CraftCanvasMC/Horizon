@@ -15,6 +15,7 @@ import org.jspecify.annotations.NullMarked;
 public enum MinecraftVersion {
     /**
      * <a href="https://minecraft.wiki/w/Chaos_Cubed">Chaos Cubed</a> drop
+     *
      * @apiNote This is the active upcoming drop for Minecraft
      */
     V26_2_RC2("26.2-rc-2", "26.2 Release Candidate 2", 25, VersionType.RELEASE_CANDIDATE),

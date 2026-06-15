@@ -11,6 +11,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -34,6 +35,21 @@ public record PluginTree(List<PluginNode> roots) {
         }
 
         return new PluginTree(roots);
+    }
+
+    /**
+     * Gets the horizon plugin instance from the id provieded, or empty if not found
+     *
+     * @param id
+     *     the plugin id to search for
+     *
+     * @return the plugin wrapped in an optional, or empty if not found
+     */
+    public @NonNull Optional<HorizonPlugin> getPluginById(final String id) {
+        for (final HorizonPlugin horizonPlugin : this.getAll()) {
+            if (horizonPlugin.pluginMetadata().id().equalsIgnoreCase(id)) return Optional.of(horizonPlugin);
+        }
+        return Optional.empty();
     }
 
     /**
