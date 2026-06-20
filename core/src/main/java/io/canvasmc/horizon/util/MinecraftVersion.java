@@ -18,6 +18,7 @@ public enum MinecraftVersion {
      *
      * @apiNote This is the active upcoming drop for Minecraft
      */
+    V26_2("26.2", "26.2", 25, VersionType.STABLE),
     V26_2_RC2("26.2-rc-2", "26.2 Release Candidate 2", 25, VersionType.RELEASE_CANDIDATE),
     V26_2_RC1("26.2-rc-1", "26.2 Release Candidate 1", 25, VersionType.RELEASE_CANDIDATE),
     V26_2_PR6("26.2-pre-6", "26.2 Pre-Release 6", 25, VersionType.PRE_RELEASE),
