@@ -27,7 +27,6 @@ private const val TASK_CACHE = "$HORIZON_NAME/taskCache"
 object Paperweight {
     const val USERDEV_SETUP_TASK_NAME = "paperweightUserdevSetup"
     const val MOJANG_MAPPED_SERVER_CONFIG = io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_CONFIG
-    const val MOJANG_MAPPED_SERVER_RUNTIME_CONFIG = io.papermc.paperweight.util.constants.MOJANG_MAPPED_SERVER_RUNTIME_CONFIG
 }
 
 object Plugins {

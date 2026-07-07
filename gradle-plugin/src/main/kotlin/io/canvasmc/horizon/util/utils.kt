@@ -202,9 +202,6 @@ fun findOutputDir(baseFile: Path): Path {
     return dir
 }
 
-inline fun <reified T : Task> TaskContainer.registering(noinline configuration: T.() -> Unit) = registering(T::class, configuration)
-inline fun <reified T : Task> TaskContainer.registering() = registering(T::class)
-
 enum class HashingAlgorithm(val algorithmName: String) {
     SHA256("SHA-256"),
     SHA1("SHA-1");

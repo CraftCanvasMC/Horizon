@@ -5,8 +5,8 @@ plugins {
     id("io.canvasmc.horizon")
 }
 
-val mainClass by extra("io.canvasmc.horizon.HorizonLoader")
-val instrumentation by extra("io.canvasmc.horizon.instrument.JavaInstrumentationImpl")
+extra.set("mainClass", "io.canvasmc.horizon.HorizonLoader")
+extra.set("instrumentation", "io.canvasmc.horizon.instrument.JavaInstrumentationImpl")
 
 val paperMavenPublicUrl = "https://repo.papermc.io/repository/maven-public/"
 

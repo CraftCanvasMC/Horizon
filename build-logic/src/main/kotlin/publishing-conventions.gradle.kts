@@ -9,10 +9,8 @@ java {
 }
 
 // configuration that includes as an implementation for the core project and stores fetch data
-val include by configurations.registering {
+val include = configurations.dependencyScope("include") {
     extendsFrom(configurations.api)
-    isCanBeConsumed = false
-    isCanBeResolved = false
 }
 
 configurations {
@@ -21,10 +19,8 @@ configurations {
     }
 }
 
-val includeResolvable by configurations.registering {
+val includeResolvable = configurations.resolvable("includeResolvable") {
     extendsFrom(include)
-    isCanBeConsumed = false
-    isCanBeResolved = true
 }
 
 val collectIncludedDependencies = tasks.register<CollectDependenciesTask>("collectIncludedDependencies") {
@@ -68,7 +64,7 @@ val createPublicationJar = tasks.register<Jar>("createPublicationJar") {
     }
 
     archiveFileName.set("horizon.$version.jar")
-    from(tasks.named<Jar>("jar").map { zipTree(it.archiveFile) })
+    from(tasks.jar.map { zipTree(it.archiveFile) })
 
     from(collectIncludedDependencies.flatMap { it.outputDir }) {
         include("*.context")

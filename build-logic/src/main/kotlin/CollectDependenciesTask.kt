@@ -121,7 +121,7 @@ abstract class CollectDependenciesTask : DefaultTask() {
             return ids.mapIndexed { idx, id -> Artifact(id, variants[idx], files[idx]) }
         }
 
-        fun setFrom(configuration: NamedDomainObjectProvider<Configuration>) = setFrom(configuration.map { it.incoming.artifacts })
+        fun setFrom(configuration: NamedDomainObjectProvider<out Configuration>) = setFrom(configuration.map { it.incoming.artifacts })
 
         fun setFrom(artifactCollection: Provider<ArtifactCollection>) {
             files.setFrom(artifactCollection.map { it.artifactFiles })

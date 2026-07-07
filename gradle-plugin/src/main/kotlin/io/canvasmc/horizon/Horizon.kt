@@ -127,12 +127,12 @@ abstract class Horizon : Plugin<Project> {
         // configure JiJ
         configureJiJ(ext)
 
-        val mergeAccessTransformers by tasks.registering<MergeAccessTransformers> {
+        val mergeAccessTransformers = tasks.register<MergeAccessTransformers>("mergeAccessTransformers") {
             files.from(ext.accessTransformerFiles)
             outputFile.set(layout.cache.resolve(horizonTaskOutput("merged", "at")))
         }
 
-        val applySourceAccessTransforms by tasks.registering<ApplySourceAccessTransforms> {
+        val applySourceAccessTransforms = tasks.register<ApplySourceAccessTransforms>("applySourceAccessTransforms") {
             mappedServerJar.set(userdevTask.flatMap { it.mappedServerJar })
             sourceTransformedMappedServerJar.set(
                 layout.cache.resolve(
@@ -148,13 +148,13 @@ abstract class Horizon : Plugin<Project> {
             ats.jstClasspath.from(configurations.named(Paperweight.MOJANG_MAPPED_SERVER_CONFIG))
         }
 
-        val applyClassAccessTransforms by tasks.registering<ApplyClassAccessTransforms> {
+        val applyClassAccessTransforms = tasks.register<ApplyClassAccessTransforms>("applyClassAccessTransforms") {
             inputJar.set(applySourceAccessTransforms.flatMap { it.sourceTransformedMappedServerJar })
             outputJar.set(layout.cache.resolve(horizonTaskOutput("transformedMappedServerJar", "jar")))
             atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
         }
 
-        val horizonSetup by tasks.registering<Task> {
+        val horizonSetup = tasks.register<Task>("horizonSetup") {
             group = HORIZON_NAME
             dependsOn(applyClassAccessTransforms)
         }

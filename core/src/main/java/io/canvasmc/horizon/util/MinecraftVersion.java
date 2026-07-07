@@ -14,9 +14,16 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public enum MinecraftVersion {
     /**
-     * <a href="https://minecraft.wiki/w/Chaos_Cubed">Chaos Cubed</a> drop
+     * <a href="https://minecraft.wiki/w/Third_Drop_2026">Third Drop of 2026</a>
      *
      * @apiNote This is the active upcoming drop for Minecraft
+     */
+    V26_3_SNAPSHOT_3("26.3-snapshot-3", "26.3 Snapshot 3", 25, VersionType.SNAPSHOT),
+    V26_3_SNAPSHOT_2("26.3-snapshot-2", "26.3 Snapshot 2", 25, VersionType.SNAPSHOT),
+    V26_3_SNAPSHOT_1("26.3-snapshot-1", "26.3 Snapshot 1", 25, VersionType.SNAPSHOT),
+
+    /**
+     * <a href="https://minecraft.wiki/w/Chaos_Cubed">Chaos Cubed</a> drop
      */
     V26_2("26.2", "26.2", 25, VersionType.STABLE),
     V26_2_RC2("26.2-rc-2", "26.2 Release Candidate 2", 25, VersionType.RELEASE_CANDIDATE),

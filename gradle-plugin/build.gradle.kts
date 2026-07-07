@@ -13,7 +13,7 @@ plugins {
 }
 
 val javaVersion = 17
-val userdev by configurations.registering
+val userdev = configurations.register("userdev")
 
 configurations {
     compileOnly {
@@ -112,7 +112,7 @@ sourceSets.all {
 
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
+        withType(JvmTestSuite::class).configureEach {
             useKotlinTest(embeddedKotlinVersion)
             dependencies {
                 implementation(libs.junit.jupiter.engine)
@@ -165,7 +165,7 @@ configurations.all {
 configurations.shadowRuntimeElements {
     attributes {
         attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, javaVersion)
-        attribute(GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, objects.named("9.0.0"))
+        attribute(GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, named("9.0.0"))
     }
 }
 
