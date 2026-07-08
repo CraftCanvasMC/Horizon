@@ -45,7 +45,7 @@ abstract class HorizonExtension @Inject constructor(
      */
     val addServerDependencyTo =
         objects.setProperty<NamedDomainObjectProvider<out Configuration>>().convention(
-            listOf(
+            setOf(
                 project.configurations.named(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME),
                 project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME),
             )
