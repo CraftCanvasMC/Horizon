@@ -69,6 +69,7 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
      * @param project project dependency [org.gradle.api.artifacts.ProjectDependency]
      * @param configurationName name of the Horizon API [org.gradle.api.artifacts.Configuration]
      * @param configurationAction action configuring the dependency
+     * @return dependency
      */
     @JvmOverloads
     fun horizonApi(

@@ -47,12 +47,12 @@ abstract class Horizon : Plugin<Project> {
 
         // resolvable configuration for Horizon API
         target.configurations.resolvable(HORIZON_API_RESOLVABLE_CONFIG) {
-            extendsFrom(horizonApi.get())
+            extendsFrom(horizonApi)
         }
 
         // resolvable non-transitive configuration for Horizon API for use in run tasks
         target.configurations.resolvable(HORIZON_API_SINGLE_RESOLVABLE_CONFIG) {
-            extendsFrom(horizonApi.get())
+            extendsFrom(horizonApi)
             isTransitive = false
         }
 
@@ -98,7 +98,7 @@ abstract class Horizon : Plugin<Project> {
             // populate compile classpath
             ext.addServerDependencyTo.get().forEach { config ->
                 config.configure {
-                    extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
+                    extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG))
                 }
             }
             // set up horizon api dependency
@@ -120,7 +120,7 @@ abstract class Horizon : Plugin<Project> {
             // set up provided runtime plugin dependencies
             ext.addRuntimePluginTo.get().forEach { config ->
                 config.configure {
-                    extendsFrom(configurations.named(RUNTIME_PLUGIN_CONFIG).get())
+                    extendsFrom(configurations.named(RUNTIME_PLUGIN_CONFIG))
                 }
             }
         }
@@ -168,22 +168,15 @@ abstract class Horizon : Plugin<Project> {
             atFile.set(mergeAccessTransformers.flatMap { it.outputFile })
         }
 
-        val horizonSetup = tasks.register<Task>("horizonSetup") {
-            group = HORIZON_NAME
-            dependsOn(applyClassAccessTransforms)
-        }
-
-        tasks.named("classes") { dependsOn(horizonSetup) } // this also attaches the task to the lifecycle
-
         configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).configure {
             defaultDependencies {
-                add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
+                add(dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar })))
             }
         }
 
         configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_RUNTIME_CONFIG).configure {
             defaultDependencies {
-                add((dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar }))))
+                add(dependencyFactory.create(files(applyClassAccessTransforms.flatMap { it.outputJar })))
             }
         }
     }
