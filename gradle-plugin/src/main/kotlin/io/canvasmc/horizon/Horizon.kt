@@ -96,18 +96,32 @@ abstract class Horizon : Plugin<Project> {
                 }
             }
             // populate compile classpath
-            ext.addServerDependencyTo.get().forEach {
-                it.extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
+            ext.addServerDependencyTo.get().forEach { config ->
+                config.configure {
+                    extendsFrom(configurations.named(TRANSFORMED_MOJANG_MAPPED_SERVER_CONFIG).get())
+                }
             }
             // set up horizon api dependency
-            ext.addHorizonApiDependencyTo.get().forEach {
+            ext.addHorizonApiDependencyTo.get().forEach { config ->
                 // we want to resolve it from the context of the horizon api configurations so pass only the files
                 // do not extend as that would resolve it from the context of compileClasspath which we dont want
-                it.dependencies.add(dependencyFactory.create(files(configurations.named(HORIZON_API_RESOLVABLE_CONFIG))))
+                config.configure {
+                    dependencies.add(
+                        dependencyFactory.create(
+                            files(
+                                configurations.named(
+                                    HORIZON_API_RESOLVABLE_CONFIG
+                                )
+                            )
+                        )
+                    )
+                }
             }
             // set up provided runtime plugin dependencies
-            ext.addRuntimePluginTo.get().forEach {
-                it.extendsFrom(configurations.named(RUNTIME_PLUGIN_CONFIG).get())
+            ext.addRuntimePluginTo.get().forEach { config ->
+                config.configure {
+                    extendsFrom(configurations.named(RUNTIME_PLUGIN_CONFIG).get())
+                }
             }
         }
 

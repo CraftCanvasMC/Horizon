@@ -18,12 +18,12 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
     private val dependencyFactory: DependencyFactory,
 ) {
     /**
-     * Adds a dependency on Horizon's API to the project Horizon API [org.gradle.api.artifacts.Configuration].
+     * Adds a dependency on Horizon's API to the project's Horizon API [org.gradle.api.artifacts.Configuration].
      *
      * @param version dependency version
      * @param group dependency group
      * @param artifactId dependency artifactId
-     * @param configurationsName name of the Horizon API [org.gradle.api.artifacts.Configuration]
+     * @param configurationName name of the Horizon API [org.gradle.api.artifacts.Configuration]
      * @param configurationAction action configuring the dependency
      * @return dependency
      */
@@ -62,12 +62,12 @@ abstract class HorizonUserDependenciesExtension @Inject constructor(
     }
 
     /**
-     * Adds a dependency on Horizon's API to the project [org.gradle.api.artifacts.Configuration].
+     * Adds a dependency on Horizon's API to the project's Horizon API [org.gradle.api.artifacts.Configuration].
      *
      * Intended for use in builds containing Horizon API as a subproject.
      *
      * @param project project dependency [org.gradle.api.artifacts.ProjectDependency]
-     * @param configurationsName name of the Horizon API [org.gradle.api.artifacts.Configuration]
+     * @param configurationName name of the Horizon API [org.gradle.api.artifacts.Configuration]
      * @param configurationAction action configuring the dependency
      */
     @JvmOverloads

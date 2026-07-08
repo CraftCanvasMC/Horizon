@@ -1,7 +1,7 @@
 plugins {
     id("io.canvasmc.weaver.userdev")
     id("io.canvasmc.horizon")
-    id("xyz.jpenilla.run-paper") version libs.versions.run.paper.get()
+    id("xyz.jpenilla.run-paper")
 }
 
 version = "1.0.0-SNAPSHOT"

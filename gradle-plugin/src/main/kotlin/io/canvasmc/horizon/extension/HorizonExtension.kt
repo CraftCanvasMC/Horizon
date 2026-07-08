@@ -3,7 +3,7 @@ package io.canvasmc.horizon.extension
 import io.canvasmc.horizon.util.constants.CANVAS_MAVEN_PUBLIC_REPO_URL
 import io.canvasmc.horizon.util.constants.NEOFORGED_MAVEN_REPO_URL
 import io.canvasmc.horizon.util.jij.configureSplitSources
-import io.canvasmc.horizon.util.providerSet
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.ConfigurableFileCollection
@@ -11,7 +11,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.SetProperty
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
 import javax.inject.Inject
@@ -42,50 +41,54 @@ abstract class HorizonExtension @Inject constructor(
     val validateATs: Property<Boolean> = objects.property<Boolean>().convention(true)
 
     /**
-     * Configurations to add the Minecraft server dependency to.
+     * Configuration providers to add the Minecraft server dependency to.
      */
-    val addServerDependencyTo: SetProperty<Configuration> = objects.setProperty<Configuration>().convention(
-        objects.providerSet(
-            project.configurations.named(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME),
-            project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+    val addServerDependencyTo =
+        objects.setProperty<NamedDomainObjectProvider<out Configuration>>().convention(
+            listOf(
+                project.configurations.named(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME),
+                project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME),
+            )
         )
-    )
 
     /**
-     * Configurations to add the Horizon API dependency to.
+     * Configuration providers to add the Horizon API dependency to.
      *
      * The dependency may appear as `unspecified` in the dependency tree. This is expected as it's added as a FileCollection.
      * It will still be available for the configured configurations.
      */
-    val addHorizonApiDependencyTo: SetProperty<Configuration> = objects.setProperty<Configuration>().convention(
-        objects.providerSet(
-            project.configurations.named(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME),
-            project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+    val addHorizonApiDependencyTo =
+        objects.setProperty<NamedDomainObjectProvider<out Configuration>>().convention(
+            setOf(
+                project.configurations.named(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME),
+                project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+            )
         )
-    )
 
     /**
-     * Configurations to add provided runtime plugin dependencies to.
+     * Configuration providers to add provided runtime plugin dependencies to.
      *
      * These dependencies are available on the compile classpath and in the dev server,
      * but are not embedded into the produced plugin jar.
      */
-    val addRuntimePluginTo: SetProperty<Configuration> = objects.setProperty<Configuration>().convention(
-        objects.providerSet(
-            project.configurations.named(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME),
-            project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+    val addRuntimePluginTo =
+        objects.setProperty<NamedDomainObjectProvider<out Configuration>>().convention(
+            setOf(
+                project.configurations.named(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME),
+                project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+            )
         )
-    )
 
     /**
-     * Configurations to add included (JiJ) dependencies to.
+     * Configuration providers to add included (JiJ) dependencies to.
      */
-    val addIncludedDependenciesTo: SetProperty<Configuration> = objects.setProperty<Configuration>().convention(
-        objects.providerSet(
-            project.configurations.named(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME),
-            project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+    val addIncludedDependenciesTo =
+        objects.setProperty<NamedDomainObjectProvider<out Configuration>>().convention(
+            setOf(
+                project.configurations.named(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME),
+                project.configurations.named(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+            )
         )
-    )
 
     /**
      * Whether to set up the run-paper compatibility layer.

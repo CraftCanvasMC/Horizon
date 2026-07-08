@@ -50,3 +50,4 @@ spotless = { id = "com.diffplug.spotless", version = "8.8.0" }
 plugin-publish = { id = "com.gradle.plugin-publish", version = "2.1.1" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.21" }
 userdev = { id = "io.canvasmc.weaver.userdev", version.ref = "userdev" }
+run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-paper" }

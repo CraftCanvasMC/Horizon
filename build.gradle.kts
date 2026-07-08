@@ -2,11 +2,12 @@ plugins {
     java
     idea
     alias(libs.plugins.userdev) apply false
+    alias(libs.plugins.run.paper) apply false
 }
 
 subprojects {
-    apply(plugin = "java-library")
-    apply(plugin = "maven-publish")
+    plugins.apply("java-library")
+    plugins.apply("maven-publish")
 
     java {
         toolchain {
