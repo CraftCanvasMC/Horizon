@@ -8,7 +8,11 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -62,7 +66,7 @@ public record PluginTree(List<PluginNode> roots) {
      */
     public @NonNull HorizonPlugin getPluginById(final String id) {
         return this.findPluginById(id)
-                .orElseThrow(() -> new NoSuchElementException("Plugin with id " + id + " not found"));
+            .orElseThrow(() -> new NoSuchElementException("Plugin with id " + id + " not found"));
     }
 
     /**

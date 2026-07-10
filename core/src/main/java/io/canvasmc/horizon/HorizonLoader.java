@@ -155,7 +155,7 @@ public class HorizonLoader {
         return INSTANCE;
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         if (Boolean.getBoolean("paper.useLegacyPluginLoading")) {
             throw new IllegalStateException("Legacy plugin loading is unsupported with Horizon");
         }
