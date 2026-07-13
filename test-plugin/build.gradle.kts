@@ -26,8 +26,6 @@ tasks {
 
 horizon {
     splitPluginSourceSets()
-    accessTransformerFiles.from(
-        file("src/main/resources/widener.at")
-    )
+    accessTransformerFiles = files("src/main/resources/widener.at")
     // customRunServerJar = file(...) // allows supplying a custom server jar instead of downloading one
 }
