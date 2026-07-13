@@ -5,15 +5,6 @@
   "entrypoints": [
     {
       "server_main": "io.canvasmc.testplugin.ServerMain"
-    },
-    {
-      "plugin_main": "io.canvasmc.testplugin.HorizonTestPlugin"
-    },
-    {
-      "bootstrapper": "io.canvasmc.testplugin.TestBootstrapper"
-    },
-    {
-      "loader": "io.canvasmc.testplugin.TestLoader"
     }
   ],
   "transformers": [
