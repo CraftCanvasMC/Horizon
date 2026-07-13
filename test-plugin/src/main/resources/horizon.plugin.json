@@ -23,7 +23,6 @@
     "CanvasMC"
   ],
   "load_datapack_entry": false,
-  "is_hybrid": true,
   "mixins": [
     "mixins.test.json"
   ],
