@@ -156,7 +156,7 @@ public class EntrypointContainer {
                         errorHandler.accept(instance, thrown);
                     }
                     else {
-                        LOGGER.error("Logging stacktrace:", thrown);
+                        LOGGER.error(thrown, "Logging stacktrace:");
                     }
                 }
             }
