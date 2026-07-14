@@ -45,8 +45,7 @@ public class TransformerContainer {
     private static final Pattern CONSTRUCTOR_REGEX =
         Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\s+([A-Za-z_][A-Za-z0-9_]*(?:[.$][A-Za-z_][A-Za-z0-9_]*)*)\\s+<init>\\s*\\(([^)]*)\\)\\s*V\\s*$");
     private static final Pattern METHOD_REGEX =
-        Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\s+([A-Za-z_][A-Za-z0-9_]*(?:[.$][A-Za-z_][A-Za-z0-9_]*)*)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*\\(([^)]*)\\)\\s*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)\\s*$");
-
+        Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\s+([A-Za-z_][A-Za-z0-9_]*(?:[.$][A-Za-z_][A-Za-z0-9_]*)*)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*\\(([^)]*)\\)\\s*(\\[*(?:[VIJZBCSFD]|L[A-Za-z_][A-Za-z0-9_]*(?:/[A-Za-z_][A-Za-z0-9_]*)*;))\\s*$");
     // just for pre-validation
     private static final Pattern MODIFIER_PREFIX =
         Pattern.compile("^\\s*(public|protected|private|default)([+-]f)?\\b");
@@ -249,7 +248,9 @@ public class TransformerContainer {
                     if (compiled != null) {
                         addDefinition(compiled.nodeTarget(), compiled);
                     }
-                    else LOGGER.warn("Couldn't compile target definition on line ({}), \"{}\"", idx, line);
+                    else {
+                        LOGGER.warn("Couldn't compile target definition on line ({}), \"{}\"", idx, line);
+                    }
                 }
             } catch (IOException ignored) {
             } catch (CompileError compileError) {
